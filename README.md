@@ -33,3 +33,8 @@
 /tmp/luau/luau-analyze src/**/*.lua   # ตรวจไวยากรณ์และ lint
 rojo build -o StreetFoodTycoon.rbxlx  # สร้างไฟล์เกม
 ```
+
+## ทดสอบอัตโนมัติ (GitHub Actions)
+ตั้ง Secrets ใน GitHub: `ROBLOX_API_KEY`, `ROBLOX_UNIVERSE_ID`, `ROBLOX_PLACE_ID`
+- ทุก push: lint + build ไฟล์เกม (ดาวน์โหลดได้จากแท็บ Actions > Artifacts)
+- push ไป main หรือกด Run workflow: รัน `tests/smoke.luau` บนเกมที่ publish ผ่าน Open Cloud

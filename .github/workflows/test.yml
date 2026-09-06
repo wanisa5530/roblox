@@ -1,0 +1,33 @@
+name: Test
+on: [push, workflow_dispatch]
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install luau + rojo
+        run: |
+          curl -sSL -o luau.zip https://github.com/luau-lang/luau/releases/latest/download/luau-ubuntu.zip && unzip -qo luau.zip -d /usr/local/bin
+          curl -sSL -o rojo.zip https://github.com/rojo-rbx/rojo/releases/download/v7.4.4/rojo-7.4.4-linux-x86_64.zip && unzip -qo rojo.zip -d /usr/local/bin
+      - name: Lint
+        run: |
+          set -e
+          for f in $(find src -name '*.lua'); do
+            luau-analyze "$f" 2>&1 | grep -iv "Unknown global\|Unknown type\|unknown require\|TypeError\|ImplicitReturn\|SameLineStatement\|^$" | grep -q . && { luau-analyze "$f"; exit 1; } || true
+          done
+      - name: Build place
+        run: rojo build -o StreetFoodTycoon.rbxlx
+      - uses: actions/upload-artifact@v4
+        with: { name: StreetFoodTycoon, path: StreetFoodTycoon.rbxlx }
+  cloud-test:
+    needs: lint-and-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    env:
+      ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+      ROBLOX_UNIVERSE_ID: ${{ secrets.ROBLOX_UNIVERSE_ID }}
+      ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Luau smoke test on published place
+        run: python3 scripts/run_luau_test.py tests/smoke.luau
