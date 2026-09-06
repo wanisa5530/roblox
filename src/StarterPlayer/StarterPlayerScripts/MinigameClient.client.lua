@@ -123,8 +123,6 @@ Remotes.StartMinigame.OnClientEvent:Connect(function(steps, duration, foodId, sp
 		end
 	end
 	end
-	end
-	end
 	runStep = start
 	start(steps)
 end)
