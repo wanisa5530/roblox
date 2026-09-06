@@ -28,8 +28,21 @@ if G.started then return end; G.started = true
 		end
 		return passCache[player][key]
 	end
+	-- เทศกาลปัจจุบัน (เวลาไทย) หรือบังคับด้วย G.forceFestival สำหรับทดสอบ
+	local function currentFestival()
+		if G.forceFestival ~= nil then return G.forceFestival or nil end
+		local t = os.time() + 7 * 3600
+		local m, d = tonumber(os.date("!%m", t)), tonumber(os.date("!%d", t))
+		local md = m * 100 + d
+		for _, f in ipairs(Config.Festivals) do
+			local a, b = f.from[1] * 100 + f.from[2], f.to[1] * 100 + f.to[2]
+			if (a <= b and md >= a and md <= b) or (a > b and (md >= a or md <= b)) then return f end
+		end
+	end
+	G.currentFestival = currentFestival
 	local function mult(player)
 		local m = 1
+		local fest = currentFestival(); if fest then m *= fest.tipMult end
 		local d = Data.get(player)
 		if d then
 			local n = 0; for _ in pairs(d.recipes or {}) do n += 1 end
@@ -461,6 +474,8 @@ if G.started then return end; G.started = true
 		if d.prestige > 0 then local m = workspace.Plots:FindFirstChild("Plot_" .. player.UserId); local ns = m and m:FindFirstChild("NameSign"); if ns then ns.SurfaceGui.TextLabel.Text = "🍜 " .. player.DisplayName .. " · " .. Locale.get("th", Config.Branches[d.branch]) end end
 		ensureQuests(d); checkLevel(player)
 		Plot.applyDecor(player, d.decor)
+		local fest = currentFestival()
+		if fest then player:SetAttribute("Festival", fest.key); Plot.festivalDecor(player, fest); notify(player, "festivalTip", "green", fest.tipMult) end
 		for _, gp in ipairs(Config.GamePasses) do ownsPass(player, gp.key) end
 		push(player)
 		player.CharacterAdded:Connect(function() task.wait(0.5); setHolding(player) end)
@@ -526,6 +541,7 @@ if G.started then return end; G.started = true
 		local d = Data.get(player); if not d then return false end
 		local f = foodOf(foodId); if not f then return false end
 		if f.branch and Config.Branches[d.branch] ~= f.branch then return false, "owned" end
+		if f.festival and not (currentFestival() and currentFestival().key == f.festival) then return false, "owned" end
 		if d.foods[foodId] then return false, "owned" end
 		if d.cash < f.cost then return false, "notEnough" end
 		d.cash -= f.cost; d.foods[foodId] = true

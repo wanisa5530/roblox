@@ -57,6 +57,10 @@ Config.FoodNames = {
 	Dimsum     = { en="Chinatown Dim Sum",       th="ติ่มซำเยาวราช",       ja="ヤワラート点心",         zh="唐人街点心",   id="Dimsum Chinatown" },
 	Scorpion   = { en="Fried Scorpion Skewer",   th="แมงป่องทอดข้าวสาร",   ja="サソリの串揚げ",         zh="炸蝎子串",     id="Sate Kalajengking" },
 	KanomJeen  = { en="Floating Market Kanom Jeen", th="ขนมจีนตลาดน้ำ",     ja="水上市場カノムチーン",   zh="水上市场米线", id="Kanom Jeen Pasar Apung" },
+	KhanomKeng = { en="Khanom Keng (CNY cake)",  th="ขนมเข่งตรุษจีน",     ja="旧正月の餅菓子",   zh="年糕",       id="Kue Keranjang" },
+	KhaoChae   = { en="Khao Chae (Songkran)",    th="ข้าวแช่สงกรานต์",    ja="カオチェー",       zh="宋干节冰水饭", id="Khao Chae" },
+	KhanomChan = { en="Khanom Chan (Loy Krathong)", th="ขนมชั้นลอยกระทง", ja="カノムチャン",     zh="水灯节千层糕", id="Kue Lapis Thailand" },
+	KhaoTom    = { en="New Year Khao Tom",       th="ข้าวต้มปีใหม่",       ja="新年のお粥",       zh="新年泰式粥",   id="Bubur Tahun Baru" },
 	DurianCart = { en="Durian Cart",              th="รถเข็นทุเรียน",        ja="ドリアン屋台",         zh="榴莲车",       id="Gerobak Durian" },
 }
 
@@ -90,6 +94,13 @@ Config.Recipes = { "GrandmaSauce", "SecretChili", "MonkTea", "RiverSalt", "Templ
 Config.RecipeTipBonus = 0.01
 Config.GoldDishChance = 0.25
 Config.GoldStreak = 3
+-- เทศกาลตามปฏิทิน (UTC+7): ช่วงวัน, เมนูจำกัดเวลา, ทิปคูณ, สีโคม
+Config.Festivals = {
+	{ key="ChineseNY",  from={1,20}, to={2,15},  food="KhanomKeng",  tipMult=1.2, color={0.9,0.15,0.15} },
+	{ key="Songkran",   from={4,10}, to={4,16},  food="KhaoChae",    tipMult=1.3, color={0.3,0.7,1.0} },
+	{ key="LoyKrathong",from={11,8}, to={11,20}, food="KhanomChan",  tipMult=1.2, color={1.0,0.8,0.3} },
+	{ key="NewYear",    from={12,25},to={1,5},   food="KhaoTom",     tipMult=1.25,color={1.0,1.0,1.0} },
+}
 -- ลูกค้าพิเศษ: โอกาส (ต่อคน), ตัวคูณ
 Config.Specials = {
 	Tourist = { chance = 0.10, emoji = "🧳", tipMult = 3,   patience = 0.6 },

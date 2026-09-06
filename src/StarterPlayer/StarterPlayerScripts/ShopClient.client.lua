@@ -166,9 +166,10 @@ local function renderShop()
 		end
 		for _, f in ipairs(Config.Foods) do
 			if f.branch and Config.Branches[d.branch or 1] ~= f.branch then continue end
+			if f.festival and player:GetAttribute("Festival") ~= f.festival and not d.foods[f.id] then continue end
 			local owned = d.foods[f.id]
 			local can = d.cash >= f.cost
-			local _, b = card(Locale.food(lang, f.id), "฿ " .. Locale.fmt(f.price) .. " / " .. f.emoji,
+			local _, b = card(Locale.food(lang, f.id), "฿ " .. Locale.fmt(f.price) .. " / " .. f.emoji .. (f.festival and ("  🎉 " .. T("limited")) or ""),
 				owned and T("owned") or ("฿ " .. Locale.fmt(f.cost)), owned and C.card or (can and C.green or C.red),
 				function()
 					if owned then return end
@@ -272,7 +273,7 @@ end
 
 local function applyLang()
 	lbTitle.Text = "🏆 " .. T("top")
-	titleLbl.Text = T("title"); shopBtn.Text = "🛒 " .. T("menu"); langBtn.Text = "🌐 " .. Locale.Names[lang]
+	local fk = player:GetAttribute("Festival"); titleLbl.Text = fk and ("🎉 " .. T(fk)) or T("title"); shopBtn.Text = "🛒 " .. T("menu"); langBtn.Text = "🌐 " .. Locale.Names[lang]
 	renderTop(); renderShop()
 end
 

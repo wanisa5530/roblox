@@ -44,7 +44,7 @@ function P.points(i)
 	local o = P.origin(i)
 	return {
 		origin = o,
-		spawn = Vector3.new(o.X, 3, 2),
+		spawn = o + Vector3.new(31, 3, 4), -- ทางเดินด้านข้างร้าน (ไม่ผ่านครัว)
 		queue = function(n) return o + Vector3.new(4, 3, -10 + (n - 1) * 3) end,
 		counterSlot = function(n) return o + Vector3.new(-5 + (n - 1) * 3.5, 3.6, -14) end,
 		staff = { Cook = o + Vector3.new(0, 3, -24), Waiter = o + Vector3.new(-3, 3, -16.5), Washer = o + Vector3.new(-11, 3, -20.5) },
@@ -276,6 +276,33 @@ function P.applyDecor(player, decor)
 		part({ Shape = Enum.PartType.Ball, Size = Vector3.new(1.5, 1.5, 1.5), Position = o + Vector3.new(7.5, 5.8, -14), Color = Color3.fromRGB(255, 215, 80), Material = Enum.Material.Metal }, df)
 		part({ Size = Vector3.new(0.4, 1.2, 0.4), CFrame = CFrame.new(o + Vector3.new(8.3, 6, -14)) * CFrame.Angles(0, 0, math.rad(-20)), Color = Color3.fromRGB(255, 215, 80), Material = Enum.Material.Metal }, df)
 		local l = Instance.new("PointLight"); l.Color = Color3.fromRGB(255, 220, 120); l.Range = 8; l.Parent = cat
+	end
+end
+
+-- ตกแต่งเทศกาลรอบร้าน: โคมสีเทศกาล + ป้าย + ของประจำเทศกาล
+function P.festivalDecor(player, fest)
+	local m = root:FindFirstChild("Plot_" .. player.UserId); if not m then return end
+	local o = P.origin(player:GetAttribute("PlotIndex"))
+	local f = m:FindFirstChild("FestivalDecor") or Instance.new("Folder"); f.Name = "FestivalDecor"; f:ClearAllChildren(); f.Parent = m
+	local c = Color3.new(fest.color[1], fest.color[2], fest.color[3])
+	for k = 0, 9 do
+		local lp = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(1.4, 1.1, 1.1), Color = c, Material = Enum.Material.Neon }, f)
+		lp.CFrame = CFrame.new(o + Vector3.new(-22.5 + k * 5, 11, 18)) * CFrame.Angles(0, 0, math.rad(90))
+		local l = Instance.new("PointLight"); l.Color = c; l.Range = 10; l.Parent = lp
+	end
+	sign(f, Locale.get("th", fest.key) .. " " .. Locale.get("en", fest.key), Vector3.new(14, 1.4, 0.2), o + Vector3.new(0, 9.6, -12.4), Color3.new(1, 1, 1), c)
+	if fest.key == "Songkran" then
+		for _, x in ipairs({ -20, 20 }) do part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(2.5, 2.2, 2.2), CFrame = CFrame.new(o + Vector3.new(x, 1.25, 22)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(80, 160, 230), Material = Enum.Material.Plastic }, f) end
+	elseif fest.key == "LoyKrathong" then
+		for k = 0, 5 do
+			local kr = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.5, 1.6, 1.6), CFrame = CFrame.new(o + Vector3.new(-15 + k * 6, 0.6, 23)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(90, 170, 80), Material = Enum.Material.Grass }, f)
+			local fl = part({ Size = Vector3.new(0.2, 0.6, 0.2), Position = kr.Position + Vector3.new(0, 0.7, 0), Color = Color3.fromRGB(255, 200, 80), Material = Enum.Material.Neon }, f)
+			local l = Instance.new("PointLight"); l.Color = Color3.fromRGB(255, 190, 90); l.Range = 5; l.Parent = fl
+		end
+	elseif fest.key == "ChineseNY" then
+		for _, x in ipairs({ -8, 8 }) do sign(f, "福", Vector3.new(2, 2, 0.15), o + Vector3.new(x, 4.6, -12.3), Color3.fromRGB(255, 220, 80), Color3.fromRGB(200, 30, 30)) end
+	elseif fest.key == "NewYear" then
+		for k = 0, 4 do local s2 = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(0.8, 0.8, 0.8), Position = o + Vector3.new(-16 + k * 8, 14 + (k % 2) * 2, 20), Color = ({ Color3.fromRGB(255, 80, 80), Color3.fromRGB(80, 200, 255), Color3.fromRGB(255, 230, 80) })[k % 3 + 1], Material = Enum.Material.Neon }, f); local l = Instance.new("PointLight"); l.Range = 12; l.Color = s2.Color; l.Parent = s2 end
 	end
 end
 

@@ -205,7 +205,18 @@ check("helper served", Customers.onServed(eH, helper) == true and eH.served)
 check("owner paid, helper share", dd.cash > ownerBefore and Data.cache[2].cash > 0 and dd.weekEarned > 0)
 Customers.leave(gH, "😊"); Data.cache[2] = nil
 
--- 12) คิวซื้อกลับไม่เกิน MaxQueue
+-- 12) เทศกาล
+GS.forceFestival = Config.Festivals[2] -- สงกรานต์
+check("festival active", GS.currentFestival().key == "Songkran")
+Plot.festivalDecor(fake, GS.currentFestival())
+check("festival decor", plot.FestivalDecor ~= nil and #plot.FestivalDecor:GetChildren() > 10)
+dd.cash = 100000
+GS.forceFestival = false
+check("festival off", GS.currentFestival() == nil)
+GS.forceFestival = nil
+check("spawn point beside plot", (Plot.points(1).spawn - Plot.origin(1)).X > 25)
+
+-- 13) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil
