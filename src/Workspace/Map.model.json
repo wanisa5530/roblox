@@ -1,0 +1,28 @@
+{
+  "className": "Folder",
+  "children": [
+    { "name": "Baseplate", "className": "Part", "properties": {
+      "Anchored": true, "Size": [200, 2, 200], "Position": [0, -1, 0],
+      "Color": [0.55, 0.7, 0.4], "Material": "Grass", "TopSurface": "Smooth" } },
+    { "name": "SpawnLocation", "className": "SpawnLocation", "properties": {
+      "Anchored": true, "Size": [8, 1, 8], "Position": [0, 0.5, 20], "Color": [0.9, 0.9, 0.9] } },
+    { "name": "Road", "className": "Part", "properties": {
+      "Anchored": true, "Size": [200, 0.2, 14], "Position": [0, 0.1, 0], "Color": [0.3, 0.3, 0.3], "Material": "Asphalt" } },
+    { "name": "Cart", "className": "Model", "children": [
+      { "name": "Body", "className": "Part", "properties": {
+        "Anchored": true, "Size": [8, 3, 4], "Position": [0, 1.5, -10], "Color": [0.9, 0.5, 0.2], "Material": "Wood" } },
+      { "name": "Roof", "className": "Part", "properties": {
+        "Anchored": true, "Size": [9, 0.4, 5], "Position": [0, 5, -10], "Color": [0.85, 0.2, 0.2], "Material": "Fabric" } },
+      { "name": "Pole1", "className": "Part", "properties": {
+        "Anchored": true, "Size": [0.3, 5, 0.3], "Position": [-4, 2.5, -8], "Color": [0.3, 0.3, 0.3] } },
+      { "name": "Pole2", "className": "Part", "properties": {
+        "Anchored": true, "Size": [0.3, 5, 0.3], "Position": [4, 2.5, -8], "Color": [0.3, 0.3, 0.3] } },
+      { "name": "Sign", "className": "Part", "properties": {
+        "Anchored": true, "Size": [8, 1.2, 0.2], "Position": [0, 5.8, -8], "Color": [1, 0.9, 0.3] },
+        "children": [ { "name": "Label", "className": "SurfaceGui", "properties": { "Face": "Front" },
+          "children": [ { "name": "Text", "className": "TextLabel", "properties": {
+            "Size": { "UDim2": [[1,0],[1,0]] }, "Text": "Street Food Tycoon", "TextScaled": true,
+            "BackgroundTransparency": 1, "TextColor3": [0.1, 0.1, 0.1] } } ] } ] }
+    ] }
+  ]
+}

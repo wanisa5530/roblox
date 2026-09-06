@@ -2,11 +2,22 @@
   "name": "StreetFoodTycoon",
   "tree": {
     "$className": "DataModel",
-    "ReplicatedStorage": { "$path": "src/ReplicatedStorage" },
-    "ServerScriptService": { "$path": "src/ServerScriptService" },
-    "StarterPlayer": {
-      "StarterPlayerScripts": { "$path": "src/StarterPlayer/StarterPlayerScripts" }
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage"
     },
-    "StarterGui": { "$path": "src/StarterGui" }
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayer/StarterPlayerScripts"
+      }
+    },
+    "StarterGui": {
+      "$path": "src/StarterGui"
+    },
+    "Workspace": {
+      "$path": "src/Workspace"
+    }
   }
 }
