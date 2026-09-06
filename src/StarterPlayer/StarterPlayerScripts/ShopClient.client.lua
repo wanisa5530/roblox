@@ -95,7 +95,7 @@ Remotes.Notify.OnClientEvent:Connect(function(key, color, a, b)
 end)
 
 -- หน้าต่างร้านค้า
-local shop = frame(gui, UDim2.new(0, 460, 0, 520), UDim2.new(0.5, -230, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
+local shop = frame(gui, UDim2.new(0, 520, 0, 520), UDim2.new(0.5, -260, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
 local tabs = {}
 local tabNames = { "menu", "staff", "passes", "robux" }
@@ -130,7 +130,23 @@ local function renderShop()
 					local ok, err = Remotes.BuyFood:InvokeServer(f.id)
 					if ok then notify(string.format(T("bought"), Locale.food(lang, f.id)), C.green) elseif err then notify(T(err), C.red) end
 				end, f.emoji)
-			if owned then b.AutoButtonColor = false end
+			if owned then
+				b.Visible = false
+				local c = b.Parent
+				for i, kind in ipairs({ "speed", "tray" }) do
+					local lv = (d.upg and d.upg[f.id] and d.upg[f.id][kind]) or 1
+					local maxed = lv >= Config.UpgradeMax
+					local cost = Config.upgradeCost(f, kind, lv)
+					local ub = button(c, (kind == "speed" and "⚡" or "🍱") .. " Lv" .. lv .. (maxed and " " .. T("maxed") or "  ฿" .. Locale.fmt(cost)),
+						UDim2.new(0, 118, 0, 24), UDim2.new(1, -250 + (i - 1) * 124, 0, 20), maxed and C.card or (d.cash >= cost and C.green or C.red),
+						function()
+							if maxed then return end
+							local ok, err = Remotes.UpgradeStation:InvokeServer(f.id, kind)
+							if ok then notify(T("upg" .. (kind == "speed" and "Speed" or "Tray")) .. " Lv" .. (lv + 1), C.green) elseif err then notify(T(err), C.red) end
+						end)
+					ub.TextSize = 14
+				end
+			end
 		end
 	elseif state.tab == "staff" then
 		for _, st in ipairs(Config.Staff) do

@@ -5,12 +5,12 @@ local Config = require(game.ReplicatedStorage.Config)
 local okStore, store = pcall(DSS.GetDataStore, DSS, "StreetFoodTycoon_v2")
 if not okStore then warn("DataStore unavailable:", store); store = nil end
 local D = { cache = {} }
-local function default() return { cash = Config.StartingCash, foods = { MooPing = true }, total = 0, rep = 0, served = 0, lastClaim = 0, streak = 0, staff = {} } end
+local function default() return { cash = Config.StartingCash, foods = { MooPing = true }, total = 0, rep = 0, served = 0, lastClaim = 0, streak = 0, staff = {}, upg = {} } end
 function D.load(p)
 	local ok, data = false, nil
 	if store then ok, data = pcall(store.GetAsync, store, "p_" .. p.UserId) end
 	local d = (ok and type(data) == "table") and data or default()
-	d.total = d.total or 0; d.rep = d.rep or 0; d.served = d.served or 0; d.pending = nil; d.staff = d.staff or {}; d.lastClaim = d.lastClaim or 0; d.streak = d.streak or 0
+	d.total = d.total or 0; d.rep = d.rep or 0; d.served = d.served or 0; d.pending = nil; d.staff = d.staff or {}; d.upg = d.upg or {}; d.lastClaim = d.lastClaim or 0; d.streak = d.streak or 0
 	D.cache[p.UserId] = d
 	return d
 end

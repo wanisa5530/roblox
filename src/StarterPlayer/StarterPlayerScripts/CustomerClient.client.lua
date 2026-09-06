@@ -22,7 +22,7 @@ local function attach(npc)
 		bg.Enabled = id ~= nil or mood ~= nil
 		if mood then t.Text = mood; barBg.Visible = false; return end
 		local food = id and foodOf(id)
-		if food then t.Text = (npc:GetAttribute("Takeaway") and "🥡 " or "") .. food.emoji .. " " .. Locale.food(lang(), id) end
+		if food then t.Text = (npc:GetAttribute("Takeaway") and "🥡 " or "") .. food.emoji .. " " .. Locale.food(lang(), id) .. (npc:GetAttribute("Spice") and (" " .. Config.SpiceLevels[npc:GetAttribute("Spice")]) or "") end
 		local left = npc:GetAttribute("Patience") or 1
 		bar.Size = UDim2.fromScale(left, 1)
 		bar.BackgroundColor3 = left > 0.5 and Color3.fromRGB(90, 200, 110) or (left > 0.25 and Color3.fromRGB(240, 190, 60) or Color3.fromRGB(220, 80, 70))

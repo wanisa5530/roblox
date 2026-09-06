@@ -35,13 +35,48 @@ UIS.InputBegan:Connect(function(input, gp)
 	if input.KeyCode == Enum.KeyCode.Space then pressed() end
 end)
 
-local function finish(score)
-	active = nil; box.Visible = false
-	Remotes.MinigameResult:FireServer(score)
+-- ปุ่มเลือกความเผ็ด
+local spiceBox = Instance.new("Frame"); spiceBox.Size = UDim2.new(0, 420, 0, 90); spiceBox.Position = UDim2.new(0.5, -210, 0.7, 0)
+spiceBox.BackgroundColor3 = Color3.fromRGB(28, 24, 22); spiceBox.Visible = false; spiceBox.Parent = gui
+Instance.new("UICorner", spiceBox).CornerRadius = UDim.new(0, 14)
+local spiceTitle = Instance.new("TextLabel"); spiceTitle.Size = UDim2.new(1, 0, 0, 30); spiceTitle.Position = UDim2.new(0, 0, 0, 6); spiceTitle.BackgroundTransparency = 1
+spiceTitle.Font = Enum.Font.FredokaOne; spiceTitle.TextSize = 18; spiceTitle.TextColor3 = Color3.fromRGB(255, 170, 40); spiceTitle.Parent = spiceBox
+local chosenSpice
+for i = 1, 3 do
+	local b = Instance.new("TextButton"); b.Size = UDim2.new(0, 120, 0, 40); b.Position = UDim2.new(0, 20 + (i - 1) * 130, 0, 42); b.Text = string.rep("🌶️", i)
+	b.Font = Enum.Font.FredokaOne; b.TextSize = 20; b.BackgroundColor3 = Color3.fromRGB(200, 60, 50); b.TextColor3 = Color3.new(1, 1, 1); b.Parent = spiceBox
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+	b.MouseButton1Click:Connect(function() chosenSpice = i end)
 end
 
-Remotes.StartMinigame.OnClientEvent:Connect(function(kind, duration, foodId)
-	title.Text = "🍳 " .. Locale.food(lang, foodId)
+local queue, results, needSpice = {}, {}, false
+local runStep
+local function finish(score)
+	active = nil; box.Visible = false
+	results[#results + 1] = score
+	if #queue > 0 and score > 0 then runStep(table.remove(queue, 1)); return end
+	local total = 0
+	for _, r in ipairs(results) do total += r end
+	local avg = score > 0 and total / #results or 0
+	if needSpice and avg > 0 then
+		spiceTitle.Text = Locale.get(lang, "chooseSpice"); chosenSpice = nil; spiceBox.Visible = true
+		task.spawn(function()
+			local t0 = os.clock()
+			while not chosenSpice and os.clock() - t0 < 15 do task.wait(0.1) end
+			spiceBox.Visible = false
+			Remotes.MinigameResult:FireServer(avg, chosenSpice or 1)
+		end)
+	else
+		Remotes.MinigameResult:FireServer(avg)
+	end
+end
+
+Remotes.StartMinigame.OnClientEvent:Connect(function(steps, duration, foodId, spicy)
+	queue = {}; results = {}; needSpice = spicy
+	if type(steps) == "table" then for i = 2, #steps do queue[i - 1] = steps[i] end; steps = steps[1] end
+	local function start(kind)
+	local total = #queue + #results + 1
+	title.Text = "🍳 " .. Locale.food(lang, foodId) .. "  " .. string.format(Locale.get(lang, "step"), #results + 1, total)
 	box.Visible = true; fill.Size = UDim2.fromScale(0, 1); marker.Visible = false; zone.Visible = false
 	local t0 = os.clock()
 	if kind == "timing" then
@@ -72,7 +107,7 @@ Remotes.StartMinigame.OnClientEvent:Connect(function(kind, duration, foodId)
 			end
 		end
 		task.delay(duration * 2.5, function() if active then finish(count / need * 0.3) end end)
-	else -- flip
+	elseif kind == "flip" then
 		hint.Text = Locale.get(lang, "mgFlip")
 		zone.Visible = true; zone.Size = UDim2.fromScale(0.2, 1); zone.Position = UDim2.fromScale(0.7, 0)
 		local prog, conn = 0, nil
@@ -87,4 +122,9 @@ Remotes.StartMinigame.OnClientEvent:Connect(function(kind, duration, foodId)
 			finish(prog >= 0.7 and 1 or (prog >= 0.55 and 0.6 or (prog >= 0.4 and 0.3 or 0)))
 		end
 	end
+	end
+	end
+	end
+	runStep = start
+	start(steps)
 end)

@@ -22,18 +22,18 @@ Config.Foods = {
 	{ id="MooPing",     emoji="🍢", game="flip", cookTime=3, price=12, batch=1, cost=0,       income=1,    color={0.80,0.45,0.20} },
 	{ id="KhanomKrok",  emoji="🥥", game="flip", cookTime=3, price=18, batch=1, cost=60,      income=2,    color={0.95,0.90,0.75} },
 	{ id="PadThai",     emoji="🍜", game="timing", cookTime=3, price=30, batch=1, cost=200,     income=5,    color={0.95,0.65,0.25} },
-	{ id="SomTam",      emoji="🥗", game="mash", cookTime=3, price=45, batch=1, cost=600,     income=12,   color={0.55,0.80,0.35} },
+	{ id="SomTam",      emoji="🥗", spicy=true, game="mash", cookTime=3, price=45, batch=1, cost=600,     income=12,   color={0.55,0.80,0.35} },
 	{ id="KaiJeow",     emoji="🍳", game="timing", cookTime=2.5, price=60, batch=1, cost=1500,    income=25,   color={0.98,0.85,0.30} },
 	{ id="Roti",        emoji="🥞", game="mash", cookTime=3, price=85, batch=1, cost=3500,    income=50,   color={0.90,0.75,0.45} },
 	{ id="Satay",       emoji="🍡", game="flip", cookTime=3.5, price=120, batch=1, cost=8000,    income=100,  color={0.75,0.50,0.25} },
-	{ id="BoatNoodle",  emoji="🍲", game="timing", cookTime=3, price=170, batch=1, cost=18000,   income=200,  color={0.50,0.25,0.15} },
-	{ id="KhaoManGai",  emoji="🍗", game="timing", cookTime=3, price=240, batch=1, cost=40000,   income=400,  color={0.95,0.85,0.60} },
-	{ id="PadKrapao",   emoji="🌶️", game="timing", cookTime=2.5, price=320, batch=1, cost=90000,   income=800,  color={0.85,0.25,0.20} },
-	{ id="TomYum",      emoji="🦐", game="mash", cookTime=4, price=450, batch=1, cost=200000,  income=1600, color={0.95,0.45,0.30} },
-	{ id="HoiTod",      emoji="🦪", game="timing", cookTime=3, price=600, batch=1, cost=450000,  income=3200, color={0.85,0.70,0.40} },
-	{ id="MangoRice",   emoji="🥭", game="flip", cookTime=4, price=800, batch=1, cost=1000000, income=6500, color={1.00,0.75,0.20} },
-	{ id="ThaiTea",     emoji="🧋", game="mash", cookTime=3, price=1000, batch=1, cost=2200000, income=13000,color={0.90,0.50,0.20} },
-	{ id="DurianCart",  emoji="🍈", game="flip", cookTime=5, price=1500, batch=1, cost=5000000, income=30000,color={0.75,0.80,0.35} },
+	{ id="BoatNoodle",  emoji="🍲", spicy=true, game="timing", cookTime=3, price=170, batch=1, cost=18000,   income=200,  color={0.50,0.25,0.15} },
+	{ id="KhaoManGai",  emoji="🍗", game="timing", steps={"flip","timing"}, cookTime=3, price=240, batch=1, cost=40000,   income=400,  color={0.95,0.85,0.60} },
+	{ id="PadKrapao",   emoji="🌶️", spicy=true, game="timing", steps={"mash","timing"}, cookTime=2.5, price=320, batch=1, cost=90000,   income=800,  color={0.85,0.25,0.20} },
+	{ id="TomYum",      emoji="🦐", spicy=true, game="mash", steps={"mash","flip"}, cookTime=4, price=450, batch=1, cost=200000,  income=1600, color={0.95,0.45,0.30} },
+	{ id="HoiTod",      emoji="🦪", game="timing", steps={"timing","flip"}, cookTime=3, price=600, batch=1, cost=450000,  income=3200, color={0.85,0.70,0.40} },
+	{ id="MangoRice",   emoji="🥭", game="flip", steps={"mash","timing","flip"}, cookTime=4, price=800, batch=1, cost=1000000, income=6500, color={1.00,0.75,0.20} },
+	{ id="ThaiTea",     emoji="🧋", game="mash", steps={"mash","timing"}, cookTime=3, price=1000, batch=1, cost=2200000, income=13000,color={0.90,0.50,0.20} },
+	{ id="DurianCart",  emoji="🍈", game="flip", steps={"mash","timing","flip"}, cookTime=5, price=1500, batch=1, cost=5000000, income=30000,color={0.75,0.80,0.35} },
 }
 
 -- ชื่อเมนูหลายภาษา
@@ -55,6 +55,10 @@ Config.FoodNames = {
 	DurianCart = { en="Durian Cart",              th="รถเข็นทุเรียน",        ja="ドリアン屋台",         zh="榴莲车",       id="Gerobak Durian" },
 }
 
+-- อัปเกรดโต๊ะครัว: speed ลดเวลาทำ 15%/ระดับ, tray ทำได้หลายจานต่อครั้ง (สูงสุดระดับ 3)
+Config.UpgradeMax = 3
+function Config.upgradeCost(food, kind, level) return math.floor(food.cost * 0.4 * level + (kind == "tray" and 400 or 250)) end
+Config.SpiceLevels = { "🌶️", "🌶️🌶️", "🌶️🌶️🌶️" }
 -- พนักงาน: cost = ค่าจ้างครั้งแรก, wage = ค่าแรงต่อคาบ, interval = วินาทีต่อการทำงาน 1 ครั้ง
 Config.WagePeriod = 300
 Config.Staff = {

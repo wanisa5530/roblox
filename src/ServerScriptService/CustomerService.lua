@@ -83,6 +83,7 @@ function C.spawn(player, foods)
 	for k = 1, size do
 		local npc = makeNpc(pts.spawn + Vector3.new((k - 1) * 2.5, 0, 0))
 		local e = { npc = npc, food = pickFood(foods), group = g, served = false }
+		if e.food.spicy then e.spice = math.random(#Config.SpiceLevels) end
 		g.members[k] = e
 		npc:SetAttribute("Takeaway", g.kind == "takeaway")
 	end
@@ -105,7 +106,7 @@ function C.spawn(player, foods)
 		if not g.alive then return end
 		g.orderAt = os.clock()
 		for _, e in ipairs(g.members) do
-			e.npc:SetAttribute("OrderFood", e.food.id); e.npc:SetAttribute("Patience", 1)
+			e.npc:SetAttribute("OrderFood", e.food.id); e.npc:SetAttribute("Spice", e.spice); e.npc:SetAttribute("Patience", 1)
 			addPrompt(e)
 		end
 		while g.alive do

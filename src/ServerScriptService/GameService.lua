@@ -42,6 +42,20 @@ if G.started then return end; G.started = true
 		Remotes.Notify:FireClient(player, key, color, ...)
 	end
 	local function foodOf(id) for _, f in ipairs(Config.Foods) do if f.id == id then return f end end end
+	local function upgOf(player, foodId, kind)
+		local d = Data.get(player); local u = d and d.upg[foodId]
+		return (u and u[kind]) or 1
+	end
+	Remotes.UpgradeStation.OnServerInvoke = function(player, foodId, kind)
+		local d = Data.get(player); local f = foodOf(foodId)
+		if not d or not f or not d.foods[foodId] or (kind ~= "speed" and kind ~= "tray") then return false end
+		local lv = upgOf(player, foodId, kind)
+		if lv >= Config.UpgradeMax then return false, "maxed" end
+		local cost = Config.upgradeCost(f, kind, lv)
+		if d.cash < cost then return false, "notEnough" end
+		d.cash -= cost; d.upg[foodId] = d.upg[foodId] or {}; d.upg[foodId][kind] = lv + 1
+		push(player); return true
+	end
 	
 	-- ถือจาน
 	local function setHolding(player, foodId, count, bagged)
@@ -96,17 +110,20 @@ if G.started then return end; G.started = true
 		if cooking[player] then return end
 		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
 		local f = foodOf(foodId); if not f then return end
-		cooking[player] = { food = f, t0 = os.clock() }
-		Remotes.StartMinigame:FireClient(player, f.game, f.cookTime, foodId)
+		local speed = 1 - 0.15 * (upgOf(player, foodId, "speed") - 1)
+		local steps = f.steps or { f.game }
+		cooking[player] = { food = f, t0 = os.clock(), time = f.cookTime * speed * #steps }
+		Remotes.StartMinigame:FireClient(player, steps, f.cookTime * speed, foodId, f.spicy)
 	end
-	Remotes.MinigameResult.OnServerEvent:Connect(function(player, score)
+	Remotes.MinigameResult.OnServerEvent:Connect(function(player, score, spice)
 		local c = cooking[player]; if not c then return end
 		cooking[player] = nil
 		score = math.clamp(tonumber(score) or 0, 0, 1)
-		if os.clock() - c.t0 < c.food.cookTime * 0.5 then score = 0 end -- กันโกง ทำเร็วเกินไป
+		if os.clock() - c.t0 < c.time * 0.5 then score = 0 end
+		player:SetAttribute("Spice", c.food.spicy and math.clamp(tonumber(spice) or 1, 1, #Config.SpiceLevels) or nil) -- กันโกง ทำเร็วเกินไป
 		if score <= 0 then notify(player, "burnt", "red"); return end
 		player:SetAttribute("Quality", score)
-		setHolding(player, c.food.id, c.food.batch or 1, false)
+		setHolding(player, c.food.id, upgOf(player, c.food.id, "tray"), false)
 		notify(player, score > 0.85 and "perfect" or (score > 0.5 and "good" or "ok"), "green")
 	end)
 	
@@ -131,7 +148,9 @@ if G.started then return end; G.started = true
 		if entry.group.kind == "takeaway" and not player:GetAttribute("Bagged") then notify(player, "needBag", "red"); return end
 		local left = (player:GetAttribute("HoldCount") or 1) - 1
 		if left > 0 then setHolding(player, holding, left, player:GetAttribute("Bagged")) else setHolding(player, nil) end
-		serveEntry(player, entry, player:GetAttribute("Quality") or 0.5)
+		local quality = player:GetAttribute("Quality") or 0.5
+		if entry.spice and player:GetAttribute("Spice") ~= entry.spice then quality = 0; notify(player, "wrongSpice", "red") end
+		serveEntry(player, entry, quality)
 	end
 	-- หยิบจานจากเคาน์เตอร์ที่พ่อครัวทำไว้
 	Plot.onPickup = function(player, dish)

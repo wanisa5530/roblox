@@ -22,7 +22,7 @@ function fake:SetAttribute(k, v) attrs[k] = v end
 function fake:GetAttribute(k) return attrs[k] end
 function fake:FindFirstChild() return nil end
 local Data = require(SSS.DataService)
-Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {} }
+Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {} }
 local plot = Plot.assign(fake)
 check("plot assigned", plot ~= nil and attrs.PlotIndex == 1)
 Plot.refresh(fake, { MooPing = true, PadThai = true })
@@ -87,7 +87,21 @@ check("wages paid", dd.cash < before)
 dd.cash = 0; GS.payWages(fake)
 check("staff quit when broke", next(dd.staff) == nil)
 
--- 6) คิวซื้อกลับไม่เกิน MaxQueue
+-- 6) อัปเกรดโต๊ะครัว + ข้อมูลหลายขั้นตอน
+local RS2 = game:GetService("ReplicatedStorage"); local Remotes = require(RS2.Remotes)
+dd.cash = 100000
+local okU = Remotes.UpgradeStation.OnServerInvoke(fake, "MooPing", "tray")
+check("upgrade tray", okU == true and dd.upg.MooPing.tray == 2)
+local okS = Remotes.UpgradeStation.OnServerInvoke(fake, "PadThai", "speed")
+check("upgrade speed", okS == true and dd.upg.PadThai.speed == 2)
+dd.cash = 0
+local okN, errN = Remotes.UpgradeStation.OnServerInvoke(fake, "MooPing", "speed")
+check("upgrade needs cash", okN == false and errN == "notEnough")
+local multi = 0
+for _, f in ipairs(Config.Foods) do if f.steps then multi += 1; check("steps valid " .. f.id, #f.steps >= 2) end end
+check("has multi-step foods", multi >= 5)
+
+-- 7) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil
