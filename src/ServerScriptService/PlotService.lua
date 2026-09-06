@@ -297,13 +297,14 @@ function P.festivalDecor(player, fest)
 		for _, x in ipairs({ -20, 20 }) do part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(2.5, 2.2, 2.2), CFrame = CFrame.new(o + Vector3.new(x, 1.25, 22)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(80, 160, 230), Material = Enum.Material.Plastic }, f) end
 	elseif fest.key == "LoyKrathong" then
 		-- บ่อน้ำหน้าร้าน กระทงลอยวน โคมลอยขึ้นฟ้า
-		local pond = part({ Size = Vector3.new(34, 0.6, 9), Position = o + Vector3.new(0, 0.5, 21), Color = Color3.fromRGB(40, 90, 140), Material = Enum.Material.Glass, Transparency = 0.25 }, f)
-		part({ Size = Vector3.new(36, 1, 11), Position = o + Vector3.new(0, 0.3, 21), Color = Color3.fromRGB(120, 110, 100), Material = Enum.Material.Cobblestone }, f)
-		pond.Parent = f
+		part({ Size = Vector3.new(36, 1.2, 11), Position = o + Vector3.new(0, 0.6, 21), Color = Color3.fromRGB(150, 140, 125), Material = Enum.Material.Cobblestone }, f)
+		part({ Size = Vector3.new(34, 0.4, 9), Position = o + Vector3.new(0, 1.05, 21), Color = Color3.fromRGB(70, 150, 220), Material = Enum.Material.SmoothPlastic, Transparency = 0.1, Reflectance = 0.3 }, f)
+		local rim = part({ Size = Vector3.new(34.4, 0.15, 9.4), Position = o + Vector3.new(0, 1.28, 21), Color = Color3.fromRGB(140, 210, 255), Material = Enum.Material.Neon, Transparency = 0.6 }, f)
+		local rl = Instance.new("PointLight"); rl.Color = Color3.fromRGB(120, 190, 255); rl.Range = 16; rl.Parent = rim
 		for k = 0, 7 do
 			local kr = Instance.new("Model"); kr.Parent = f
 			local base = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.6, 2.2, 2.2), Color = Color3.fromRGB(70, 150, 70), Material = Enum.Material.Grass }, kr)
-			base.CFrame = CFrame.new(o + Vector3.new(-14 + k * 4, 1.1, 21)) * CFrame.Angles(0, 0, math.rad(90)); kr.PrimaryPart = base
+			base.CFrame = CFrame.new(o + Vector3.new(-14 + k * 4, 1.6, 21)) * CFrame.Angles(0, 0, math.rad(90)); kr.PrimaryPart = base
 			for _, ang in ipairs({ 0, 90, 180, 270 }) do
 				local petal = part({ Size = Vector3.new(0.9, 0.5, 0.5), Color = ({ Color3.fromRGB(255, 120, 160), Color3.fromRGB(255, 200, 60) })[k % 2 + 1], Material = Enum.Material.SmoothPlastic }, kr)
 				petal.CFrame = base.CFrame * CFrame.Angles(0, 0, math.rad(-90)) * CFrame.Angles(0, math.rad(ang), 0) * CFrame.new(0.9, 0.5, 0)
@@ -313,7 +314,7 @@ function P.festivalDecor(player, fest)
 			for _, x in ipairs(kr:GetChildren()) do if x ~= base then local w = Instance.new("WeldConstraint"); w.Part0 = base; w.Part1 = x; w.Parent = x; x.Anchored = false end end
 			task.spawn(function()
 				local t0 = os.clock() + k
-				while kr.Parent do base.CFrame = CFrame.new(o + Vector3.new(-14 + k * 4 + math.sin(os.clock() - t0) * 1.2, 1.1 + math.sin((os.clock() - t0) * 2) * 0.08, 21 + math.cos(os.clock() - t0) * 1.2)) * CFrame.Angles(0, (os.clock() - t0) * 0.3, math.rad(90)); task.wait(0.05) end
+				while kr.Parent do base.CFrame = CFrame.new(o + Vector3.new(-14 + k * 4 + math.sin(os.clock() - t0) * 1.2, 1.6 + math.sin((os.clock() - t0) * 2) * 0.08, 21 + math.cos(os.clock() - t0) * 1.2)) * CFrame.Angles(0, (os.clock() - t0) * 0.3, math.rad(90)); task.wait(0.05) end
 			end)
 		end
 		for k = 0, 5 do

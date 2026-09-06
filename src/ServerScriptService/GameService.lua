@@ -439,6 +439,13 @@ if G.started then return end; G.started = true
 	end
 	local function staffTick(player)
 		local d = Data.get(player); if not d then return end
+		-- ว่างงาน: เดินขยับเล็กน้อยทุก ๆ 6 วิ ให้เห็นว่าไม่ได้แข็งทื่อ
+		for key, npc in pairs(staffNpcs[player] or {}) do
+			if npc.Parent and not npc:GetAttribute("Busy") and math.random() < 0.15 then
+				local pts = Plot.points(player:GetAttribute("PlotIndex"))
+				staffWalk(player, key, pts.staff[key] + Vector3.new(math.random(-3, 3), 0, math.random(-2, 2)), function() end)
+			end
+		end
 		local t = os.clock()
 		d._staffNext = d._staffNext or {}
 		for _, st in ipairs(Config.Staff) do
@@ -526,7 +533,9 @@ if G.started then return end; G.started = true
 		task.spawn(function()
 			local lastWage = os.clock()
 			while player.Parent do
-				task.wait(1); staffTick(player)
+				task.wait(1)
+				local okT, errT = pcall(staffTick, player)
+				if not okT then warn("staffTick:", errT) end
 				if os.clock() - lastWage >= Config.WagePeriod then lastWage = os.clock(); payWages(player) end
 			end
 		end)

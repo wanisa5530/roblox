@@ -117,7 +117,7 @@ Config.WagePeriod = 300
 Config.Staff = {
 	{ key="Cook",   emoji="👨‍🍳", cost=1500, wage=120, interval=9 },
 	{ key="Waiter", emoji="🧑‍💼", cost=900,  wage=80,  interval=6 },
-	{ key="Washer", emoji="🧽", cost=600,  wage=50,  interval=8 },
+	{ key="Washer", emoji="🧽", cost=600,  wage=50,  interval=4 },
 }
 -- ของตกแต่งร้าน: cat = tent/chairs/sign/prop, cost = เงินในเกม, premium = ต้องมี Golden Decor Pack
 Config.Decor = {
