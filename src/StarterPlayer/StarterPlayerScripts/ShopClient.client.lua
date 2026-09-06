@@ -1,7 +1,8 @@
 -- UI ฝั่งผู้เล่น: แสดงเงิน ปุ่มเก็บเงิน ซื้อเมนู และปุ่มซื้อ Robux
 local Players = game:GetService("Players")
-local Config = require(game.ReplicatedStorage.Config)
-local Remotes = require(game.ReplicatedStorage.Remotes)
+local RS = game:GetService("ReplicatedStorage")
+local Config = require(RS:WaitForChild("Config"))
+local Remotes = require(RS:WaitForChild("Remotes"))
 
 local gui = Instance.new("ScreenGui"); gui.Name = "TycoonUI"; gui.ResetOnSpawn = false
 gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -48,4 +49,5 @@ local function render(d)
 end
 
 Remotes.DataUpdate.OnClientEvent:Connect(render)
-render(Remotes.GetData:InvokeServer())
+local ok, d = pcall(function() return Remotes.GetData:InvokeServer() end)
+if ok and d then render(d) else cashLabel.Text = "ERR: " .. tostring(d) end

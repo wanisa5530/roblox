@@ -3,7 +3,9 @@ local DSS = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local Config = require(game.ReplicatedStorage.Config)
 
-local store = DSS:GetDataStore("StreetFoodTycoon_v1")
+-- ถ้าเปิดจากไฟล์ที่ยังไม่ publish DataStore จะใช้ไม่ได้ ให้เล่นได้โดยไม่บันทึก
+local okStore, store = pcall(DSS.GetDataStore, DSS, "StreetFoodTycoon_v1")
+if not okStore then warn("DataStore unavailable:", store); store = nil end
 local DataService = { cache = {} }
 
 local function default()
@@ -11,14 +13,15 @@ local function default()
 end
 
 function DataService.load(player)
-	local ok, data = pcall(store.GetAsync, store, "p_" .. player.UserId)
+	local ok, data = false, nil
+	if store then ok, data = pcall(store.GetAsync, store, "p_" .. player.UserId) end
 	DataService.cache[player.UserId] = (ok and data) or default()
 	return DataService.cache[player.UserId]
 end
 
 function DataService.save(player)
 	local data = DataService.cache[player.UserId]
-	if not data then return end
+	if not data or not store then return end
 	pcall(store.SetAsync, store, "p_" .. player.UserId, data)
 end
 

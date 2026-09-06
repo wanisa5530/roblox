@@ -51,8 +51,7 @@ Players.PlayerAdded:Connect(onPlayer)
 for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
 
 Remotes.GetData.OnServerInvoke = function(player)
-	while not Data.get(player) do task.wait(0.1) end
-	return Data.get(player)
+	return Data.get(player) or Data.load(player)
 end
 
 Remotes.Collect.OnServerInvoke = function(player)
