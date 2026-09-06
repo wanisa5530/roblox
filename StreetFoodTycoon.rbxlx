@@ -12,6 +12,8 @@ Config.StartingCash = 50
 Config.PayoutInterval = 1 -- วินาที
 Config.MaxPlots = 8
 Config.DefaultLocale = "en"
+-- รางวัลล็อกอินรายวัน ตามจำนวนวันติดต่อกัน (วนซ้ำหลังวันที่ 7)
+Config.DailyRewards = { 200, 400, 700, 1000, 1500, 2500, 5000 }
 
 -- เมนูอาหารข้างทางไทย เรียงจากถูกไปแพง (cost = ราคาซื้อ, income = รายได้/วินาที)
 Config.Foods = {
@@ -75,15 +77,15 @@ local L = {}
 L.Supported = { "en", "th", "ja", "zh", "id" }
 L.Names = { en="English", th="ไทย", ja="日本語", zh="中文", id="Indonesia" }
 L.Strings = {
-	en = { title="Street Food Tycoon", cash="Cash", perSec="/sec", collect="Collect", owned="OWNED", buy="Buy", menu="Menu", passes="Passes", robux="Robux", notEnough="Not enough cash!", bought="Opened: %s",
+	en = { daily="Daily Reward", day="Day %d", claim="Claim", claimed="Come back tomorrow!", top="Top Tycoons", you="You", title="Street Food Tycoon", cash="Cash", perSec="/sec", collect="Collect", owned="OWNED", buy="Buy", menu="Menu", passes="Passes", robux="Robux", notEnough="Not enough cash!", bought="Opened: %s",
 		DoubleIncome="2x Income", AutoCollect="Auto Collect", VIP="VIP (+50%)", Cash1="+5,000 Cash", Cash2="+50,000 Cash", Cash3="+500,000 Cash", lang="Language" },
-	th = { title="สตรีทฟู้ดไทคูน", cash="เงิน", perSec="/วิ", collect="เก็บเงิน", owned="มีแล้ว", buy="ซื้อ", menu="เมนู", passes="แพ็กเกจ", robux="Robux", notEnough="เงินไม่พอ!", bought="เปิดร้าน: %s",
+	th = { daily="รางวัลรายวัน", day="วันที่ %d", claim="รับรางวัล", claimed="พรุ่งนี้มาใหม่นะ!", top="เศรษฐีอันดับต้น", you="คุณ", title="สตรีทฟู้ดไทคูน", cash="เงิน", perSec="/วิ", collect="เก็บเงิน", owned="มีแล้ว", buy="ซื้อ", menu="เมนู", passes="แพ็กเกจ", robux="Robux", notEnough="เงินไม่พอ!", bought="เปิดร้าน: %s",
 		DoubleIncome="รายได้ x2", AutoCollect="เก็บเงินอัตโนมัติ", VIP="VIP (+50%)", Cash1="+5,000 เงิน", Cash2="+50,000 เงิน", Cash3="+500,000 เงิน", lang="ภาษา" },
-	ja = { title="屋台タイクーン", cash="所持金", perSec="/秒", collect="回収", owned="所有済み", buy="購入", menu="メニュー", passes="パス", robux="Robux", notEnough="お金が足りません！", bought="開店: %s",
+	ja = { daily="デイリー報酬", day="%d日目", claim="受け取る", claimed="また明日！", top="トップ長者", you="あなた", title="屋台タイクーン", cash="所持金", perSec="/秒", collect="回収", owned="所有済み", buy="購入", menu="メニュー", passes="パス", robux="Robux", notEnough="お金が足りません！", bought="開店: %s",
 		DoubleIncome="収入2倍", AutoCollect="自動回収", VIP="VIP (+50%)", Cash1="+5,000", Cash2="+50,000", Cash3="+500,000", lang="言語" },
-	zh = { title="街头小吃大亨", cash="现金", perSec="/秒", collect="收取", owned="已拥有", buy="购买", menu="菜单", passes="通行证", robux="Robux", notEnough="现金不足！", bought="开张: %s",
+	zh = { daily="每日奖励", day="第 %d 天", claim="领取", claimed="明天再来！", top="富豪榜", you="你", title="街头小吃大亨", cash="现金", perSec="/秒", collect="收取", owned="已拥有", buy="购买", menu="菜单", passes="通行证", robux="Robux", notEnough="现金不足！", bought="开张: %s",
 		DoubleIncome="双倍收入", AutoCollect="自动收取", VIP="VIP (+50%)", Cash1="+5,000 现金", Cash2="+50,000 现金", Cash3="+500,000 现金", lang="语言" },
-	id = { title="Street Food Tycoon", cash="Uang", perSec="/dtk", collect="Ambil", owned="DIMILIKI", buy="Beli", menu="Menu", passes="Pass", robux="Robux", notEnough="Uang tidak cukup!", bought="Dibuka: %s",
+	id = { daily="Hadiah Harian", day="Hari %d", claim="Ambil", claimed="Kembali besok!", top="Taipan Teratas", you="Kamu", title="Street Food Tycoon", cash="Uang", perSec="/dtk", collect="Ambil", owned="DIMILIKI", buy="Beli", menu="Menu", passes="Pass", robux="Robux", notEnough="Uang tidak cukup!", bought="Dibuka: %s",
 		DoubleIncome="Pendapatan 2x", AutoCollect="Ambil Otomatis", VIP="VIP (+50%)", Cash1="+5.000 Uang", Cash2="+50.000 Uang", Cash3="+500.000 Uang", lang="Bahasa" },
 }
 function L.detect(localeId)
@@ -113,7 +115,7 @@ return L
         <string name="Source"><![CDATA[local RS = game:GetService("ReplicatedStorage")
 local isServer = game:GetService("RunService"):IsServer()
 local names = { BuyFood="RemoteFunction", GetData="RemoteFunction", Collect="RemoteFunction",
-	DataUpdate="RemoteEvent", PromptPass="RemoteEvent" }
+	DataUpdate="RemoteEvent", PromptPass="RemoteEvent", ClaimDaily="RemoteFunction", Leaderboard="RemoteEvent" }
 local folder
 if isServer then
 	folder = Instance.new("Folder"); folder.Name = "RemoteFolder"; folder.Parent = RS
@@ -142,12 +144,12 @@ local Config = require(game.ReplicatedStorage.Config)
 local okStore, store = pcall(DSS.GetDataStore, DSS, "StreetFoodTycoon_v2")
 if not okStore then warn("DataStore unavailable:", store); store = nil end
 local D = { cache = {} }
-local function default() return { cash = Config.StartingCash, foods = { MooPing = true }, pending = 0, total = 0 } end
+local function default() return { cash = Config.StartingCash, foods = { MooPing = true }, pending = 0, total = 0, lastClaim = 0, streak = 0 } end
 function D.load(p)
 	local ok, data = false, nil
 	if store then ok, data = pcall(store.GetAsync, store, "p_" .. p.UserId) end
 	local d = (ok and type(data) == "table") and data or default()
-	d.total = d.total or 0
+	d.total = d.total or 0; d.lastClaim = d.lastClaim or 0; d.streak = d.streak or 0
 	D.cache[p.UserId] = d
 	return d
 end
@@ -164,6 +166,61 @@ return D
       </Properties>
     </Item>
     <Item class="ModuleScript" referent="6">
+      <Properties>
+        <string name="Name">LeaderboardService</string>
+        <string name="Source"><![CDATA[-- Leaderboard: leaderstats ในเกม + อันดับรวมทุกเซิร์ฟเวอร์ (OrderedDataStore) + ป้ายในแมพ
+local DSS = game:GetService("DataStoreService")
+local Players = game:GetService("Players")
+local Remotes = require(game.ReplicatedStorage.Remotes)
+local ok, ods = pcall(DSS.GetOrderedDataStore, DSS, "TotalEarned_v1")
+if not ok then ods = nil end
+local LB = { top = {} }
+
+function LB.setup(player, d)
+	local ls = Instance.new("Folder"); ls.Name = "leaderstats"; ls.Parent = player
+	local cash = Instance.new("NumberValue"); cash.Name = "Cash"; cash.Parent = ls
+	local inc = Instance.new("NumberValue"); inc.Name = "Income/s"; inc.Parent = ls
+end
+function LB.update(player, d, income)
+	local ls = player:FindFirstChild("leaderstats"); if not ls then return end
+	ls.Cash.Value = math.floor(d.cash); ls["Income/s"].Value = income
+end
+function LB.submit(player, d)
+	if ods then pcall(ods.SetAsync, ods, tostring(player.UserId), math.floor(d.total)) end
+end
+
+-- ป้ายอันดับในแมพ
+local board = Instance.new("Part"); board.Name = "LeaderboardSign"; board.Anchored = true
+board.Size = Vector3.new(18, 12, 0.5); board.Position = Vector3.new(30, 7, -30); board.Color = Color3.fromRGB(30, 26, 24)
+board.Material = Enum.Material.SmoothPlastic; board.Parent = workspace
+local sg = Instance.new("SurfaceGui"); sg.Face = Enum.NormalId.Front; sg.Parent = board
+local tl = Instance.new("TextLabel"); tl.Size = UDim2.fromScale(1, 1); tl.BackgroundTransparency = 1
+tl.TextColor3 = Color3.fromRGB(255, 220, 120); tl.Font = Enum.Font.FredokaOne; tl.TextScaled = true
+tl.TextXAlignment = Enum.TextXAlignment.Left; tl.Text = "🏆 Top Tycoons"; tl.Parent = sg
+local pad = Instance.new("UIPadding"); pad.PaddingLeft = UDim.new(0.05, 0); pad.PaddingTop = UDim.new(0.03, 0); pad.Parent = tl
+
+local function fmt(n) if n >= 1e6 then return string.format("%.1fM", n/1e6) elseif n >= 1e3 then return string.format("%.1fK", n/1e3) end return tostring(n) end
+function LB.refresh()
+	if not ods then return end
+	local okp, pages = pcall(ods.GetSortedAsync, ods, false, 10)
+	if not okp then return end
+	local rows, lines = {}, { "🏆 Top Tycoons" }
+	for i, e in ipairs(pages:GetCurrentPage()) do
+		local okn, name = pcall(Players.GetNameFromUserIdAsync, Players, tonumber(e.key))
+		name = okn and name or "?"
+		rows[#rows + 1] = { name = name, value = e.value }
+		lines[#lines + 1] = string.format("%d. %s  ฿%s", i, name, fmt(e.value))
+	end
+	LB.top = rows
+	tl.Text = table.concat(lines, "\n")
+	Remotes.Leaderboard:FireAllClients(rows)
+end
+task.spawn(function() while true do LB.refresh(); task.wait(60) end end)
+return LB
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="7">
       <Properties>
         <string name="Name">PlotService</string>
         <string name="Source"><![CDATA[-- แปลงร้านของผู้เล่นแต่ละคน: สร้างรถเข็น + แผงอาหารตามเมนูที่ซื้อ
@@ -241,7 +298,7 @@ return P
 ]]></string>
       </Properties>
     </Item>
-    <Item class="Script" referent="7">
+    <Item class="Script" referent="8">
       <Properties>
         <string name="Name">TycoonServer</string>
         <token name="RunContext">0</token>
@@ -253,6 +310,7 @@ local Config = require(RS.Config)
 local Remotes = require(RS.Remotes)
 local Data = require(script.Parent.DataService)
 local Plot = require(script.Parent.PlotService)
+local LB = require(script.Parent.LeaderboardService)
 
 local passCache = {}
 local function ownsPass(player, key)
@@ -277,7 +335,7 @@ end
 
 local function push(player)
 	local d = Data.get(player)
-	if d then Remotes.DataUpdate:FireClient(player, d, incomePerSec(player)) end
+	if d then local inc = incomePerSec(player); LB.update(player, d, inc); Remotes.DataUpdate:FireClient(player, d, inc) end
 end
 
 local function collect(player)
@@ -288,6 +346,7 @@ end
 
 local function onPlayer(player)
 	local d = Data.load(player)
+	LB.setup(player, d)
 	local _, pad = Plot.assign(player)
 	Plot.refresh(player, d.foods)
 	push(player)
@@ -309,7 +368,27 @@ local function onPlayer(player)
 end
 Players.PlayerAdded:Connect(onPlayer)
 for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
-Players.PlayerRemoving:Connect(function(p) Plot.release(p); passCache[p] = nil end)
+Players.PlayerRemoving:Connect(function(p) local d = Data.get(p); if d then LB.submit(p, d) end; Plot.release(p); passCache[p] = nil end)
+task.spawn(function() while true do task.wait(120); for _, p in ipairs(Players:GetPlayers()) do local d = Data.get(p); if d then LB.submit(p, d) end end end end)
+
+-- ล็อกอินรายวัน: คืน (สถานะ, วันสตรีค, จำนวนเงิน)
+local DAY = 86400
+local function dailyInfo(d)
+	local now = os.time()
+	local since = now - (d.lastClaim or 0)
+	local canClaim = since >= DAY
+	local streak = (since < DAY * 2) and (d.streak or 0) or 0 -- ขาดเกิน 1 วัน สตรีคหลุด
+	local nextDay = math.min(streak + 1, #Config.DailyRewards)
+	return canClaim, nextDay, Config.DailyRewards[nextDay]
+end
+Remotes.ClaimDaily.OnServerInvoke = function(player, justAsk)
+	local d = Data.get(player); if not d then return false end
+	local can, day, reward = dailyInfo(d)
+	if justAsk or not can then return can, day, reward end
+	d.cash += reward; d.total += reward; d.streak = day; d.lastClaim = os.time()
+	Data.save(player); push(player)
+	return true, day, reward
+end
 
 Remotes.GetData.OnServerInvoke = function(player)
 	local d = Data.get(player) or Data.load(player)
@@ -357,20 +436,20 @@ end)
       </Properties>
     </Item>
   </Item>
-  <Item class="StarterGui" referent="8">
+  <Item class="StarterGui" referent="9">
     <Properties>
       <string name="Name">StarterGui</string>
     </Properties>
   </Item>
-  <Item class="StarterPlayer" referent="9">
+  <Item class="StarterPlayer" referent="10">
     <Properties>
       <string name="Name">StarterPlayer</string>
     </Properties>
-    <Item class="StarterPlayerScripts" referent="10">
+    <Item class="StarterPlayerScripts" referent="11">
       <Properties>
         <string name="Name">StarterPlayerScripts</string>
       </Properties>
-      <Item class="LocalScript" referent="11">
+      <Item class="LocalScript" referent="12">
         <Properties>
           <string name="Name">ShopClient</string>
           <string name="Source"><![CDATA[-- UI หลัก: แถบเงินด้านบน, ร้านค้าแบบแท็บ, สลับภาษา, แจ้งเตือน
@@ -433,6 +512,34 @@ local function notify(msg, color)
 	task.delay(2, function() if toast.Text == msg then toast.Visible = false end end)
 end
 
+-- รางวัลรายวัน
+local daily = frame(gui, UDim2.new(0, 320, 0, 200), UDim2.new(0.5, -160, 0.5, -100), C.bg); corner(daily, 16); daily.Visible = false
+local dailyTitle = label(daily, "", UDim2.new(1, 0, 0, 40), UDim2.new(0, 0, 0, 12), 26, C.accent, Enum.TextXAlignment.Center)
+local dailyDay = label(daily, "", UDim2.new(1, 0, 0, 30), UDim2.new(0, 0, 0, 56), 20, C.muted, Enum.TextXAlignment.Center)
+local dailyAmt = label(daily, "", UDim2.new(1, 0, 0, 40), UDim2.new(0, 0, 0, 88), 32, C.green, Enum.TextXAlignment.Center)
+local dailyBtn = button(daily, "", UDim2.new(0, 180, 0, 44), UDim2.new(0.5, -90, 1, -56), C.green)
+local function showDaily(day, amt)
+	dailyTitle.Text = "🎁 " .. T("daily"); dailyDay.Text = string.format(T("day"), day); dailyAmt.Text = "฿ " .. Locale.fmt(amt); dailyBtn.Text = T("claim")
+	daily.Visible = true
+end
+dailyBtn.MouseButton1Click:Connect(function()
+	local okc = Remotes.ClaimDaily:InvokeServer(false)
+	daily.Visible = false
+	notify(okc and (dailyAmt.Text) or T("claimed"), C.green)
+end)
+
+-- Leaderboard ด้านขวา
+local lbFrame = frame(gui, UDim2.new(0, 220, 0, 260), UDim2.new(1, -236, 0, 90), C.bg); corner(lbFrame, 12); pad(lbFrame, 10)
+lbFrame.BackgroundTransparency = 0.15
+local lbTitle = label(lbFrame, "🏆 " .. T("top"), UDim2.new(1, 0, 0, 26), UDim2.new(), 18, C.accent)
+local lbBody = label(lbFrame, "...", UDim2.new(1, 0, 1, -30), UDim2.new(0, 0, 0, 30), 14, C.text)
+lbBody.TextYAlignment = Enum.TextYAlignment.Top; lbBody.TextWrapped = true
+Remotes.Leaderboard.OnClientEvent:Connect(function(rows)
+	local lines = {}
+	for i, r in ipairs(rows) do lines[#lines + 1] = string.format("%d. %s  ฿%s", i, r.name, Locale.fmt(r.value)) end
+	lbBody.Text = #lines > 0 and table.concat(lines, "\n") or "-"
+end)
+
 -- หน้าต่างร้านค้า
 local shop = frame(gui, UDim2.new(0, 460, 0, 520), UDim2.new(0.5, -230, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
@@ -490,6 +597,7 @@ local function renderTop()
 end
 
 local function applyLang()
+	lbTitle.Text = "🏆 " .. T("top")
 	titleLbl.Text = T("title"); shopBtn.Text = "🛒 " .. T("menu"); langBtn.Text = "🌐 " .. Locale.Names[lang]
 	renderTop(); renderShop()
 end
@@ -511,21 +619,25 @@ Remotes.DataUpdate.OnClientEvent:Connect(function(d, income)
 end)
 local ok, d, income = pcall(function() return Remotes.GetData:InvokeServer() end)
 if ok and d then state.data, state.income = d, income or 0; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
+task.delay(1, function()
+	local okd, can, day, amt = pcall(function() return Remotes.ClaimDaily:InvokeServer(true) end)
+	if okd and can then showDaily(day, amt) end
+end)
 ]]></string>
         </Properties>
       </Item>
     </Item>
   </Item>
-  <Item class="Workspace" referent="12">
+  <Item class="Workspace" referent="13">
     <Properties>
       <string name="Name">Workspace</string>
       <bool name="NeedsPivotMigration">false</bool>
     </Properties>
-    <Item class="Folder" referent="13">
+    <Item class="Folder" referent="14">
       <Properties>
         <string name="Name">Map</string>
       </Properties>
-      <Item class="Part" referent="14">
+      <Item class="Part" referent="15">
         <Properties>
           <string name="Name">Ground</string>
           <bool name="Anchored">true</bool>
@@ -544,7 +656,7 @@ if ok and d then state.data, state.income = d, income or 0; applyLang() else cas
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="15">
+      <Item class="Part" referent="16">
         <Properties>
           <string name="Name">Road</string>
           <bool name="Anchored">true</bool>
@@ -562,7 +674,7 @@ if ok and d then state.data, state.income = d, income or 0; applyLang() else cas
           </Vector3>
         </Properties>
       </Item>
-      <Item class="SpawnLocation" referent="16">
+      <Item class="SpawnLocation" referent="17">
         <Properties>
           <string name="Name">SpawnLocation</string>
           <bool name="Anchored">true</bool>
@@ -580,7 +692,7 @@ if ok and d then state.data, state.income = d, income or 0; applyLang() else cas
           </Vector3>
         </Properties>
       </Item>
-      <Item class="Part" referent="17">
+      <Item class="Part" referent="18">
         <Properties>
           <string name="Name">Welcome</string>
           <bool name="Anchored">true</bool>
@@ -597,12 +709,12 @@ if ok and d then state.data, state.income = d, income or 0; applyLang() else cas
             <Z>0.4</Z>
           </Vector3>
         </Properties>
-        <Item class="SurfaceGui" referent="18">
+        <Item class="SurfaceGui" referent="19">
           <Properties>
             <string name="Name">Gui</string>
             <token name="Face">5</token>
           </Properties>
-          <Item class="TextLabel" referent="19">
+          <Item class="TextLabel" referent="20">
             <Properties>
               <string name="Name">Text</string>
               <float name="BackgroundTransparency">1</float>

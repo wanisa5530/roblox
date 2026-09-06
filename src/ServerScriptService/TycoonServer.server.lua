@@ -6,6 +6,7 @@ local Config = require(RS.Config)
 local Remotes = require(RS.Remotes)
 local Data = require(script.Parent.DataService)
 local Plot = require(script.Parent.PlotService)
+local LB = require(script.Parent.LeaderboardService)
 
 local passCache = {}
 local function ownsPass(player, key)
@@ -30,7 +31,7 @@ end
 
 local function push(player)
 	local d = Data.get(player)
-	if d then Remotes.DataUpdate:FireClient(player, d, incomePerSec(player)) end
+	if d then local inc = incomePerSec(player); LB.update(player, d, inc); Remotes.DataUpdate:FireClient(player, d, inc) end
 end
 
 local function collect(player)
@@ -41,6 +42,7 @@ end
 
 local function onPlayer(player)
 	local d = Data.load(player)
+	LB.setup(player, d)
 	local _, pad = Plot.assign(player)
 	Plot.refresh(player, d.foods)
 	push(player)
@@ -62,7 +64,27 @@ local function onPlayer(player)
 end
 Players.PlayerAdded:Connect(onPlayer)
 for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
-Players.PlayerRemoving:Connect(function(p) Plot.release(p); passCache[p] = nil end)
+Players.PlayerRemoving:Connect(function(p) local d = Data.get(p); if d then LB.submit(p, d) end; Plot.release(p); passCache[p] = nil end)
+task.spawn(function() while true do task.wait(120); for _, p in ipairs(Players:GetPlayers()) do local d = Data.get(p); if d then LB.submit(p, d) end end end end)
+
+-- ล็อกอินรายวัน: คืน (สถานะ, วันสตรีค, จำนวนเงิน)
+local DAY = 86400
+local function dailyInfo(d)
+	local now = os.time()
+	local since = now - (d.lastClaim or 0)
+	local canClaim = since >= DAY
+	local streak = (since < DAY * 2) and (d.streak or 0) or 0 -- ขาดเกิน 1 วัน สตรีคหลุด
+	local nextDay = math.min(streak + 1, #Config.DailyRewards)
+	return canClaim, nextDay, Config.DailyRewards[nextDay]
+end
+Remotes.ClaimDaily.OnServerInvoke = function(player, justAsk)
+	local d = Data.get(player); if not d then return false end
+	local can, day, reward = dailyInfo(d)
+	if justAsk or not can then return can, day, reward end
+	d.cash += reward; d.total += reward; d.streak = day; d.lastClaim = os.time()
+	Data.save(player); push(player)
+	return true, day, reward
+end
 
 Remotes.GetData.OnServerInvoke = function(player)
 	local d = Data.get(player) or Data.load(player)

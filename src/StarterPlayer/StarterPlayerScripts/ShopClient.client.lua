@@ -58,6 +58,34 @@ local function notify(msg, color)
 	task.delay(2, function() if toast.Text == msg then toast.Visible = false end end)
 end
 
+-- รางวัลรายวัน
+local daily = frame(gui, UDim2.new(0, 320, 0, 200), UDim2.new(0.5, -160, 0.5, -100), C.bg); corner(daily, 16); daily.Visible = false
+local dailyTitle = label(daily, "", UDim2.new(1, 0, 0, 40), UDim2.new(0, 0, 0, 12), 26, C.accent, Enum.TextXAlignment.Center)
+local dailyDay = label(daily, "", UDim2.new(1, 0, 0, 30), UDim2.new(0, 0, 0, 56), 20, C.muted, Enum.TextXAlignment.Center)
+local dailyAmt = label(daily, "", UDim2.new(1, 0, 0, 40), UDim2.new(0, 0, 0, 88), 32, C.green, Enum.TextXAlignment.Center)
+local dailyBtn = button(daily, "", UDim2.new(0, 180, 0, 44), UDim2.new(0.5, -90, 1, -56), C.green)
+local function showDaily(day, amt)
+	dailyTitle.Text = "🎁 " .. T("daily"); dailyDay.Text = string.format(T("day"), day); dailyAmt.Text = "฿ " .. Locale.fmt(amt); dailyBtn.Text = T("claim")
+	daily.Visible = true
+end
+dailyBtn.MouseButton1Click:Connect(function()
+	local okc = Remotes.ClaimDaily:InvokeServer(false)
+	daily.Visible = false
+	notify(okc and (dailyAmt.Text) or T("claimed"), C.green)
+end)
+
+-- Leaderboard ด้านขวา
+local lbFrame = frame(gui, UDim2.new(0, 220, 0, 260), UDim2.new(1, -236, 0, 90), C.bg); corner(lbFrame, 12); pad(lbFrame, 10)
+lbFrame.BackgroundTransparency = 0.15
+local lbTitle = label(lbFrame, "🏆 " .. T("top"), UDim2.new(1, 0, 0, 26), UDim2.new(), 18, C.accent)
+local lbBody = label(lbFrame, "...", UDim2.new(1, 0, 1, -30), UDim2.new(0, 0, 0, 30), 14, C.text)
+lbBody.TextYAlignment = Enum.TextYAlignment.Top; lbBody.TextWrapped = true
+Remotes.Leaderboard.OnClientEvent:Connect(function(rows)
+	local lines = {}
+	for i, r in ipairs(rows) do lines[#lines + 1] = string.format("%d. %s  ฿%s", i, r.name, Locale.fmt(r.value)) end
+	lbBody.Text = #lines > 0 and table.concat(lines, "\n") or "-"
+end)
+
 -- หน้าต่างร้านค้า
 local shop = frame(gui, UDim2.new(0, 460, 0, 520), UDim2.new(0.5, -230, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
@@ -115,6 +143,7 @@ local function renderTop()
 end
 
 local function applyLang()
+	lbTitle.Text = "🏆 " .. T("top")
 	titleLbl.Text = T("title"); shopBtn.Text = "🛒 " .. T("menu"); langBtn.Text = "🌐 " .. Locale.Names[lang]
 	renderTop(); renderShop()
 end
@@ -136,3 +165,7 @@ Remotes.DataUpdate.OnClientEvent:Connect(function(d, income)
 end)
 local ok, d, income = pcall(function() return Remotes.GetData:InvokeServer() end)
 if ok and d then state.data, state.income = d, income or 0; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
+task.delay(1, function()
+	local okd, can, day, amt = pcall(function() return Remotes.ClaimDaily:InvokeServer(true) end)
+	if okd and can then showDaily(day, amt) end
+end)

@@ -4,6 +4,8 @@ Config.StartingCash = 50
 Config.PayoutInterval = 1 -- วินาที
 Config.MaxPlots = 8
 Config.DefaultLocale = "en"
+-- รางวัลล็อกอินรายวัน ตามจำนวนวันติดต่อกัน (วนซ้ำหลังวันที่ 7)
+Config.DailyRewards = { 200, 400, 700, 1000, 1500, 2500, 5000 }
 
 -- เมนูอาหารข้างทางไทย เรียงจากถูกไปแพง (cost = ราคาซื้อ, income = รายได้/วินาที)
 Config.Foods = {

@@ -25,3 +25,11 @@
 - 5 ภาษา: ไทย อังกฤษ ญี่ปุ่น จีน อินโดนีเซีย (`src/ReplicatedStorage/Locale.lua`) ตรวจจากภาษาเครื่องผู้เล่น สลับได้ด้วยปุ่ม 🌐
 - แปลงร้านส่วนตัวสูงสุด 8 คน แผงอาหารโผล่ตามเมนูที่ซื้อ (`src/ServerScriptService/PlotService.lua`)
 - เก็บเงินได้ 2 ทาง: ปุ่มบน UI หรือเดินเหยียบแผ่นเหลืองหน้าร้าน
+- Leaderboard: leaderstats ในเกม + อันดับรวมทุกเซิร์ฟเวอร์ (OrderedDataStore) + ป้ายในแมพ (`LeaderboardService.lua`)
+- ล็อกอินรายวัน สตรีค 7 วัน รางวัลใน `Config.DailyRewards`
+
+## ทดสอบบนเซิร์ฟเวอร์ (ไม่มี Studio)
+```
+/tmp/luau/luau-analyze src/**/*.lua   # ตรวจไวยากรณ์และ lint
+rojo build -o StreetFoodTycoon.rbxlx  # สร้างไฟล์เกม
+```
