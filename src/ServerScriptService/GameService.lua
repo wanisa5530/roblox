@@ -130,6 +130,41 @@ if G.started then return end; G.started = true
 		player:SetAttribute("Holding", on and "Dirty" or nil); player:SetAttribute("HoldCount", nil)
 		syncTray(player)
 	end
+	-- ภารกิจรายวันและเลเวลร้าน
+	local function today() return os.date("!%Y-%m-%d") end
+	local function ensureQuests(d)
+		if d.quests and d.quests.date == today() then return end
+		local pool = table.clone(Config.QuestPool); local list = {}
+		for _ = 1, 3 do local i = math.random(#pool); local q = pool[i]; table.remove(pool, i); list[#list + 1] = { type = q.type, target = q.target, reward = q.reward, progress = 0, claimed = false } end
+		d.quests = { date = today(), list = list }
+	end
+	local function progress(player, qtype, amount)
+		local d = Data.get(player); if not d then return end
+		ensureQuests(d)
+		for _, q in ipairs(d.quests.list) do
+			if q.type == qtype and not q.claimed and q.progress < q.target then
+				q.progress = math.min(q.progress + (amount or 1), q.target)
+				if q.progress >= q.target then notify(player, "questReady", "green") end
+			end
+		end
+	end
+	local function checkLevel(player)
+		local d = Data.get(player); if not d then return end
+		local lv = 1
+		for i, L in ipairs(Config.Levels) do if d.total >= L.need then lv = i end end
+		if lv ~= d.level then d.level = lv; notify(player, "levelUp", "green", Config.Levels[lv].key) end
+		Plot.setLevel(player, lv)
+	end
+	Remotes.ClaimQuest.OnServerInvoke = function(player, idx)
+		local d = Data.get(player); if not d or not d.quests then return false end
+		local q = d.quests.list[idx]
+		if not q or q.claimed or q.progress < q.target then return false end
+		q.claimed = true; d.cash += q.reward; push(player)
+		notify(player, "questDone", "green", q.reward)
+		return true
+	end
+	G.progress, G.checkLevel, G.ensureQuests = progress, checkLevel, ensureQuests
+
 	G.tray, G.addToTray = tray, addToTray
 	-- ใช้ชื่อเดิมให้โค้ดส่วนอื่น (ผู้เล่นเกิดใหม่)
 	local function setHolding(player) syncTray(player) end
@@ -174,41 +209,6 @@ if G.started then return end; G.started = true
 	end)
 	
 	-- เสิร์ฟ
-	-- ภารกิจรายวันและเลเวลร้าน
-	local function today() return os.date("!%Y-%m-%d") end
-	local function ensureQuests(d)
-		if d.quests and d.quests.date == today() then return end
-		local pool = table.clone(Config.QuestPool); local list = {}
-		for _ = 1, 3 do local i = math.random(#pool); local q = pool[i]; table.remove(pool, i); list[#list + 1] = { type = q.type, target = q.target, reward = q.reward, progress = 0, claimed = false } end
-		d.quests = { date = today(), list = list }
-	end
-	local function progress(player, qtype, amount)
-		local d = Data.get(player); if not d then return end
-		ensureQuests(d)
-		for _, q in ipairs(d.quests.list) do
-			if q.type == qtype and not q.claimed and q.progress < q.target then
-				q.progress = math.min(q.progress + (amount or 1), q.target)
-				if q.progress >= q.target then notify(player, "questReady", "green") end
-			end
-		end
-	end
-	local function checkLevel(player)
-		local d = Data.get(player); if not d then return end
-		local lv = 1
-		for i, L in ipairs(Config.Levels) do if d.total >= L.need then lv = i end end
-		if lv ~= d.level then d.level = lv; notify(player, "levelUp", "green", Config.Levels[lv].key) end
-		Plot.setLevel(player, lv)
-	end
-	Remotes.ClaimQuest.OnServerInvoke = function(player, idx)
-		local d = Data.get(player); if not d or not d.quests then return false end
-		local q = d.quests.list[idx]
-		if not q or q.claimed or q.progress < q.target then return false end
-		q.claimed = true; d.cash += q.reward; push(player)
-		notify(player, "questDone", "green", q.reward)
-		return true
-	end
-	G.progress, G.checkLevel, G.ensureQuests = progress, checkLevel, ensureQuests
-
 	local function serveEntry(player, entry, quality)
 		local d = Data.get(player); if not d then return end
 		local patience = Customers.patienceLeft(entry)
