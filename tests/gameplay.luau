@@ -56,8 +56,11 @@ check("all served", allServed)
 if g.kind == "dine" then
 	task.wait(Config.EatTime + 2)
 	check("table dirty after dine", g.table.dirty == true)
-	g.table.setDirty(false)
-	check("table clean again", g.table.dirty == false and Plot.freeTable(fake) ~= nil)
+	attrs.Holding = nil
+	Plot.onClean(fake, g.table)
+	check("holding dirty plates", attrs.Holding == "Dirty" and g.table.dirty == false)
+	Plot.onWash(fake)
+	check("washed", attrs.Holding == nil and Plot.freeTable(fake) ~= nil)
 else
 	task.wait(1)
 end

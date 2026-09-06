@@ -50,7 +50,14 @@ if G.started then return end; G.started = true
 			local old = char:FindFirstChild("HeldDish"); if old then old:Destroy() end
 			if foodId then
 				local d
-				if bagged then
+				if foodId == "Dirty" then
+					d = Instance.new("Model"); d.Name = "HeldDish"
+					for k = 1, 3 do
+						local pl = Instance.new("Part"); pl.Shape = Enum.PartType.Cylinder; pl.Size = Vector3.new(0.12, 1.3, 1.3); pl.Color = Color3.fromRGB(225, 215, 195)
+						pl.CanCollide = false; pl.Massless = true; pl.CFrame = CFrame.new(0, k * 0.15, 0) * CFrame.Angles(0, 0, math.rad(90)); pl.Parent = d
+						if k == 1 then d.PrimaryPart = pl else local w = Instance.new("Weld"); w.Part0 = d.PrimaryPart; w.Part1 = pl; w.C0 = CFrame.new(0, (k - 1) * 0.15, 0); w.Parent = pl end
+					end
+				elseif bagged then
 					d = Instance.new("Model"); d.Name = "HeldDish"
 					local bag = Instance.new("Part"); bag.Size = Vector3.new(1.4, 1.6, 1); bag.Color = Color3.fromRGB(240, 240, 235); bag.Material = Enum.Material.Plastic
 					bag.CanCollide = false; bag.Massless = true; bag.Parent = d; d.PrimaryPart = bag
@@ -70,17 +77,24 @@ if G.started then return end; G.started = true
 	end
 	Plot.onPack = function(player)
 		local id = player:GetAttribute("Holding")
-		if not id then notify(player, "noDish", "red"); return end
+		if not id or id == "Dirty" then notify(player, id and "handsFull" or "noDish", "red"); return end
 		setHolding(player, id, player:GetAttribute("HoldCount") or 1, true)
 	end
 	Plot.onClean = function(player, t)
+		if player:GetAttribute("Holding") then notify(player, player:GetAttribute("Holding") == "Dirty" and "handsFull" or "holding", "red"); return end
 		t.setDirty(false)
+		setHolding(player, "Dirty", 1, false)
+	end
+	Plot.onWash = function(player)
+		if player:GetAttribute("Holding") ~= "Dirty" then return end
+		setHolding(player, nil)
 		local d = Data.get(player); if d then d.rep = math.min(d.rep + 1, 1000); push(player) end
 	end
 	
 	-- ทำอาหาร: เริ่มมินิเกมที่ client แล้วรอผล
 	Plot.onCook = function(player, foodId)
 		if cooking[player] then return end
+		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
 		local f = foodOf(foodId); if not f then return end
 		cooking[player] = { food = f, t0 = os.clock() }
 		Remotes.StartMinigame:FireClient(player, f.game, f.cookTime, foodId)

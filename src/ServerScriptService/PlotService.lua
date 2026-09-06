@@ -3,7 +3,7 @@ local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
 local Locale = require(RS.Locale)
 local Dish = require(RS.Dish)
-local P = { owners = {}, tables = {}, onCook = nil, onPack = nil, onClean = nil }
+local P = { owners = {}, tables = {}, onCook = nil, onPack = nil, onClean = nil, onWash = nil }
 local root = Instance.new("Folder"); root.Name = "Plots"; root.Parent = workspace
 
 local function part(props, parent)
@@ -52,9 +52,9 @@ local function makeTable(m, pos, idx, player)
 	part({ Size = Vector3.new(0.3, 2.4, 0.3), Position = pos + Vector3.new(0, 1.2, 0), Color = Color3.fromRGB(120, 120, 125), Material = Enum.Material.Metal }, g)
 	-- ร่ม
 	part({ Size = Vector3.new(0.25, 8, 0.25), Position = pos + Vector3.new(0, 6, 0), Color = Color3.fromRGB(230, 230, 230) }, g)
-	local top = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.6, 9, 9), Color = idx % 2 == 0 and Color3.fromRGB(220, 50, 50) or Color3.fromRGB(50, 90, 200), Material = Enum.Material.Fabric }, g)
-	top.CFrame = CFrame.new(pos + Vector3.new(0, 9.8, 0)) * CFrame.Angles(0, 0, math.rad(90))
-	light(g, pos + Vector3.new(0, 8.6, 0), Color3.fromRGB(255, 220, 150))
+	local top = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.5, 6.5, 6.5), Color = idx % 2 == 0 and Color3.fromRGB(220, 50, 50) or Color3.fromRGB(50, 90, 200), Material = Enum.Material.Fabric }, g)
+	top.CFrame = CFrame.new(pos + Vector3.new(0, 8.2, 0)) * CFrame.Angles(0, 0, math.rad(90))
+	light(g, pos + Vector3.new(0, 7.4, 0), Color3.fromRGB(255, 220, 150))
 	local seats = {}
 	local colors = { Color3.fromRGB(220, 50, 50), Color3.fromRGB(40, 80, 200), Color3.fromRGB(220, 50, 50), Color3.fromRGB(40, 80, 200) }
 	for k, off in ipairs({ Vector3.new(3, 0, 0), Vector3.new(-3, 0, 0), Vector3.new(0, 0, 3), Vector3.new(0, 0, -3) }) do
@@ -110,6 +110,12 @@ function P.assign(player)
 			local pack = part({ Size = Vector3.new(3, 2.8, 2), Position = o + Vector3.new(11, 1.8, -14), Color = Color3.fromRGB(240, 235, 220), Material = Enum.Material.Plastic }, m)
 			sign(m, "🥡", Vector3.new(2.5, 1, 0.1), o + Vector3.new(11, 4, -13), nil, Color3.fromRGB(255, 240, 200))
 			prompt(pack, "Pack", "🥡", "pack", function(who) if who == player and P.onPack then P.onPack(player) end end)
+			-- อ่างล้างจาน
+			local sink = part({ Size = Vector3.new(4, 2.6, 2.5), Position = o + Vector3.new(-11, 1.6, -18), Color = Color3.fromRGB(190, 195, 200), Material = Enum.Material.Metal }, m)
+			part({ Size = Vector3.new(3, 0.3, 1.8), Position = o + Vector3.new(-11, 2.9, -18), Color = Color3.fromRGB(120, 180, 230), Material = Enum.Material.Glass }, m)
+			sign(m, "🧼 " .. Locale.get("th", "wash"), Vector3.new(4, 0.9, 0.1), o + Vector3.new(-11, 4, -16.7), nil, Color3.fromRGB(200, 230, 255))
+			local wp = prompt(sink, "Wash", "🧼", "wash", function(who) if who == player and P.onWash then P.onWash(player) end end)
+			wp.HoldDuration = 1.5
 			-- โต๊ะนั่ง
 			P.tables[player] = {}
 			local spots = { Vector3.new(-16, 0, -2), Vector3.new(16, 0, -2), Vector3.new(-16, 0, 12), Vector3.new(16, 0, 12) }
@@ -128,9 +134,9 @@ function P.menuBoard(player, foods)
 	local board = m:FindFirstChild("MenuBoard")
 	if not board then
 		board = sign(m, "", Vector3.new(6, 7, 0.3), o + Vector3.new(-13, 4, -13), Color3.fromRGB(255, 240, 200), Color3.fromRGB(40, 30, 30))
-		board.Name = "MenuBoard"; board.Material = Enum.Material.Wood
-		local t = board.SurfaceGui.TextLabel; t.TextScaled = false; t.TextSize = 60; t.TextXAlignment = Enum.TextXAlignment.Left; t.TextYAlignment = Enum.TextYAlignment.Top
-		board.SurfaceGui.PixelsPerStud = 100
+		board.Name = "MenuBoard"
+		local t = board.SurfaceGui.TextLabel; t.TextScaled = false; t.TextSize = 34; t.TextXAlignment = Enum.TextXAlignment.Left; t.TextYAlignment = Enum.TextYAlignment.Top
+		t.TextColor3 = Color3.fromRGB(255, 240, 200); board.SurfaceGui.PixelsPerStud = 60; board.Material = Enum.Material.SmoothPlastic; board.Color = Color3.fromRGB(45, 35, 30)
 		local pad = Instance.new("UIPadding"); pad.PaddingLeft = UDim.new(0, 20); pad.PaddingTop = UDim.new(0, 20); pad.Parent = t
 	end
 	local lines = { "📋 MENU" }

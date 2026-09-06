@@ -148,7 +148,7 @@ local function renderTop()
 	cashLbl.Text = "฿ " .. Locale.fmt(d.cash)
 	local stars = math.clamp(math.floor((d.rep or 0) / 200) + 1, 1, 5)
 	incLbl.Text = string.rep("⭐", stars) .. "  " .. T("served") .. ": " .. (d.served or 0)
-	holdLbl.Text = state.holding and ((state.bagged and "🥡 " or "🍽️ ") .. Locale.food(lang, state.holding) .. " x" .. (state.count or 1)) or ""
+	holdLbl.Text = state.holding == "Dirty" and ("🧽 " .. T("dirtyPlates")) or (state.holding and ((state.bagged and "🥡 " or "🍽️ ") .. Locale.food(lang, state.holding) .. ((state.count or 1) > 1 and (" x" .. state.count) or "")) or "")
 end
 
 local function applyLang()

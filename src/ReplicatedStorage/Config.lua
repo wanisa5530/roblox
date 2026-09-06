@@ -19,20 +19,20 @@ Config.DailyRewards = { 200, 400, 700, 1000, 1500, 2500, 5000 }
 
 -- เมนูอาหารข้างทางไทย (cost = ราคาปลดล็อกโต๊ะครัว, price = ราคาขายต่อจาน, income ใช้กับพนักงานอัตโนมัติ)
 Config.Foods = {
-	{ id="MooPing",     emoji="🍢", game="flip", cookTime=3, price=12, batch=4, cost=0,       income=1,    color={0.80,0.45,0.20} },
-	{ id="KhanomKrok",  emoji="🥥", game="flip", cookTime=3, price=18, batch=4, cost=60,      income=2,    color={0.95,0.90,0.75} },
+	{ id="MooPing",     emoji="🍢", game="flip", cookTime=3, price=12, batch=1, cost=0,       income=1,    color={0.80,0.45,0.20} },
+	{ id="KhanomKrok",  emoji="🥥", game="flip", cookTime=3, price=18, batch=1, cost=60,      income=2,    color={0.95,0.90,0.75} },
 	{ id="PadThai",     emoji="🍜", game="timing", cookTime=3, price=30, batch=1, cost=200,     income=5,    color={0.95,0.65,0.25} },
 	{ id="SomTam",      emoji="🥗", game="mash", cookTime=3, price=45, batch=1, cost=600,     income=12,   color={0.55,0.80,0.35} },
 	{ id="KaiJeow",     emoji="🍳", game="timing", cookTime=2.5, price=60, batch=1, cost=1500,    income=25,   color={0.98,0.85,0.30} },
 	{ id="Roti",        emoji="🥞", game="mash", cookTime=3, price=85, batch=1, cost=3500,    income=50,   color={0.90,0.75,0.45} },
-	{ id="Satay",       emoji="🍡", game="flip", cookTime=3.5, price=120, batch=3, cost=8000,    income=100,  color={0.75,0.50,0.25} },
-	{ id="BoatNoodle",  emoji="🍲", game="timing", cookTime=3, price=170, batch=2, cost=18000,   income=200,  color={0.50,0.25,0.15} },
+	{ id="Satay",       emoji="🍡", game="flip", cookTime=3.5, price=120, batch=1, cost=8000,    income=100,  color={0.75,0.50,0.25} },
+	{ id="BoatNoodle",  emoji="🍲", game="timing", cookTime=3, price=170, batch=1, cost=18000,   income=200,  color={0.50,0.25,0.15} },
 	{ id="KhaoManGai",  emoji="🍗", game="timing", cookTime=3, price=240, batch=1, cost=40000,   income=400,  color={0.95,0.85,0.60} },
 	{ id="PadKrapao",   emoji="🌶️", game="timing", cookTime=2.5, price=320, batch=1, cost=90000,   income=800,  color={0.85,0.25,0.20} },
-	{ id="TomYum",      emoji="🦐", game="mash", cookTime=4, price=450, batch=2, cost=200000,  income=1600, color={0.95,0.45,0.30} },
+	{ id="TomYum",      emoji="🦐", game="mash", cookTime=4, price=450, batch=1, cost=200000,  income=1600, color={0.95,0.45,0.30} },
 	{ id="HoiTod",      emoji="🦪", game="timing", cookTime=3, price=600, batch=1, cost=450000,  income=3200, color={0.85,0.70,0.40} },
 	{ id="MangoRice",   emoji="🥭", game="flip", cookTime=4, price=800, batch=1, cost=1000000, income=6500, color={1.00,0.75,0.20} },
-	{ id="ThaiTea",     emoji="🧋", game="mash", cookTime=3, price=1000, batch=3, cost=2200000, income=13000,color={0.90,0.50,0.20} },
+	{ id="ThaiTea",     emoji="🧋", game="mash", cookTime=3, price=1000, batch=1, cost=2200000, income=13000,color={0.90,0.50,0.20} },
 	{ id="DurianCart",  emoji="🍈", game="flip", cookTime=5, price=1500, batch=1, cost=5000000, income=30000,color={0.75,0.80,0.35} },
 }
 

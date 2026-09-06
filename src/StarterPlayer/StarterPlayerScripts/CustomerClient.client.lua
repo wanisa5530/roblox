@@ -41,7 +41,8 @@ local function localizePrompt(pp)
 		if kind == "cook" then pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.food(L, pp:GetAttribute("FoodId"))
 		elseif kind == "serve" then pp.ActionText = Locale.get(L, "serve")
 		elseif kind == "pack" then pp.ActionText = Locale.get(L, "pack"); pp.ObjectText = Locale.get(L, "takeaway")
-		elseif kind == "clean" then pp.ActionText = Locale.get(L, "clean"); pp.ObjectText = "" end
+		elseif kind == "clean" then pp.ActionText = Locale.get(L, "clean"); pp.ObjectText = ""
+		elseif kind == "wash" then pp.ActionText = Locale.get(L, "wash"); pp.ObjectText = "" end
 	end
 	apply(); player:GetAttributeChangedSignal("Lang"):Connect(apply)
 end
