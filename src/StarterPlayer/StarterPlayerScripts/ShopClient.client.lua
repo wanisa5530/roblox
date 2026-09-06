@@ -53,11 +53,11 @@ local shopBtn = button(gui, "🛒 " .. T("menu"), UDim2.new(0, 150, 0, 44), UDim
 local langBtn = button(gui, "🌐 " .. Locale.Names[lang], UDim2.new(0, 130, 0, 44), UDim2.new(0, 176, 1, -64), C.card)
 
 -- แจ้งเตือน
-local toast = label(gui, "", UDim2.new(0, 400, 0, 36), UDim2.new(0.5, -200, 0, 90), 18, C.text, Enum.TextXAlignment.Center)
+local toast = label(gui, "", UDim2.new(0, 460, 0, 44), UDim2.new(0.5, -230, 0, 90), 22, C.text, Enum.TextXAlignment.Center)
 toast.BackgroundTransparency = 0.2; toast.BackgroundColor3 = C.bg; toast.Visible = false; corner(toast, 8)
 local function notify(msg, color)
 	toast.Text = msg; toast.TextColor3 = color or C.text; toast.Visible = true
-	task.delay(2, function() if toast.Text == msg then toast.Visible = false end end)
+	task.delay(3, function() if toast.Text == msg then toast.Visible = false end end)
 end
 
 -- รางวัลรายวัน

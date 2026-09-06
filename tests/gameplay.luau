@@ -19,6 +19,9 @@ local attrs = {}
 local fake = { UserId = 1, DisplayName = "Tester", Parent = game, Character = nil }
 function fake:SetAttribute(k, v) attrs[k] = v end
 function fake:GetAttribute(k) return attrs[k] end
+function fake:FindFirstChild() return nil end
+local Data = require(SSS.DataService)
+Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0 }
 local plot = Plot.assign(fake)
 check("plot assigned", plot ~= nil and attrs.PlotIndex == 1)
 Plot.refresh(fake, { MooPing = true, PadThai = true })
@@ -40,8 +43,14 @@ print("group kind:", g and g.kind, "size:", g and #g.members)
 -- 4) เสิร์ฟทุกคนในกลุ่ม แล้วกลุ่มออก โต๊ะสกปรกถ้านั่งทาน
 local doneCalled = false
 Customers.onGroupDone = function() doneCalled = true end
+check("onServed wired", type(Customers.onServed) == "function")
 local allServed = false
-for _, e in ipairs(g.members) do allServed = Customers.markServed(e) end
+for _, e in ipairs(g.members) do
+	attrs.Holding = e.food.id; attrs.HoldCount = 1; attrs.Bagged = (g.kind == "takeaway")
+	local ok, err = pcall(Customers.onServed, e)
+	check("onServed no error " .. tostring(err or ""), ok)
+	allServed = e.served
+end
 check("all served", allServed)
 if g.kind == "dine" then
 	task.wait(Config.EatTime + 2)
@@ -53,11 +62,12 @@ else
 end
 check("group done callback", doneCalled)
 check("groups cleared", #(Customers.groups[fake] or {}) == 0)
+check("cash earned", Data.cache[fake.UserId].cash > 0 and Data.cache[fake.UserId].served == #g.members)
 
 -- 5) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
-Customers.clear(fake); Plot.release(fake)
+Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil
 
 print(#fails == 0 and "ALL PASS" or ("FAILED: " .. table.concat(fails, ", ")))
 return #fails == 0, fails

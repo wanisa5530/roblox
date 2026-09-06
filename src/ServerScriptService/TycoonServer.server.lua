@@ -28,11 +28,13 @@ local function mult(player)
 	for _, gp in ipairs(Config.GamePasses) do if gp.mult and ownsPass(player, gp.key) then m *= gp.mult end end
 	return m
 end
+local function isReal(p) return typeof(p) == "Instance" end -- เทสต์ใช้ผู้เล่นจำลอง
 local function push(player)
 	local d = Data.get(player)
-	if d then LB.update(player, d, d.served); Remotes.DataUpdate:FireClient(player, d, player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")) end
+	if d and isReal(player) then LB.update(player, d, d.served); Remotes.DataUpdate:FireClient(player, d, player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")) end
 end
 local function notify(player, key, color, ...)
+	if not isReal(player) then print("notify:", key, ...); return end
 	Remotes.Notify:FireClient(player, key, color, ...)
 end
 local function foodOf(id) for _, f in ipairs(Config.Foods) do if f.id == id then return f end end end
@@ -92,7 +94,7 @@ end)
 
 -- เสิร์ฟ
 Customers.onServed = function(entry)
-	local player = entry.player
+	local player = entry.group.player
 	local holding = player:GetAttribute("Holding")
 	if not holding then notify(player, "noDish", "red"); return end
 	if holding ~= entry.food.id then notify(player, "wrongDish", "red"); return end
