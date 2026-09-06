@@ -11,7 +11,8 @@ local function get(name, class)
 end
 
 return {
-	BuyFood = get("BuyFood", "RemoteFunction"),      -- client -> server: ซื้อเมนู
+	BuyFood = get("BuyFood", "RemoteFunction"),
+	GetData = get("GetData", "RemoteFunction"),      -- client -> server: ขอข้อมูลตอนเริ่ม      -- client -> server: ซื้อเมนู
 	Collect = get("Collect", "RemoteFunction"),      -- client -> server: เก็บเงินจากร้าน
 	DataUpdate = get("DataUpdate", "RemoteEvent"),   -- server -> client: ส่งข้อมูลล่าสุด
 	PromptPass = get("PromptPass", "RemoteEvent"),   -- client -> server: ขอซื้อ pass/product

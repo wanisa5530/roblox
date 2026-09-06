@@ -47,6 +47,10 @@ Players.PlayerAdded:Connect(function(player)
 	end)
 end)
 
+Remotes.GetData.OnServerInvoke = function(player)
+	return Data.get(player)
+end
+
 Remotes.Collect.OnServerInvoke = function(player)
 	local d = Data.get(player)
 	d.cash += d.pending
