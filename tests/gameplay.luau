@@ -27,23 +27,35 @@ check("stall has dish", plot.Stalls.MooPing:FindFirstChild("Dish_MooPing") ~= ni
 check("stall has prompt", plot.Stalls.MooPing:FindFirstChildWhichIsA("ProximityPrompt", true) ~= nil)
 
 -- 3) ลูกค้าเดินมาสั่ง
-local entry = Customers.spawn(fake, { MooPing = true, PadThai = true })
-check("customer spawned", entry ~= nil and entry.npc ~= nil and entry.npc:FindFirstChildOfClass("Humanoid") ~= nil)
+check("tables built", #Plot.tables[fake] == Config.TablesPerPlot and Plot.freeTable(fake) ~= nil)
+local g = Customers.spawn(fake, { MooPing = true, PadThai = true })
+check("group spawned", g ~= nil and #g.members >= 1 and g.members[1].npc:FindFirstChildOfClass("Humanoid") ~= nil)
 local t0 = os.clock()
-while entry and not entry.orderAt and os.clock() - t0 < 15 do task.wait(0.2) end
-check("customer reached queue and ordered", entry ~= nil and entry.orderAt ~= nil)
-check("order attribute set", entry ~= nil and entry.npc:GetAttribute("OrderFood") ~= nil)
-check("patience full", entry ~= nil and Customers.patienceLeft(entry) > 0.8)
+while g and not g.orderAt and os.clock() - t0 < 20 do task.wait(0.2) end
+check("group ordered", g ~= nil and g.orderAt ~= nil)
+check("order attribute set", g ~= nil and g.members[1].npc:GetAttribute("OrderFood") ~= nil)
+check("patience full", g ~= nil and Customers.patienceLeft(g.members[1]) > 0.7)
+print("group kind:", g and g.kind, "size:", g and #g.members)
 
--- 4) เสิร์ฟผ่าน callback แล้วลูกค้าออกจากคิว
-local served = false
-Customers.onServed = function(e) served = true; Customers.leave(e, "😊") end
-if entry then Customers.onServed(entry) end
-check("served callback", served)
-check("queue cleared", #Customers.queue(fake) == 0)
+-- 4) เสิร์ฟทุกคนในกลุ่ม แล้วกลุ่มออก โต๊ะสกปรกถ้านั่งทาน
+local doneCalled = false
+Customers.onGroupDone = function() doneCalled = true end
+local allServed = false
+for _, e in ipairs(g.members) do allServed = Customers.markServed(e) end
+check("all served", allServed)
+if g.kind == "dine" then
+	task.wait(Config.EatTime + 2)
+	check("table dirty after dine", g.table.dirty == true)
+	g.table.setDirty(false)
+	check("table clean again", g.table.dirty == false and Plot.freeTable(fake) ~= nil)
+else
+	task.wait(1)
+end
+check("group done callback", doneCalled)
+check("groups cleared", #(Customers.groups[fake] or {}) == 0)
 
--- 5) คิวเต็มไม่เกิน MaxQueue
-for _ = 1, Config.MaxQueue + 2 do Customers.spawn(fake, { MooPing = true }) end
+-- 5) คิวซื้อกลับไม่เกิน MaxQueue
+for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake)
 

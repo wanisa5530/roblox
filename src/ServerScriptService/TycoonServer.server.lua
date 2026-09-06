@@ -30,7 +30,7 @@ local function mult(player)
 end
 local function push(player)
 	local d = Data.get(player)
-	if d then LB.update(player, d, d.served); Remotes.DataUpdate:FireClient(player, d, player:GetAttribute("Holding")) end
+	if d then LB.update(player, d, d.served); Remotes.DataUpdate:FireClient(player, d, player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")) end
 end
 local function notify(player, key, color, ...)
 	Remotes.Notify:FireClient(player, key, color, ...)
@@ -38,12 +38,19 @@ end
 local function foodOf(id) for _, f in ipairs(Config.Foods) do if f.id == id then return f end end end
 
 -- ถือจาน
-local function setHolding(player, foodId)
+local function setHolding(player, foodId, count, bagged)
 	local char = player.Character
 	if char then
 		local old = char:FindFirstChild("HeldDish"); if old then old:Destroy() end
 		if foodId then
-			local d = Dish.build(foodId); d.Name = "HeldDish"
+			local d
+			if bagged then
+				d = Instance.new("Model"); d.Name = "HeldDish"
+				local bag = Instance.new("Part"); bag.Size = Vector3.new(1.4, 1.6, 1); bag.Color = Color3.fromRGB(240, 240, 235); bag.Material = Enum.Material.Plastic
+				bag.CanCollide = false; bag.Massless = true; bag.Parent = d; d.PrimaryPart = bag
+			else
+				d = Dish.build(foodId); d.Name = "HeldDish"
+			end
 			local hand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
 			if hand then
 				d:PivotTo(hand.CFrame * CFrame.new(0, -0.6, -1.2))
@@ -52,8 +59,17 @@ local function setHolding(player, foodId)
 			d.Parent = char
 		end
 	end
-	player:SetAttribute("Holding", foodId)
+	player:SetAttribute("Holding", foodId); player:SetAttribute("HoldCount", foodId and (count or 1) or nil); player:SetAttribute("Bagged", bagged or nil)
 	push(player)
+end
+Plot.onPack = function(player)
+	local id = player:GetAttribute("Holding")
+	if not id then notify(player, "noDish", "red"); return end
+	setHolding(player, id, player:GetAttribute("HoldCount") or 1, true)
+end
+Plot.onClean = function(player, t)
+	t.setDirty(false)
+	local d = Data.get(player); if d then d.rep = math.min(d.rep + 1, 1000); push(player) end
 end
 
 -- ทำอาหาร: เริ่มมินิเกมที่ client แล้วรอผล
@@ -70,7 +86,7 @@ Remotes.MinigameResult.OnServerEvent:Connect(function(player, score)
 	if os.clock() - c.t0 < c.food.cookTime * 0.5 then score = 0 end -- กันโกง ทำเร็วเกินไป
 	if score <= 0 then notify(player, "burnt", "red"); return end
 	player:SetAttribute("Quality", score)
-	setHolding(player, c.food.id)
+	setHolding(player, c.food.id, c.food.batch or 1, false)
 	notify(player, score > 0.85 and "perfect" or (score > 0.5 and "good" or "ok"), "green")
 end)
 
@@ -80,6 +96,7 @@ Customers.onServed = function(entry)
 	local holding = player:GetAttribute("Holding")
 	if not holding then notify(player, "noDish", "red"); return end
 	if holding ~= entry.food.id then notify(player, "wrongDish", "red"); return end
+	if entry.group.kind == "takeaway" and not player:GetAttribute("Bagged") then notify(player, "needBag", "red"); return end
 	local d = Data.get(player); if not d then return end
 	local quality = player:GetAttribute("Quality") or 0.5
 	local patience = Customers.patienceLeft(entry)
@@ -88,14 +105,15 @@ Customers.onServed = function(entry)
 	local earned = math.floor((base + tip) * mult(player))
 	d.cash += earned; d.total += earned; d.served += 1
 	d.rep = math.min(d.rep + (quality > 0.85 and 2 or 1), 1000)
-	setHolding(player, nil)
-	Customers.leave(entry, quality > 0.85 and "😍" or "😊")
+	local left = (player:GetAttribute("HoldCount") or 1) - 1
+	if left > 0 then setHolding(player, holding, left, player:GetAttribute("Bagged")) else setHolding(player, nil) end
+	Customers.markServed(entry)
 	notify(player, "tip", "green", earned, tip)
 	push(player)
 end
-Customers.onLeft = function(entry)
-	local d = Data.get(entry.player)
-	if d then d.rep = math.max(d.rep - 2, 0); notify(entry.player, "left", "red"); push(entry.player) end
+Customers.onLeft = function(g)
+	local d = Data.get(g.player)
+	if d then d.rep = math.max(d.rep - 2 * #g.members, 0); notify(g.player, "left", "red"); push(g.player) end
 end
 
 local function onPlayer(player)
@@ -104,7 +122,7 @@ local function onPlayer(player)
 	Plot.assign(player)
 	Plot.refresh(player, d.foods)
 	push(player)
-	player.CharacterAdded:Connect(function() task.wait(0.5); if player:GetAttribute("Holding") then setHolding(player, player:GetAttribute("Holding")) end end)
+	player.CharacterAdded:Connect(function() task.wait(0.5); if player:GetAttribute("Holding") then setHolding(player, player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")) end end)
 	-- ลูกค้าเดินเข้ามาเรื่อย ๆ ชื่อเสียงสูงมาถี่ขึ้น
 	task.spawn(function()
 		task.wait(4)
@@ -120,11 +138,17 @@ local function onPlayer(player)
 		while player.Parent do
 			task.wait(10)
 			if ownsPass(player, "AutoChef") then
-				local q = Customers.queue(player)
-				local e = q[1]
-				if e and e.alive and e.orderAt then
-					local dd = Data.get(player)
-					if dd then dd.cash += e.food.price; dd.total += e.food.price; dd.served += 1; Customers.leave(e, "🤖"); push(player) end
+				for _, g in ipairs(Customers.groups[player] or {}) do
+					if g.alive and g.orderAt then
+						for _, e in ipairs(g.members) do
+							if not e.served then
+								local dd = Data.get(player)
+								if dd then dd.cash += e.food.price; dd.total += e.food.price; dd.served += 1; Customers.markServed(e); push(player) end
+								break
+							end
+						end
+						break
+					end
 				end
 			end
 		end
@@ -139,7 +163,7 @@ end)
 task.spawn(function() while true do task.wait(120); for _, p in ipairs(Players:GetPlayers()) do local d = Data.get(p); if d then LB.submit(p, d) end end end end)
 
 Remotes.GetData.OnServerInvoke = function(player)
-	return Data.get(player) or Data.load(player), player:GetAttribute("Holding")
+	return Data.get(player) or Data.load(player), player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")
 end
 Remotes.BuyFood.OnServerInvoke = function(player, foodId)
 	local d = Data.get(player); if not d then return false end

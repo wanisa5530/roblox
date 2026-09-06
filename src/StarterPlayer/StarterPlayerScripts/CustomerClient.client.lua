@@ -22,7 +22,7 @@ local function attach(npc)
 		bg.Enabled = id ~= nil or mood ~= nil
 		if mood then t.Text = mood; barBg.Visible = false; return end
 		local food = id and foodOf(id)
-		if food then t.Text = food.emoji .. " " .. Locale.food(lang(), id) end
+		if food then t.Text = (npc:GetAttribute("Takeaway") and "🥡 " or "") .. food.emoji .. " " .. Locale.food(lang(), id) end
 		local left = npc:GetAttribute("Patience") or 1
 		bar.Size = UDim2.fromScale(left, 1)
 		bar.BackgroundColor3 = left > 0.5 and Color3.fromRGB(90, 200, 110) or (left > 0.25 and Color3.fromRGB(240, 190, 60) or Color3.fromRGB(220, 80, 70))
@@ -37,11 +37,11 @@ folder.ChildAdded:Connect(function(n) task.spawn(attach, n) end)
 local function localizePrompt(pp)
 	local function apply()
 		local L = lang()
-		if pp.ActionText == "Cook" or pp:GetAttribute("FoodId") then
-			pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.food(L, pp:GetAttribute("FoodId"))
-		elseif pp.ActionText == "Serve" or pp:GetAttribute("IsCustomer") then
-			pp:SetAttribute("IsCustomer", true); pp.ActionText = Locale.get(L, "serve")
-		end
+		local kind = pp:GetAttribute("Kind")
+		if kind == "cook" then pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.food(L, pp:GetAttribute("FoodId"))
+		elseif kind == "serve" then pp.ActionText = Locale.get(L, "serve")
+		elseif kind == "pack" then pp.ActionText = Locale.get(L, "pack"); pp.ObjectText = Locale.get(L, "takeaway")
+		elseif kind == "clean" then pp.ActionText = Locale.get(L, "clean"); pp.ObjectText = "" end
 	end
 	apply(); player:GetAttributeChangedSignal("Lang"):Connect(apply)
 end

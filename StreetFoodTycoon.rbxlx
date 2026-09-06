@@ -13,6 +13,10 @@ Config.StartingCash = 50
 Config.CustomerInterval = { min = 6, max = 12 } -- วินาทีระหว่างลูกค้าแต่ละคน
 Config.Patience = 45           -- วินาทีที่ลูกค้ารอได้
 Config.MaxQueue = 4
+Config.TablesPerPlot = 4
+Config.DineInChance = 0.6   -- โอกาสลูกค้านั่งทานที่ร้าน
+Config.EatTime = 12         -- วินาทีที่นั่งกิน
+Config.GroupSize = { 1, 3 } -- จำนวนคนต่อกลุ่ม
 Config.TipMax = 0.5            -- ทิปสูงสุด 50% ของราคา
 -- มินิเกม: timing = กดเมื่อเข็มอยู่โซนเขียว, mash = คลิกรัว, flip = รอให้แถบเต็มแล้วกดก่อนไหม้
 Config.MaxPlots = 8
@@ -22,21 +26,21 @@ Config.DailyRewards = { 200, 400, 700, 1000, 1500, 2500, 5000 }
 
 -- เมนูอาหารข้างทางไทย (cost = ราคาปลดล็อกโต๊ะครัว, price = ราคาขายต่อจาน, income ใช้กับพนักงานอัตโนมัติ)
 Config.Foods = {
-	{ id="MooPing",     emoji="🍢", game="flip", cookTime=3, price=12, cost=0,       income=1,    color={0.80,0.45,0.20} },
-	{ id="KhanomKrok",  emoji="🥥", game="flip", cookTime=3, price=18, cost=60,      income=2,    color={0.95,0.90,0.75} },
-	{ id="PadThai",     emoji="🍜", game="timing", cookTime=3, price=30, cost=200,     income=5,    color={0.95,0.65,0.25} },
-	{ id="SomTam",      emoji="🥗", game="mash", cookTime=3, price=45, cost=600,     income=12,   color={0.55,0.80,0.35} },
-	{ id="KaiJeow",     emoji="🍳", game="timing", cookTime=2.5, price=60, cost=1500,    income=25,   color={0.98,0.85,0.30} },
-	{ id="Roti",        emoji="🥞", game="mash", cookTime=3, price=85, cost=3500,    income=50,   color={0.90,0.75,0.45} },
-	{ id="Satay",       emoji="🍡", game="flip", cookTime=3.5, price=120, cost=8000,    income=100,  color={0.75,0.50,0.25} },
-	{ id="BoatNoodle",  emoji="🍲", game="timing", cookTime=3, price=170, cost=18000,   income=200,  color={0.50,0.25,0.15} },
-	{ id="KhaoManGai",  emoji="🍗", game="timing", cookTime=3, price=240, cost=40000,   income=400,  color={0.95,0.85,0.60} },
-	{ id="PadKrapao",   emoji="🌶️", game="timing", cookTime=2.5, price=320, cost=90000,   income=800,  color={0.85,0.25,0.20} },
-	{ id="TomYum",      emoji="🦐", game="mash", cookTime=4, price=450, cost=200000,  income=1600, color={0.95,0.45,0.30} },
-	{ id="HoiTod",      emoji="🦪", game="timing", cookTime=3, price=600, cost=450000,  income=3200, color={0.85,0.70,0.40} },
-	{ id="MangoRice",   emoji="🥭", game="flip", cookTime=4, price=800, cost=1000000, income=6500, color={1.00,0.75,0.20} },
-	{ id="ThaiTea",     emoji="🧋", game="mash", cookTime=3, price=1000, cost=2200000, income=13000,color={0.90,0.50,0.20} },
-	{ id="DurianCart",  emoji="🍈", game="flip", cookTime=5, price=1500, cost=5000000, income=30000,color={0.75,0.80,0.35} },
+	{ id="MooPing",     emoji="🍢", game="flip", cookTime=3, price=12, batch=4, cost=0,       income=1,    color={0.80,0.45,0.20} },
+	{ id="KhanomKrok",  emoji="🥥", game="flip", cookTime=3, price=18, batch=4, cost=60,      income=2,    color={0.95,0.90,0.75} },
+	{ id="PadThai",     emoji="🍜", game="timing", cookTime=3, price=30, batch=1, cost=200,     income=5,    color={0.95,0.65,0.25} },
+	{ id="SomTam",      emoji="🥗", game="mash", cookTime=3, price=45, batch=1, cost=600,     income=12,   color={0.55,0.80,0.35} },
+	{ id="KaiJeow",     emoji="🍳", game="timing", cookTime=2.5, price=60, batch=1, cost=1500,    income=25,   color={0.98,0.85,0.30} },
+	{ id="Roti",        emoji="🥞", game="mash", cookTime=3, price=85, batch=1, cost=3500,    income=50,   color={0.90,0.75,0.45} },
+	{ id="Satay",       emoji="🍡", game="flip", cookTime=3.5, price=120, batch=3, cost=8000,    income=100,  color={0.75,0.50,0.25} },
+	{ id="BoatNoodle",  emoji="🍲", game="timing", cookTime=3, price=170, batch=2, cost=18000,   income=200,  color={0.50,0.25,0.15} },
+	{ id="KhaoManGai",  emoji="🍗", game="timing", cookTime=3, price=240, batch=1, cost=40000,   income=400,  color={0.95,0.85,0.60} },
+	{ id="PadKrapao",   emoji="🌶️", game="timing", cookTime=2.5, price=320, batch=1, cost=90000,   income=800,  color={0.85,0.25,0.20} },
+	{ id="TomYum",      emoji="🦐", game="mash", cookTime=4, price=450, batch=2, cost=200000,  income=1600, color={0.95,0.45,0.30} },
+	{ id="HoiTod",      emoji="🦪", game="timing", cookTime=3, price=600, batch=1, cost=450000,  income=3200, color={0.85,0.70,0.40} },
+	{ id="MangoRice",   emoji="🥭", game="flip", cookTime=4, price=800, batch=1, cost=1000000, income=6500, color={1.00,0.75,0.20} },
+	{ id="ThaiTea",     emoji="🧋", game="mash", cookTime=3, price=1000, batch=3, cost=2200000, income=13000,color={0.90,0.50,0.20} },
+	{ id="DurianCart",  emoji="🍈", game="flip", cookTime=5, price=1500, batch=1, cost=5000000, income=30000,color={0.75,0.80,0.35} },
 }
 
 -- ชื่อเมนูหลายภาษา
@@ -171,15 +175,15 @@ local L = {}
 L.Supported = { "en", "th", "ja", "zh", "id" }
 L.Names = { en="English", th="ไทย", ja="日本語", zh="中文", id="Indonesia" }
 L.Strings = {
-	en = { cook="Cook", serve="Serve", holding="Holding", rep="Reputation", served="Served", wrongDish="Wrong dish!", noDish="Cook the order first", left="Customer left", tip="Tip", burnt="Burnt!", mgTiming="Press SPACE in the green zone!", mgMash="Click fast!", mgFlip="Wait... then press SPACE before it burns!", perfect="Perfect!", good="Good", ok="Okay", AutoChef="Auto Chef", customer="Customer", daily="Daily Reward", day="Day %d", claim="Claim", claimed="Come back tomorrow!", top="Top Tycoons", you="You", title="Street Food Tycoon", cash="Cash", perSec="/sec", collect="Collect", owned="OWNED", buy="Buy", menu="Menu", passes="Passes", robux="Robux", notEnough="Not enough cash!", bought="Opened: %s",
+	en = { pack="Pack", clean="Clean table", takeaway="Takeaway", needBag="Pack it in a bag first!", tableDirty="Dirty table!", portions="portions", noTable="No free table", cook="Cook", serve="Serve", holding="Holding", rep="Reputation", served="Served", wrongDish="Wrong dish!", noDish="Cook the order first", left="Customer left", tip="Tip", burnt="Burnt!", mgTiming="Press SPACE in the green zone!", mgMash="Click fast!", mgFlip="Wait... then press SPACE before it burns!", perfect="Perfect!", good="Good", ok="Okay", AutoChef="Auto Chef", customer="Customer", daily="Daily Reward", day="Day %d", claim="Claim", claimed="Come back tomorrow!", top="Top Tycoons", you="You", title="Street Food Tycoon", cash="Cash", perSec="/sec", collect="Collect", owned="OWNED", buy="Buy", menu="Menu", passes="Passes", robux="Robux", notEnough="Not enough cash!", bought="Opened: %s",
 		DoubleIncome="2x Income", VIP="VIP (+50%)", Cash1="+5,000 Cash", Cash2="+50,000 Cash", Cash3="+500,000 Cash", lang="Language" },
-	th = { cook="ทำอาหาร", serve="เสิร์ฟ", holding="ถืออยู่", rep="ชื่อเสียง", served="เสิร์ฟแล้ว", wrongDish="ผิดเมนู!", noDish="ทำอาหารตามออเดอร์ก่อน", left="ลูกค้าเดินหนี", tip="ทิป", burnt="ไหม้!", mgTiming="กด SPACE ตอนเข็มอยู่โซนเขียว!", mgMash="คลิกรัว ๆ!", mgFlip="รอ... แล้วกด SPACE ก่อนไหม้!", perfect="สุดยอด!", good="ดี", ok="พอใช้", AutoChef="พ่อครัวอัตโนมัติ", customer="ลูกค้า", daily="รางวัลรายวัน", day="วันที่ %d", claim="รับรางวัล", claimed="พรุ่งนี้มาใหม่นะ!", top="เศรษฐีอันดับต้น", you="คุณ", title="สตรีทฟู้ดไทคูน", cash="เงิน", perSec="/วิ", collect="เก็บเงิน", owned="มีแล้ว", buy="ซื้อ", menu="เมนู", passes="แพ็กเกจ", robux="Robux", notEnough="เงินไม่พอ!", bought="เปิดร้าน: %s",
+	th = { pack="ใส่ถุง", clean="เก็บโต๊ะ", takeaway="ซื้อกลับ", needBag="ใส่ถุงก่อน!", tableDirty="โต๊ะสกปรก!", portions="ที่", noTable="โต๊ะเต็ม", cook="ทำอาหาร", serve="เสิร์ฟ", holding="ถืออยู่", rep="ชื่อเสียง", served="เสิร์ฟแล้ว", wrongDish="ผิดเมนู!", noDish="ทำอาหารตามออเดอร์ก่อน", left="ลูกค้าเดินหนี", tip="ทิป", burnt="ไหม้!", mgTiming="กด SPACE ตอนเข็มอยู่โซนเขียว!", mgMash="คลิกรัว ๆ!", mgFlip="รอ... แล้วกด SPACE ก่อนไหม้!", perfect="สุดยอด!", good="ดี", ok="พอใช้", AutoChef="พ่อครัวอัตโนมัติ", customer="ลูกค้า", daily="รางวัลรายวัน", day="วันที่ %d", claim="รับรางวัล", claimed="พรุ่งนี้มาใหม่นะ!", top="เศรษฐีอันดับต้น", you="คุณ", title="สตรีทฟู้ดไทคูน", cash="เงิน", perSec="/วิ", collect="เก็บเงิน", owned="มีแล้ว", buy="ซื้อ", menu="เมนู", passes="แพ็กเกจ", robux="Robux", notEnough="เงินไม่พอ!", bought="เปิดร้าน: %s",
 		DoubleIncome="รายได้ x2", VIP="VIP (+50%)", Cash1="+5,000 เงิน", Cash2="+50,000 เงิน", Cash3="+500,000 เงิน", lang="ภาษา" },
-	ja = { cook="調理", serve="提供", holding="所持", rep="評判", served="提供数", wrongDish="違う料理！", noDish="先に注文を調理", left="客が帰った", tip="チップ", burnt="焦げた！", mgTiming="緑ゾーンでSPACE！", mgMash="連打！", mgFlip="待って…焦げる前にSPACE！", perfect="完璧！", good="良い", ok="まあまあ", AutoChef="自動シェフ", customer="客", daily="デイリー報酬", day="%d日目", claim="受け取る", claimed="また明日！", top="トップ長者", you="あなた", title="屋台タイクーン", cash="所持金", perSec="/秒", collect="回収", owned="所有済み", buy="購入", menu="メニュー", passes="パス", robux="Robux", notEnough="お金が足りません！", bought="開店: %s",
+	ja = { pack="袋詰め", clean="片付け", takeaway="持ち帰り", needBag="先に袋に入れて！", tableDirty="テーブルが汚れている！", portions="人前", noTable="満席", cook="調理", serve="提供", holding="所持", rep="評判", served="提供数", wrongDish="違う料理！", noDish="先に注文を調理", left="客が帰った", tip="チップ", burnt="焦げた！", mgTiming="緑ゾーンでSPACE！", mgMash="連打！", mgFlip="待って…焦げる前にSPACE！", perfect="完璧！", good="良い", ok="まあまあ", AutoChef="自動シェフ", customer="客", daily="デイリー報酬", day="%d日目", claim="受け取る", claimed="また明日！", top="トップ長者", you="あなた", title="屋台タイクーン", cash="所持金", perSec="/秒", collect="回収", owned="所有済み", buy="購入", menu="メニュー", passes="パス", robux="Robux", notEnough="お金が足りません！", bought="開店: %s",
 		DoubleIncome="収入2倍", VIP="VIP (+50%)", Cash1="+5,000", Cash2="+50,000", Cash3="+500,000", lang="言語" },
-	zh = { cook="烹饪", serve="上菜", holding="手持", rep="声誉", served="已上菜", wrongDish="菜错了！", noDish="先做订单的菜", left="顾客走了", tip="小费", burnt="糊了！", mgTiming="绿区按SPACE！", mgMash="快速点击！", mgFlip="等待…糊之前按SPACE！", perfect="完美！", good="不错", ok="一般", AutoChef="自动厨师", customer="顾客", daily="每日奖励", day="第 %d 天", claim="领取", claimed="明天再来！", top="富豪榜", you="你", title="街头小吃大亨", cash="现金", perSec="/秒", collect="收取", owned="已拥有", buy="购买", menu="菜单", passes="通行证", robux="Robux", notEnough="现金不足！", bought="开张: %s",
+	zh = { pack="打包", clean="收拾桌子", takeaway="外带", needBag="先打包！", tableDirty="桌子脏了！", portions="份", noTable="没有空桌", cook="烹饪", serve="上菜", holding="手持", rep="声誉", served="已上菜", wrongDish="菜错了！", noDish="先做订单的菜", left="顾客走了", tip="小费", burnt="糊了！", mgTiming="绿区按SPACE！", mgMash="快速点击！", mgFlip="等待…糊之前按SPACE！", perfect="完美！", good="不错", ok="一般", AutoChef="自动厨师", customer="顾客", daily="每日奖励", day="第 %d 天", claim="领取", claimed="明天再来！", top="富豪榜", you="你", title="街头小吃大亨", cash="现金", perSec="/秒", collect="收取", owned="已拥有", buy="购买", menu="菜单", passes="通行证", robux="Robux", notEnough="现金不足！", bought="开张: %s",
 		DoubleIncome="双倍收入", VIP="VIP (+50%)", Cash1="+5,000 现金", Cash2="+50,000 现金", Cash3="+500,000 现金", lang="语言" },
-	id = { cook="Masak", serve="Sajikan", holding="Dipegang", rep="Reputasi", served="Tersaji", wrongDish="Salah menu!", noDish="Masak pesanan dulu", left="Pelanggan pergi", tip="Tip", burnt="Gosong!", mgTiming="Tekan SPACE di zona hijau!", mgMash="Klik cepat!", mgFlip="Tunggu... tekan SPACE sebelum gosong!", perfect="Sempurna!", good="Bagus", ok="Lumayan", AutoChef="Koki Otomatis", customer="Pelanggan", daily="Hadiah Harian", day="Hari %d", claim="Ambil", claimed="Kembali besok!", top="Taipan Teratas", you="Kamu", title="Street Food Tycoon", cash="Uang", perSec="/dtk", collect="Ambil", owned="DIMILIKI", buy="Beli", menu="Menu", passes="Pass", robux="Robux", notEnough="Uang tidak cukup!", bought="Dibuka: %s",
+	id = { pack="Bungkus", clean="Bersihkan meja", takeaway="Bawa pulang", needBag="Bungkus dulu!", tableDirty="Meja kotor!", portions="porsi", noTable="Meja penuh", cook="Masak", serve="Sajikan", holding="Dipegang", rep="Reputasi", served="Tersaji", wrongDish="Salah menu!", noDish="Masak pesanan dulu", left="Pelanggan pergi", tip="Tip", burnt="Gosong!", mgTiming="Tekan SPACE di zona hijau!", mgMash="Klik cepat!", mgFlip="Tunggu... tekan SPACE sebelum gosong!", perfect="Sempurna!", good="Bagus", ok="Lumayan", AutoChef="Koki Otomatis", customer="Pelanggan", daily="Hadiah Harian", day="Hari %d", claim="Ambil", claimed="Kembali besok!", top="Taipan Teratas", you="Kamu", title="Street Food Tycoon", cash="Uang", perSec="/dtk", collect="Ambil", owned="DIMILIKI", buy="Beli", menu="Menu", passes="Pass", robux="Robux", notEnough="Uang tidak cukup!", bought="Dibuka: %s",
 		DoubleIncome="Pendapatan 2x", VIP="VIP (+50%)", Cash1="+5.000 Uang", Cash2="+50.000 Uang", Cash3="+500.000 Uang", lang="Bahasa" },
 }
 function L.detect(localeId)
@@ -232,17 +236,16 @@ return R
     <Item class="ModuleScript" referent="6">
       <Properties>
         <string name="Name">CustomerService</string>
-        <string name="Source"><![CDATA[-- ลูกค้า NPC: เดินมาต่อคิว สั่งอาหาร รอ แล้วเดินออก
+        <string name="Source"><![CDATA[-- ลูกค้าเป็นกลุ่ม: นั่งทานที่ร้าน (ต้องมีโต๊ะว่างและสะอาด) หรือซื้อกลับ (ต่อคิวหน้าเคาน์เตอร์ ต้องใส่ถุง)
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
-local Locale = require(RS.Locale)
 local Plot = require(script.Parent.PlotService)
-local C = { queues = {}, onServed = nil, onLeft = nil }
+local C = { queues = {}, groups = {}, onServed = nil, onLeft = nil, onGroupDone = nil }
 local folder = Instance.new("Folder"); folder.Name = "Customers"; folder.Parent = workspace
 
-local NAMES = { "Somchai", "Nid", "Ploy", "Ken", "Yuki", "Mei", "Budi", "Anna", "Tom", "Fah" }
+local NAMES = { "Somchai", "Nid", "Ploy", "Ken", "Yuki", "Mei", "Budi", "Anna", "Tom", "Fah", "Bee", "Pim" }
 local SHIRTS = { Color3.fromRGB(230, 80, 80), Color3.fromRGB(80, 140, 230), Color3.fromRGB(90, 190, 110), Color3.fromRGB(240, 190, 60), Color3.fromRGB(180, 100, 220) }
 
 local function makeNpc(pos)
@@ -251,11 +254,11 @@ local function makeNpc(pos)
 	desc.LeftArmColor = desc.HeadColor; desc.RightArmColor = desc.HeadColor
 	desc.LeftLegColor = Color3.fromRGB(60, 60, 80); desc.RightLegColor = desc.LeftLegColor
 	local ok, model = pcall(Players.CreateHumanoidModelFromDescription, Players, desc, Enum.HumanoidRigType.R15)
-	if not ok then -- สำรอง: กล่องเดินได้
+	if not ok then
 		model = Instance.new("Model")
 		local p = Instance.new("Part"); p.Name = "HumanoidRootPart"; p.Size = Vector3.new(2, 5, 1); p.Color = SHIRTS[math.random(#SHIRTS)]; p.Anchored = true; p.Parent = model
 		model.PrimaryPart = p
-		local h = Instance.new("Humanoid"); h.Parent = model
+		Instance.new("Humanoid").Parent = model
 	end
 	model.Name = NAMES[math.random(#NAMES)]
 	model:PivotTo(CFrame.new(pos))
@@ -265,7 +268,8 @@ end
 local function walkTo(model, target)
 	local h = model:FindFirstChildOfClass("Humanoid")
 	local root = model.PrimaryPart or model:FindFirstChild("HumanoidRootPart")
-	if h and root and not root.Anchored then
+	if not root then return end
+	if h and not root.Anchored then
 		h:MoveTo(target)
 		local done = false
 		local conn; conn = h.MoveToFinished:Connect(function() done = true; conn:Disconnect() end)
@@ -278,69 +282,118 @@ local function walkTo(model, target)
 	end
 end
 
-
 function C.queue(player) C.queues[player] = C.queues[player] or {}; return C.queues[player] end
+function C.patienceLeft(entry)
+	local g = entry.group
+	if not g.orderAt then return 1 end
+	return math.clamp(1 - (os.clock() - g.orderAt) / Config.Patience, 0, 1)
+end
 
--- ลูกค้าเดินเข้ามาสั่ง; คืน entry ที่ให้ระบบเสิร์ฟใช้
-function C.spawn(player, foods)
-	local q = C.queue(player)
-	if #q >= Config.MaxQueue then return end
+local function pickFood(foods)
 	local owned = {}
 	for _, f in ipairs(Config.Foods) do if foods[f.id] then owned[#owned + 1] = f end end
-	if #owned == 0 then return end
-	local food = owned[math.random(#owned)]
+	return owned[math.random(#owned)]
+end
+
+local function addPrompt(entry)
+	local npc = entry.npc
+	local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Serve"; pp.ObjectText = npc.Name; pp.KeyboardKeyCode = Enum.KeyCode.E
+	pp.HoldDuration = 0; pp.MaxActivationDistance = 7; pp.RequiresLineOfSight = false; pp:SetAttribute("Kind", "serve")
+	pp.Parent = npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart")
+	pp.Triggered:Connect(function(who) if who == entry.group.player and entry.group.alive and not entry.served and C.onServed then C.onServed(entry) end end)
+end
+
+-- สร้างกลุ่มลูกค้า
+function C.spawn(player, foods)
+	local anyFood = next(foods) ~= nil
+	if not anyFood then return end
 	local pts = Plot.points(player:GetAttribute("PlotIndex"))
-	local npc = makeNpc(pts.spawn)
-	local entry = { npc = npc, food = food, player = player, alive = true, t0 = os.clock() }
-	table.insert(q, entry)
-	local slot = #q
+	local tbl = (math.random() < Config.DineInChance) and Plot.freeTable(player) or nil
+	local q = C.queue(player)
+	if not tbl and #q >= Config.MaxQueue then return end
+	local size = tbl and math.random(Config.GroupSize[1], Config.GroupSize[2]) or 1
+	local g = { player = player, members = {}, table = tbl, kind = tbl and "dine" or "takeaway", alive = true, t0 = os.clock() }
+	if tbl then tbl.group = g end
+	C.groups[player] = C.groups[player] or {}
+	table.insert(C.groups[player], g)
+	for k = 1, size do
+		local npc = makeNpc(pts.spawn + Vector3.new((k - 1) * 2.5, 0, 0))
+		local e = { npc = npc, food = pickFood(foods), group = g, served = false }
+		g.members[k] = e
+		npc:SetAttribute("Takeaway", g.kind == "takeaway")
+	end
+	local slot
+	if g.kind == "takeaway" then table.insert(q, g); slot = #q end
 	task.spawn(function()
-		walkTo(npc, pts.queue(slot))
-		if not entry.alive then return end
-		npc:SetAttribute("OrderFood", food.id); npc:SetAttribute("Patience", 1)
-		entry.bubble = true
-		entry.orderAt = os.clock()
-		-- ปุ่มเสิร์ฟ
-		local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Serve"; pp.ObjectText = npc.Name; pp.KeyboardKeyCode = Enum.KeyCode.E
-		pp.HoldDuration = 0; pp.MaxActivationDistance = 7; pp.RequiresLineOfSight = false; pp.Parent = npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart")
-		pp.Triggered:Connect(function(who) if who == player and entry.alive and C.onServed then C.onServed(entry) end end)
-		-- แถบความอดทน
-		while entry.alive and npc.Parent do
-			local left = 1 - (os.clock() - entry.orderAt) / Config.Patience
+		for k, e in ipairs(g.members) do
+			task.spawn(function()
+				if tbl then
+					local seat = tbl.seats[k]
+					walkTo(e.npc, seat.Position + Vector3.new(0, 2, 0))
+					local h = e.npc:FindFirstChildOfClass("Humanoid")
+					if h and e.npc.Parent and g.alive then pcall(function() seat:Sit(h) end) end
+				else
+					walkTo(e.npc, pts.queue(slot))
+				end
+			end)
+		end
+		task.wait(tbl and 4 or 3)
+		if not g.alive then return end
+		g.orderAt = os.clock()
+		for _, e in ipairs(g.members) do
+			e.npc:SetAttribute("OrderFood", e.food.id); e.npc:SetAttribute("Patience", 1)
+			addPrompt(e)
+		end
+		while g.alive do
+			local left = 1 - (os.clock() - g.orderAt) / Config.Patience
 			if left <= 0 then break end
-			npc:SetAttribute("Patience", left)
+			for _, e in ipairs(g.members) do if not e.served then e.npc:SetAttribute("Patience", left) end end
 			task.wait(0.25)
 		end
-		if entry.alive then entry.alive = false; if C.onLeft then C.onLeft(entry) end; C.leave(entry, "😠") end
+		if g.alive then C.leave(g, "😠"); if C.onLeft then C.onLeft(g) end end
 	end)
-	return entry
+	return g
 end
 
-function C.patienceLeft(entry)
-	if not entry.orderAt then return 1 end
-	return math.clamp(1 - (os.clock() - entry.orderAt) / Config.Patience, 0, 1)
-end
-
-function C.leave(entry, mood)
-	entry.alive = false
-	local q = C.queues[entry.player]
-	if q then
-		local i = table.find(q, entry); if i then table.remove(q, i) end
-		-- เลื่อนคิว
-		local pts = Plot.points(entry.player:GetAttribute("PlotIndex"))
-		for n, e in ipairs(q) do if e.orderAt then task.spawn(walkTo, e.npc, pts.queue(n)) end end
-	end
+-- เสิร์ฟครบทั้งกลุ่มแล้ว: นั่งกิน แล้วออกไป โต๊ะสกปรก
+function C.markServed(entry)
+	entry.served = true
+	entry.npc:SetAttribute("OrderFood", nil); entry.npc:SetAttribute("Mood", "😋")
+	local pp = entry.npc:FindFirstChildWhichIsA("ProximityPrompt", true); if pp then pp:Destroy() end
+	local g = entry.group
+	for _, e in ipairs(g.members) do if not e.served then return false end end
+	g.alive = false -- หยุดนับความอดทน
 	task.spawn(function()
-		entry.npc:SetAttribute("Mood", mood)
-		local pts = Plot.points(entry.player:GetAttribute("PlotIndex"))
-		walkTo(entry.npc, pts.spawn)
-		entry.npc:Destroy()
+		if g.kind == "dine" then task.wait(Config.EatTime) end
+		C.leave(g, "😊", true)
+		if C.onGroupDone then C.onGroupDone(g) end
 	end)
+	return true
+end
+
+function C.leave(g, mood, done)
+	g.alive = false
+	local player = g.player
+	local q = C.queues[player]
+	if q then local i = table.find(q, g); if i then table.remove(q, i) end end
+	local gs = C.groups[player]
+	if gs then local i = table.find(gs, g); if i then table.remove(gs, i) end end
+	local pts = Plot.points(player:GetAttribute("PlotIndex"))
+	if q then for n, og in ipairs(q) do if og.orderAt then task.spawn(walkTo, og.members[1].npc, pts.queue(n)) end end end
+	if g.table then g.table.group = nil; if done then g.table.setDirty(true) end end
+	for _, e in ipairs(g.members) do
+		task.spawn(function()
+			e.npc:SetAttribute("OrderFood", nil); e.npc:SetAttribute("Mood", mood)
+			local h = e.npc:FindFirstChildOfClass("Humanoid"); if h then h.Sit = false; task.wait(0.3); h.Jump = true end
+			walkTo(e.npc, pts.spawn)
+			e.npc:Destroy()
+		end)
+	end
 end
 
 function C.clear(player)
-	for _, e in ipairs(C.queues[player] or {}) do e.alive = false; e.npc:Destroy() end
-	C.queues[player] = nil
+	for _, g in ipairs(C.groups[player] or {}) do g.alive = false; for _, e in ipairs(g.members) do e.npc:Destroy() end end
+	C.groups[player] = nil; C.queues[player] = nil
 end
 return C
 ]]></string>
@@ -432,15 +485,61 @@ return LB
 ]]></string>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="9">
+    <Item class="Script" referent="9">
+      <Properties>
+        <string name="Name">MapService</string>
+        <token name="RunContext">0</token>
+        <string name="Source"><![CDATA[-- ตกแต่งตลาดโต้รุ่ง: กลางคืน ไฟราวตามถนน ตุ๊กตุ๊กวิ่งวน
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+Lighting.ClockTime = 19.5; Lighting.Brightness = 1; Lighting.Ambient = Color3.fromRGB(70, 60, 80)
+Lighting.OutdoorAmbient = Color3.fromRGB(80, 70, 90); Lighting.FogEnd = 600
+local deco = Instance.new("Folder"); deco.Name = "Decor"; deco.Parent = workspace
+local function part(props)
+	local x = Instance.new("Part"); x.Anchored = true
+	for k, v in pairs(props) do x[k] = v end
+	x.Parent = deco; return x
+end
+-- เสาไฟ + ไฟราวสีเหลืองสองฝั่งถนน
+for x = -140, 140, 20 do
+	for _, z in ipairs({ -18, 2 }) do
+		part({ Size = Vector3.new(0.4, 12, 0.4), Position = Vector3.new(x, 6, z), Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Metal })
+		part({ Size = Vector3.new(20, 0.08, 0.08), Position = Vector3.new(x + 10, 11.5, z), Color = Color3.fromRGB(30, 30, 30) })
+		for k = 0, 3 do
+			local b = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(0.7, 0.7, 0.7), Position = Vector3.new(x + 2.5 + k * 5, 11, z), Color = Color3.fromRGB(255, 200, 90), Material = Enum.Material.Neon })
+			local l = Instance.new("PointLight"); l.Color = Color3.fromRGB(255, 200, 120); l.Range = 16; l.Brightness = 1; l.Parent = b
+		end
+	end
+end
+-- ตุ๊กตุ๊กวิ่งวนบนถนน
+local tuk = Instance.new("Model"); tuk.Name = "TukTuk"; tuk.Parent = deco
+local body = part({ Size = Vector3.new(5, 3, 3), Position = Vector3.new(-200, 2.2, -12), Color = Color3.fromRGB(30, 100, 200), Material = Enum.Material.Metal }); body.Parent = tuk
+local roof = part({ Size = Vector3.new(5.4, 0.3, 3.4), Position = Vector3.new(-200, 4, -12), Color = Color3.fromRGB(240, 200, 40) }); roof.Parent = tuk
+local nose = part({ Size = Vector3.new(2, 1.6, 2), Position = Vector3.new(-203.3, 1.5, -12), Color = Color3.fromRGB(30, 100, 200), Material = Enum.Material.Metal }); nose.Parent = tuk
+tuk.PrimaryPart = body
+for _, p in ipairs({ roof, nose }) do
+	local w = Instance.new("WeldConstraint"); w.Part0 = body; w.Part1 = p; w.Parent = p; p.Anchored = false
+end
+task.spawn(function()
+	while true do
+		tuk:PivotTo(CFrame.new(-220, 2.2, -12) * CFrame.Angles(0, math.rad(180), 0))
+		local tw = TweenService:Create(body, TweenInfo.new(22, Enum.EasingStyle.Linear), { CFrame = CFrame.new(220, 2.2, -12) * CFrame.Angles(0, math.rad(180), 0) })
+		tw:Play(); tw.Completed:Wait()
+		task.wait(6)
+	end
+end)
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="10">
       <Properties>
         <string name="Name">PlotService</string>
-        <string name="Source"><![CDATA[-- แปลงร้าน: รถเข็น, โต๊ะครัวของแต่ละเมนูพร้อมโมเดลอาหารและปุ่มทำอาหาร, จุดคิวลูกค้า
+        <string name="Source"><![CDATA[-- แปลงร้านสไตล์ตลาดโต้รุ่ง: เคาน์เตอร์ โต๊ะครัว โต๊ะนั่งกับเก้าอี้พลาสติก ร่ม จุดใส่ถุง
 local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
 local Locale = require(RS.Locale)
 local Dish = require(RS.Dish)
-local P = { owners = {}, onCook = nil }
+local P = { owners = {}, tables = {}, onCook = nil, onPack = nil, onClean = nil }
 local root = Instance.new("Folder"); root.Name = "Plots"; root.Parent = workspace
 
 local function part(props, parent)
@@ -450,27 +549,72 @@ local function part(props, parent)
 	x.Parent = parent
 	return x
 end
-local function sign(parent, text, size, pos, color)
-	local s = part({ Size = size, Position = pos, Color = Color3.new(1, 0.95, 0.6), Material = Enum.Material.SmoothPlastic }, parent)
+local function sign(parent, text, size, pos, color, bg)
+	local s = part({ Size = size, Position = pos, Color = bg or Color3.new(1, 0.95, 0.6), Material = Enum.Material.Neon }, parent)
 	local g = Instance.new("SurfaceGui"); g.Face = Enum.NormalId.Front; g.Parent = s
 	local t = Instance.new("TextLabel"); t.Size = UDim2.fromScale(1, 1); t.BackgroundTransparency = 1
 	t.Text = text; t.TextScaled = true; t.Font = Enum.Font.FredokaOne; t.TextColor3 = color or Color3.new(0.15, 0.1, 0.05); t.Parent = g
 	return s
+end
+local function prompt(parent, action, obj, key, cb)
+	local pp = Instance.new("ProximityPrompt"); pp.ActionText = action; pp.ObjectText = obj or ""
+	pp.KeyboardKeyCode = Enum.KeyCode.E; pp.HoldDuration = 0; pp.MaxActivationDistance = 8; pp.RequiresLineOfSight = false
+	if key then pp:SetAttribute("Kind", key) end
+	pp.Parent = parent; pp.Triggered:Connect(cb)
+	return pp
+end
+local function light(parent, pos, color)
+	local b = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(0.6, 0.6, 0.6), Position = pos, Color = color, Material = Enum.Material.Neon }, parent)
+	local l = Instance.new("PointLight"); l.Color = color; l.Range = 14; l.Brightness = 1.2; l.Parent = b
 end
 
 function P.origin(i)
 	local row, col = math.floor((i - 1) / 4), (i - 1) % 4
 	return Vector3.new(-90 + col * 60, 0, 30 + row * 80)
 end
--- ตำแหน่งสำคัญของแปลง
 function P.points(i)
 	local o = P.origin(i)
 	return {
 		origin = o,
-		spawn = Vector3.new(o.X, 3, 2),             -- ริมถนน
-		counter = o + Vector3.new(0, 3, -12),      -- หน้าเคาน์เตอร์
+		spawn = Vector3.new(o.X, 3, 2),
 		queue = function(n) return o + Vector3.new(-6 + (n - 1) * 4, 3, -8) end,
 	}
+end
+
+-- โต๊ะนั่ง: โต๊ะสแตนเลส + เก้าอี้พลาสติก 4 ตัว (Seat) + ร่ม
+local function makeTable(m, pos, idx, player)
+	local g = Instance.new("Model"); g.Name = "Table" .. idx; g.Parent = m
+	part({ Size = Vector3.new(4, 0.2, 4), Position = pos + Vector3.new(0, 2.5, 0), Color = Color3.fromRGB(200, 205, 210), Material = Enum.Material.Metal }, g)
+	part({ Size = Vector3.new(0.3, 2.4, 0.3), Position = pos + Vector3.new(0, 1.2, 0), Color = Color3.fromRGB(120, 120, 125), Material = Enum.Material.Metal }, g)
+	-- ร่ม
+	part({ Size = Vector3.new(0.25, 8, 0.25), Position = pos + Vector3.new(0, 6, 0), Color = Color3.fromRGB(230, 230, 230) }, g)
+	local top = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.6, 9, 9), Color = idx % 2 == 0 and Color3.fromRGB(220, 50, 50) or Color3.fromRGB(50, 90, 200), Material = Enum.Material.Fabric }, g)
+	top.CFrame = CFrame.new(pos + Vector3.new(0, 9.8, 0)) * CFrame.Angles(0, 0, math.rad(90))
+	light(g, pos + Vector3.new(0, 8.6, 0), Color3.fromRGB(255, 220, 150))
+	local seats = {}
+	local colors = { Color3.fromRGB(220, 50, 50), Color3.fromRGB(40, 80, 200), Color3.fromRGB(220, 50, 50), Color3.fromRGB(40, 80, 200) }
+	for k, off in ipairs({ Vector3.new(3, 0, 0), Vector3.new(-3, 0, 0), Vector3.new(0, 0, 3), Vector3.new(0, 0, -3) }) do
+		local seat = Instance.new("Seat"); seat.Size = Vector3.new(1.6, 0.3, 1.6); seat.Anchored = true; seat.Color = colors[k]; seat.Material = Enum.Material.SmoothPlastic
+		seat.CFrame = CFrame.new(pos + off + Vector3.new(0, 1.5, 0), pos + Vector3.new(0, 1.5, 0)); seat.Parent = g
+		for _, l in ipairs({ Vector3.new(0.6, 0, 0.6), Vector3.new(-0.6, 0, 0.6), Vector3.new(0.6, 0, -0.6), Vector3.new(-0.6, 0, -0.6) }) do
+			part({ Size = Vector3.new(0.15, 1.4, 0.15), Position = pos + off + l + Vector3.new(0, 0.7, 0), Color = colors[k] }, g)
+		end
+		seats[k] = seat
+	end
+	local t = { model = g, seats = seats, pos = pos, dirty = false, group = nil, idx = idx }
+	-- จานสกปรก + ปุ่มเก็บโต๊ะ
+	local plates = Instance.new("Model"); plates.Name = "Dirty"; plates.Parent = g
+	for k = 1, 3 do
+		local d = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.12, 1.4, 1.4), Color = Color3.fromRGB(235, 225, 210), Transparency = 1 }, plates)
+		d.CFrame = CFrame.new(pos + Vector3.new(-1 + k * 0.7, 2.66 + k * 0.05, (k % 2) * 0.8 - 0.4)) * CFrame.Angles(0, 0, math.rad(90))
+	end
+	local cleanPrompt = prompt(g:FindFirstChildWhichIsA("Part"), "Clean", "Table " .. idx, "clean", function(who) if who == player and t.dirty and P.onClean then P.onClean(player, t) end end)
+	cleanPrompt.Enabled = false
+	function t.setDirty(dirty)
+		t.dirty = dirty; cleanPrompt.Enabled = dirty
+		for _, d in ipairs(plates:GetChildren()) do d.Transparency = dirty and 0 or 1 end
+	end
+	return t
 end
 
 function P.assign(player)
@@ -479,12 +623,21 @@ function P.assign(player)
 			P.owners[i] = player
 			local o = P.origin(i)
 			local m = Instance.new("Model"); m.Name = "Plot_" .. player.UserId; m.Parent = root
-			part({ Size = Vector3.new(50, 0.4, 56), Position = o + Vector3.new(0, 0.2, -3), Color = Color3.fromRGB(190, 170, 140), Material = Enum.Material.Cobblestone }, m)
-			-- เคาน์เตอร์ขาย (ลูกค้ายืนฝั่งถนน ผู้เล่นยืนฝั่งใน)
+			part({ Size = Vector3.new(50, 0.4, 56), Position = o + Vector3.new(0, 0.2, -3), Color = Color3.fromRGB(150, 140, 130), Material = Enum.Material.Concrete }, m)
+			-- เคาน์เตอร์ + หลังคาผ้าใบ + ไฟราว
 			part({ Size = Vector3.new(16, 3, 2), Position = o + Vector3.new(0, 1.9, -14), Color = Color3.fromRGB(200, 110, 50), Material = Enum.Material.Wood }, m)
 			part({ Size = Vector3.new(18, 0.3, 6), Position = o + Vector3.new(0, 6, -15), Color = Color3.fromRGB(210, 50, 50), Material = Enum.Material.Fabric }, m)
 			for _, dx in ipairs({ -8, 8 }) do part({ Size = Vector3.new(0.3, 6, 0.3), Position = o + Vector3.new(dx, 3, -12.5), Color = Color3.fromRGB(60, 60, 60) }, m) end
-			sign(m, player.DisplayName .. "'s Street Food", Vector3.new(16, 1.4, 0.2), o + Vector3.new(0, 7, -12.4))
+			sign(m, "🍜 " .. player.DisplayName, Vector3.new(16, 1.4, 0.2), o + Vector3.new(0, 7, -12.4), Color3.fromRGB(60, 20, 10), Color3.fromRGB(255, 200, 60))
+			for k = -7, 7, 2 do light(m, o + Vector3.new(k, 5.6, -11.8), Color3.fromRGB(255, 210, 120)) end
+			-- จุดใส่ถุง (ซื้อกลับ)
+			local pack = part({ Size = Vector3.new(3, 2.8, 2), Position = o + Vector3.new(11, 1.8, -14), Color = Color3.fromRGB(240, 235, 220), Material = Enum.Material.Plastic }, m)
+			sign(m, "🥡", Vector3.new(2.5, 1, 0.1), o + Vector3.new(11, 4, -13), nil, Color3.fromRGB(255, 240, 200))
+			prompt(pack, "Pack", "🥡", "pack", function(who) if who == player and P.onPack then P.onPack(player) end end)
+			-- โต๊ะนั่ง
+			P.tables[player] = {}
+			local spots = { Vector3.new(-16, 0, -2), Vector3.new(16, 0, -2), Vector3.new(-16, 0, 12), Vector3.new(16, 0, 12) }
+			for k = 1, Config.TablesPerPlot do P.tables[player][k] = makeTable(m, o + spots[k], k, player) end
 			local stalls = Instance.new("Folder"); stalls.Name = "Stalls"; stalls.Parent = m
 			player:SetAttribute("PlotIndex", i)
 			return m
@@ -492,13 +645,17 @@ function P.assign(player)
 	end
 end
 
+function P.freeTable(player)
+	for _, t in ipairs(P.tables[player] or {}) do if not t.group and not t.dirty then return t end end
+end
+
 function P.release(player)
 	for i, o in pairs(P.owners) do if o == player then P.owners[i] = nil end end
+	P.tables[player] = nil
 	local m = root:FindFirstChild("Plot_" .. player.UserId)
 	if m then m:Destroy() end
 end
 
--- โต๊ะครัวของเมนูที่ปลดล็อก
 function P.refresh(player, foods)
 	local m = root:FindFirstChild("Plot_" .. player.UserId)
 	if not m then return end
@@ -513,14 +670,11 @@ function P.refresh(player, foods)
 			part({ Size = Vector3.new(6.4, 0.2, 3.4), Position = pos + Vector3.new(0, 3.1, 0), Color = Color3.fromRGB(70, 70, 70), Material = Enum.Material.Metal }, g)
 			part({ Size = Vector3.new(7, 0.25, 4), Position = pos + Vector3.new(0, 5.4, 0), Color = Color3.fromRGB(240, 240, 230), Material = Enum.Material.Fabric }, g)
 			sign(g, f.emoji .. " " .. Locale.food("en", f.id), Vector3.new(6, 0.8, 0.15), pos + Vector3.new(0, 4.4, 1.6))
-			-- อาหารโชว์บนโต๊ะ
 			local d = Dish.build(f.id); d.Parent = g
 			d:PivotTo(CFrame.new(pos + Vector3.new(0, 3.3, 0)))
 			for _, x in ipairs(d:GetDescendants()) do if x:IsA("BasePart") then x.Anchored = true end end
-			-- ปุ่มทำอาหาร
-			local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Cook"; pp.ObjectText = Locale.food("en", f.id); pp:SetAttribute("FoodId", f.id)
-			pp.KeyboardKeyCode = Enum.KeyCode.E; pp.HoldDuration = 0; pp.MaxActivationDistance = 8; pp.RequiresLineOfSight = false; pp.Parent = body
-			pp.Triggered:Connect(function(who) if who == player and P.onCook then P.onCook(player, f.id) end end)
+			local pp = prompt(body, "Cook", Locale.food("en", f.id), "cook", function(who) if who == player and P.onCook then P.onCook(player, f.id) end end)
+			pp:SetAttribute("FoodId", f.id)
 		end
 	end
 end
@@ -528,7 +682,7 @@ return P
 ]]></string>
       </Properties>
     </Item>
-    <Item class="Script" referent="10">
+    <Item class="Script" referent="11">
       <Properties>
         <string name="Name">TycoonServer</string>
         <token name="RunContext">0</token>
@@ -564,7 +718,7 @@ local function mult(player)
 end
 local function push(player)
 	local d = Data.get(player)
-	if d then LB.update(player, d, d.served); Remotes.DataUpdate:FireClient(player, d, player:GetAttribute("Holding")) end
+	if d then LB.update(player, d, d.served); Remotes.DataUpdate:FireClient(player, d, player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")) end
 end
 local function notify(player, key, color, ...)
 	Remotes.Notify:FireClient(player, key, color, ...)
@@ -572,12 +726,19 @@ end
 local function foodOf(id) for _, f in ipairs(Config.Foods) do if f.id == id then return f end end end
 
 -- ถือจาน
-local function setHolding(player, foodId)
+local function setHolding(player, foodId, count, bagged)
 	local char = player.Character
 	if char then
 		local old = char:FindFirstChild("HeldDish"); if old then old:Destroy() end
 		if foodId then
-			local d = Dish.build(foodId); d.Name = "HeldDish"
+			local d
+			if bagged then
+				d = Instance.new("Model"); d.Name = "HeldDish"
+				local bag = Instance.new("Part"); bag.Size = Vector3.new(1.4, 1.6, 1); bag.Color = Color3.fromRGB(240, 240, 235); bag.Material = Enum.Material.Plastic
+				bag.CanCollide = false; bag.Massless = true; bag.Parent = d; d.PrimaryPart = bag
+			else
+				d = Dish.build(foodId); d.Name = "HeldDish"
+			end
 			local hand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
 			if hand then
 				d:PivotTo(hand.CFrame * CFrame.new(0, -0.6, -1.2))
@@ -586,8 +747,17 @@ local function setHolding(player, foodId)
 			d.Parent = char
 		end
 	end
-	player:SetAttribute("Holding", foodId)
+	player:SetAttribute("Holding", foodId); player:SetAttribute("HoldCount", foodId and (count or 1) or nil); player:SetAttribute("Bagged", bagged or nil)
 	push(player)
+end
+Plot.onPack = function(player)
+	local id = player:GetAttribute("Holding")
+	if not id then notify(player, "noDish", "red"); return end
+	setHolding(player, id, player:GetAttribute("HoldCount") or 1, true)
+end
+Plot.onClean = function(player, t)
+	t.setDirty(false)
+	local d = Data.get(player); if d then d.rep = math.min(d.rep + 1, 1000); push(player) end
 end
 
 -- ทำอาหาร: เริ่มมินิเกมที่ client แล้วรอผล
@@ -604,7 +774,7 @@ Remotes.MinigameResult.OnServerEvent:Connect(function(player, score)
 	if os.clock() - c.t0 < c.food.cookTime * 0.5 then score = 0 end -- กันโกง ทำเร็วเกินไป
 	if score <= 0 then notify(player, "burnt", "red"); return end
 	player:SetAttribute("Quality", score)
-	setHolding(player, c.food.id)
+	setHolding(player, c.food.id, c.food.batch or 1, false)
 	notify(player, score > 0.85 and "perfect" or (score > 0.5 and "good" or "ok"), "green")
 end)
 
@@ -614,6 +784,7 @@ Customers.onServed = function(entry)
 	local holding = player:GetAttribute("Holding")
 	if not holding then notify(player, "noDish", "red"); return end
 	if holding ~= entry.food.id then notify(player, "wrongDish", "red"); return end
+	if entry.group.kind == "takeaway" and not player:GetAttribute("Bagged") then notify(player, "needBag", "red"); return end
 	local d = Data.get(player); if not d then return end
 	local quality = player:GetAttribute("Quality") or 0.5
 	local patience = Customers.patienceLeft(entry)
@@ -622,14 +793,15 @@ Customers.onServed = function(entry)
 	local earned = math.floor((base + tip) * mult(player))
 	d.cash += earned; d.total += earned; d.served += 1
 	d.rep = math.min(d.rep + (quality > 0.85 and 2 or 1), 1000)
-	setHolding(player, nil)
-	Customers.leave(entry, quality > 0.85 and "😍" or "😊")
+	local left = (player:GetAttribute("HoldCount") or 1) - 1
+	if left > 0 then setHolding(player, holding, left, player:GetAttribute("Bagged")) else setHolding(player, nil) end
+	Customers.markServed(entry)
 	notify(player, "tip", "green", earned, tip)
 	push(player)
 end
-Customers.onLeft = function(entry)
-	local d = Data.get(entry.player)
-	if d then d.rep = math.max(d.rep - 2, 0); notify(entry.player, "left", "red"); push(entry.player) end
+Customers.onLeft = function(g)
+	local d = Data.get(g.player)
+	if d then d.rep = math.max(d.rep - 2 * #g.members, 0); notify(g.player, "left", "red"); push(g.player) end
 end
 
 local function onPlayer(player)
@@ -638,7 +810,7 @@ local function onPlayer(player)
 	Plot.assign(player)
 	Plot.refresh(player, d.foods)
 	push(player)
-	player.CharacterAdded:Connect(function() task.wait(0.5); if player:GetAttribute("Holding") then setHolding(player, player:GetAttribute("Holding")) end end)
+	player.CharacterAdded:Connect(function() task.wait(0.5); if player:GetAttribute("Holding") then setHolding(player, player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")) end end)
 	-- ลูกค้าเดินเข้ามาเรื่อย ๆ ชื่อเสียงสูงมาถี่ขึ้น
 	task.spawn(function()
 		task.wait(4)
@@ -654,11 +826,17 @@ local function onPlayer(player)
 		while player.Parent do
 			task.wait(10)
 			if ownsPass(player, "AutoChef") then
-				local q = Customers.queue(player)
-				local e = q[1]
-				if e and e.alive and e.orderAt then
-					local dd = Data.get(player)
-					if dd then dd.cash += e.food.price; dd.total += e.food.price; dd.served += 1; Customers.leave(e, "🤖"); push(player) end
+				for _, g in ipairs(Customers.groups[player] or {}) do
+					if g.alive and g.orderAt then
+						for _, e in ipairs(g.members) do
+							if not e.served then
+								local dd = Data.get(player)
+								if dd then dd.cash += e.food.price; dd.total += e.food.price; dd.served += 1; Customers.markServed(e); push(player) end
+								break
+							end
+						end
+						break
+					end
 				end
 			end
 		end
@@ -673,7 +851,7 @@ end)
 task.spawn(function() while true do task.wait(120); for _, p in ipairs(Players:GetPlayers()) do local d = Data.get(p); if d then LB.submit(p, d) end end end end)
 
 Remotes.GetData.OnServerInvoke = function(player)
-	return Data.get(player) or Data.load(player), player:GetAttribute("Holding")
+	return Data.get(player) or Data.load(player), player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")
 end
 Remotes.BuyFood.OnServerInvoke = function(player, foodId)
 	local d = Data.get(player); if not d then return false end
@@ -727,20 +905,20 @@ end
       </Properties>
     </Item>
   </Item>
-  <Item class="StarterGui" referent="11">
+  <Item class="StarterGui" referent="12">
     <Properties>
       <string name="Name">StarterGui</string>
     </Properties>
   </Item>
-  <Item class="StarterPlayer" referent="12">
+  <Item class="StarterPlayer" referent="13">
     <Properties>
       <string name="Name">StarterPlayer</string>
     </Properties>
-    <Item class="StarterPlayerScripts" referent="13">
+    <Item class="StarterPlayerScripts" referent="14">
       <Properties>
         <string name="Name">StarterPlayerScripts</string>
       </Properties>
-      <Item class="LocalScript" referent="14">
+      <Item class="LocalScript" referent="15">
         <Properties>
           <string name="Name">CustomerClient</string>
           <string name="Source"><![CDATA[-- วาดลูกโป่งคำสั่งของลูกค้าตามภาษาของผู้เล่นแต่ละคน + แปลข้อความปุ่ม E
@@ -767,7 +945,7 @@ local function attach(npc)
 		bg.Enabled = id ~= nil or mood ~= nil
 		if mood then t.Text = mood; barBg.Visible = false; return end
 		local food = id and foodOf(id)
-		if food then t.Text = food.emoji .. " " .. Locale.food(lang(), id) end
+		if food then t.Text = (npc:GetAttribute("Takeaway") and "🥡 " or "") .. food.emoji .. " " .. Locale.food(lang(), id) end
 		local left = npc:GetAttribute("Patience") or 1
 		bar.Size = UDim2.fromScale(left, 1)
 		bar.BackgroundColor3 = left > 0.5 and Color3.fromRGB(90, 200, 110) or (left > 0.25 and Color3.fromRGB(240, 190, 60) or Color3.fromRGB(220, 80, 70))
@@ -782,11 +960,11 @@ folder.ChildAdded:Connect(function(n) task.spawn(attach, n) end)
 local function localizePrompt(pp)
 	local function apply()
 		local L = lang()
-		if pp.ActionText == "Cook" or pp:GetAttribute("FoodId") then
-			pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.food(L, pp:GetAttribute("FoodId"))
-		elseif pp.ActionText == "Serve" or pp:GetAttribute("IsCustomer") then
-			pp:SetAttribute("IsCustomer", true); pp.ActionText = Locale.get(L, "serve")
-		end
+		local kind = pp:GetAttribute("Kind")
+		if kind == "cook" then pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.food(L, pp:GetAttribute("FoodId"))
+		elseif kind == "serve" then pp.ActionText = Locale.get(L, "serve")
+		elseif kind == "pack" then pp.ActionText = Locale.get(L, "pack"); pp.ObjectText = Locale.get(L, "takeaway")
+		elseif kind == "clean" then pp.ActionText = Locale.get(L, "clean"); pp.ObjectText = "" end
 	end
 	apply(); player:GetAttributeChangedSignal("Lang"):Connect(apply)
 end
@@ -795,7 +973,7 @@ workspace.DescendantAdded:Connect(function(pp) if pp:IsA("ProximityPrompt") then
 ]]></string>
         </Properties>
       </Item>
-      <Item class="LocalScript" referent="15">
+      <Item class="LocalScript" referent="16">
         <Properties>
           <string name="Name">MinigameClient</string>
           <string name="Source"><![CDATA[-- มินิเกมทำอาหาร 3 แบบ: timing / mash / flip ส่งคะแนน 0-1 กลับเซิร์ฟเวอร์
@@ -891,7 +1069,7 @@ end)
 ]]></string>
         </Properties>
       </Item>
-      <Item class="LocalScript" referent="16">
+      <Item class="LocalScript" referent="17">
         <Properties>
           <string name="Name">ShopClient</string>
           <string name="Source"><![CDATA[-- UI หลัก: แถบเงินด้านบน, ร้านค้าแบบแท็บ, สลับภาษา, แจ้งเตือน
@@ -905,7 +1083,7 @@ local player = Players.LocalPlayer
 local lang = Locale.detect(player.LocaleId)
 player:SetAttribute("Lang", lang)
 local T = function(k) return Locale.get(lang, k) end
-local state = { data = nil, holding = nil, tab = "menu" }
+local state = { data = nil, holding = nil, count = 0, bagged = false, tab = "menu" }
 
 local C = { bg = Color3.fromRGB(28, 24, 22), panel = Color3.fromRGB(42, 36, 32), card = Color3.fromRGB(58, 50, 44),
 	accent = Color3.fromRGB(255, 170, 40), green = Color3.fromRGB(90, 200, 110), red = Color3.fromRGB(220, 80, 70),
@@ -1044,7 +1222,7 @@ local function renderTop()
 	cashLbl.Text = "฿ " .. Locale.fmt(d.cash)
 	local stars = math.clamp(math.floor((d.rep or 0) / 200) + 1, 1, 5)
 	incLbl.Text = string.rep("⭐", stars) .. "  " .. T("served") .. ": " .. (d.served or 0)
-	holdLbl.Text = state.holding and ("🍽️ " .. T("holding") .. ": " .. Locale.food(lang, state.holding)) or ""
+	holdLbl.Text = state.holding and ((state.bagged and "🥡 " or "🍽️ ") .. Locale.food(lang, state.holding) .. " x" .. (state.count or 1)) or ""
 end
 
 local function applyLang()
@@ -1062,14 +1240,14 @@ langBtn.MouseButton1Click:Connect(function()
 end)
 
 local lastCash
-Remotes.DataUpdate.OnClientEvent:Connect(function(d, holding)
-	state.data, state.holding = d, holding
+Remotes.DataUpdate.OnClientEvent:Connect(function(d, holding, count, bagged)
+	state.data, state.holding, state.count, state.bagged = d, holding, count, bagged
 	renderTop()
 	if shopOpen and d.cash ~= lastCash then renderShop() end
 	lastCash = d.cash
 end)
-local ok, d, holding = pcall(function() return Remotes.GetData:InvokeServer() end)
-if ok and d then state.data, state.holding = d, holding; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
+local ok, d, holding, count, bagged = pcall(function() return Remotes.GetData:InvokeServer() end)
+if ok and d then state.data, state.holding, state.count, state.bagged = d, holding, count, bagged; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
 task.delay(1, function()
 	local okd, can, day, amt = pcall(function() return Remotes.ClaimDaily:InvokeServer(true) end)
 	if okd and can then showDaily(day, amt) end
@@ -1079,53 +1257,71 @@ end)
       </Item>
     </Item>
   </Item>
-  <Item class="Workspace" referent="17">
+  <Item class="Workspace" referent="18">
     <Properties>
       <string name="Name">Workspace</string>
       <bool name="NeedsPivotMigration">false</bool>
     </Properties>
-    <Item class="Folder" referent="18">
+    <Item class="Folder" referent="19">
       <Properties>
         <string name="Name">Map</string>
       </Properties>
-      <Item class="Part" referent="19">
+      <Item class="Part" referent="20">
         <Properties>
           <string name="Name">Ground</string>
           <bool name="Anchored">true</bool>
-          <Color3uint8 name="Color3uint8">7577177</Color3uint8>
-          <token name="Material">1280</token>
+          <Color3uint8 name="Color3uint8">5854285</Color3uint8>
+          <token name="Material">816</token>
           <Vector3 name="Position">
             <X>0</X>
             <Y>-1</Y>
             <Z>0</Z>
           </Vector3>
           <Vector3 name="size">
-            <X>400</X>
+            <X>500</X>
             <Y>2</Y>
-            <Z>400</Z>
+            <Z>500</Z>
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="20">
+      <Item class="Part" referent="21">
         <Properties>
           <string name="Name">Road</string>
           <bool name="Anchored">true</bool>
-          <Color3uint8 name="Color3uint8">4210757</Color3uint8>
+          <Color3uint8 name="Color3uint8">3355448</Color3uint8>
           <token name="Material">1376</token>
           <Vector3 name="Position">
             <X>0</X>
             <Y>0.1</Y>
-            <Z>0</Z>
+            <Z>-8</Z>
           </Vector3>
           <Vector3 name="size">
-            <X>400</X>
+            <X>500</X>
             <Y>0.2</Y>
-            <Z>16</Z>
+            <Z>18</Z>
           </Vector3>
         </Properties>
       </Item>
-      <Item class="SpawnLocation" referent="21">
+      <Item class="Part" referent="22">
+        <Properties>
+          <string name="Name">Line</string>
+          <bool name="Anchored">true</bool>
+          <Color3uint8 name="Color3uint8">16767309</Color3uint8>
+          <token name="Material">272</token>
+          <Vector3 name="Position">
+            <X>0</X>
+            <Y>0.1</Y>
+            <Z>-8</Z>
+          </Vector3>
+          <Vector3 name="size">
+            <X>500</X>
+            <Y>0.22</Y>
+            <Z>0.4</Z>
+          </Vector3>
+        </Properties>
+      </Item>
+      <Item class="SpawnLocation" referent="23">
         <Properties>
           <string name="Name">SpawnLocation</string>
           <bool name="Anchored">true</bool>
@@ -1134,7 +1330,7 @@ end)
           <Vector3 name="Position">
             <X>0</X>
             <Y>0.5</Y>
-            <Z>-20</Z>
+            <Z>-28</Z>
           </Vector3>
           <Vector3 name="size">
             <X>10</X>
@@ -1143,29 +1339,29 @@ end)
           </Vector3>
         </Properties>
       </Item>
-      <Item class="Part" referent="22">
+      <Item class="Part" referent="24">
         <Properties>
           <string name="Name">Welcome</string>
           <bool name="Anchored">true</bool>
-          <Color3uint8 name="Color3uint8">16772505</Color3uint8>
-          <token name="Material">272</token>
+          <Color3uint8 name="Color3uint8">16760627</Color3uint8>
+          <token name="Material">288</token>
           <Vector3 name="Position">
             <X>0</X>
-            <Y>8</Y>
-            <Z>-30</Z>
+            <Y>10</Y>
+            <Z>-40</Z>
           </Vector3>
           <Vector3 name="size">
-            <X>24</X>
-            <Y>4</Y>
+            <X>30</X>
+            <Y>5</Y>
             <Z>0.4</Z>
           </Vector3>
         </Properties>
-        <Item class="SurfaceGui" referent="23">
+        <Item class="SurfaceGui" referent="25">
           <Properties>
             <string name="Name">Gui</string>
             <token name="Face">5</token>
           </Properties>
-          <Item class="TextLabel" referent="24">
+          <Item class="TextLabel" referent="26">
             <Properties>
               <string name="Name">Text</string>
               <float name="BackgroundTransparency">1</float>
@@ -1182,10 +1378,10 @@ end)
                 <YS>1</YS>
                 <YO>0</YO>
               </UDim2>
-              <string name="Text">🍜 Street Food Tycoon 🍢</string>
+              <string name="Text">🍜 ตลาดโต้รุ่ง Street Food Tycoon 🍢</string>
               <Color3 name="TextColor3">
                 <R>0.3</R>
-                <G>0.15</G>
+                <G>0.1</G>
                 <B>0.05</B>
               </Color3>
               <bool name="TextScaled">true</bool>

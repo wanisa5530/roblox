@@ -9,7 +9,7 @@ local player = Players.LocalPlayer
 local lang = Locale.detect(player.LocaleId)
 player:SetAttribute("Lang", lang)
 local T = function(k) return Locale.get(lang, k) end
-local state = { data = nil, holding = nil, tab = "menu" }
+local state = { data = nil, holding = nil, count = 0, bagged = false, tab = "menu" }
 
 local C = { bg = Color3.fromRGB(28, 24, 22), panel = Color3.fromRGB(42, 36, 32), card = Color3.fromRGB(58, 50, 44),
 	accent = Color3.fromRGB(255, 170, 40), green = Color3.fromRGB(90, 200, 110), red = Color3.fromRGB(220, 80, 70),
@@ -148,7 +148,7 @@ local function renderTop()
 	cashLbl.Text = "฿ " .. Locale.fmt(d.cash)
 	local stars = math.clamp(math.floor((d.rep or 0) / 200) + 1, 1, 5)
 	incLbl.Text = string.rep("⭐", stars) .. "  " .. T("served") .. ": " .. (d.served or 0)
-	holdLbl.Text = state.holding and ("🍽️ " .. T("holding") .. ": " .. Locale.food(lang, state.holding)) or ""
+	holdLbl.Text = state.holding and ((state.bagged and "🥡 " or "🍽️ ") .. Locale.food(lang, state.holding) .. " x" .. (state.count or 1)) or ""
 end
 
 local function applyLang()
@@ -166,14 +166,14 @@ langBtn.MouseButton1Click:Connect(function()
 end)
 
 local lastCash
-Remotes.DataUpdate.OnClientEvent:Connect(function(d, holding)
-	state.data, state.holding = d, holding
+Remotes.DataUpdate.OnClientEvent:Connect(function(d, holding, count, bagged)
+	state.data, state.holding, state.count, state.bagged = d, holding, count, bagged
 	renderTop()
 	if shopOpen and d.cash ~= lastCash then renderShop() end
 	lastCash = d.cash
 end)
-local ok, d, holding = pcall(function() return Remotes.GetData:InvokeServer() end)
-if ok and d then state.data, state.holding = d, holding; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
+local ok, d, holding, count, bagged = pcall(function() return Remotes.GetData:InvokeServer() end)
+if ok and d then state.data, state.holding, state.count, state.bagged = d, holding, count, bagged; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
 task.delay(1, function()
 	local okd, can, day, amt = pcall(function() return Remotes.ClaimDaily:InvokeServer(true) end)
 	if okd and can then showDaily(day, amt) end
