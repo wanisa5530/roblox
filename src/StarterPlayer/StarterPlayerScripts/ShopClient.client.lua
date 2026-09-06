@@ -192,7 +192,8 @@ local function renderShop()
 		end
 	elseif state.tab == "passes" then
 		for _, gp in ipairs(Config.GamePasses) do
-			card(T(gp.key), "Game Pass", "Robux", C.accent, function() Remotes.PromptPass:FireServer("pass", gp.key) end, "⭐")
+			local owned = player:GetAttribute("Pass_" .. gp.key)
+			card(T(gp.key), "Game Pass", owned and T("owned") or "Robux", owned and C.card or C.accent, function() if not owned then Remotes.PromptPass:FireServer("pass", gp.key) end end, "⭐")
 		end
 	else
 		for _, dp in ipairs(Config.DevProducts) do

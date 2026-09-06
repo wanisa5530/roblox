@@ -24,6 +24,7 @@ if G.started then return end; G.started = true
 		if passCache[player][key] == nil then
 			local ok, res = pcall(MPS.UserOwnsGamePassAsync, MPS, player.UserId, id)
 			passCache[player][key] = ok and res or false
+			if isReal(player) then player:SetAttribute("Pass_" .. key, passCache[player][key] or nil) end
 		end
 		return passCache[player][key]
 	end
@@ -372,6 +373,7 @@ if G.started then return end; G.started = true
 		Plot.assign(player)
 		Plot.refresh(player, d.foods)
 		ensureQuests(d); checkLevel(player)
+		for _, gp in ipairs(Config.GamePasses) do ownsPass(player, gp.key) end
 		push(player)
 		player.CharacterAdded:Connect(function() task.wait(0.5); setHolding(player) end)
 		for _, st in ipairs(Config.Staff) do showStaff(player, st.key) end
