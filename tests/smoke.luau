@@ -29,6 +29,19 @@ check("sounds >= 8", n >= 8)
 local map = game:GetService("ServerScriptService"):FindFirstChild("MapService")
 check("map script exists", map ~= nil)
 
+-- ไอดีขายจริงต้องไม่เป็น 0 และ MarketplaceService ต้องอ่านข้อมูลได้
+local MPS = game:GetService("MarketplaceService")
+for _, gp in ipairs(Config.GamePasses) do
+	check("pass id " .. gp.key, gp.id > 0)
+	local ok, info = pcall(MPS.GetProductInfo, MPS, gp.id, Enum.InfoType.GamePass)
+	check("pass info " .. gp.key .. " " .. tostring(ok and info.Name or info), ok and info.Name ~= nil)
+end
+for _, dp in ipairs(Config.DevProducts) do
+	check("product id " .. dp.key, dp.id > 0)
+	local ok, info = pcall(MPS.GetProductInfo, MPS, dp.id, Enum.InfoType.Product)
+	check("product info " .. dp.key .. " " .. tostring(ok and info.Name or info), ok and info.Name ~= nil)
+end
+
 local DSS = game:GetService("DataStoreService")
 local store = DSS:GetDataStore("StreetFoodTycoon_v2")
 local ok, err = pcall(function()

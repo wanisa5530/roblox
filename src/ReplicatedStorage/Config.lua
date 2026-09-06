@@ -103,8 +103,8 @@ Config.GamePasses = {
 }
 -- Dev Product
 Config.DevProducts = {
-	{ key="Cash1",  id=0, cash=5000 },
-	{ key="Cash2",  id=0, cash=50000 },
-	{ key="Cash3",  id=0, cash=500000 },
+	{ key="Cash1",  id=3711589208, cash=5000 },
+	{ key="Cash2",  id=3711589251, cash=50000 },
+	{ key="Cash3",  id=3711589276, cash=500000 },
 }
 return Config
