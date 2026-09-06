@@ -29,5 +29,13 @@ jobs:
       ROBLOX_PLACE_ID: ${{ secrets.ROBLOX_PLACE_ID }}
     steps:
       - uses: actions/checkout@v4
+      - name: Build place
+        run: |
+          curl -sSL -o rojo.zip https://github.com/rojo-rbx/rojo/releases/download/v7.4.4/rojo-7.4.4-linux-x86_64.zip && unzip -qo rojo.zip -d /usr/local/bin
+          rojo build -o StreetFoodTycoon.rbxlx
+      - name: Publish place to Roblox
+        run: python3 scripts/publish_place.py StreetFoodTycoon.rbxlx
       - name: Run Luau smoke test on published place
         run: python3 scripts/run_luau_test.py tests/smoke.luau
+      - name: Run gameplay simulation test
+        run: python3 scripts/run_luau_test.py tests/gameplay.luau
