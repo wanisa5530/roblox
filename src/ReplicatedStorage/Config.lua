@@ -61,6 +61,7 @@ Config.FoodNames = {
 Config.UpgradeMax = 3
 Config.TrayCapacity = 4 -- จำนวนจานที่ถือได้พร้อมกัน
 function Config.upgradeCost(food, kind, level) return math.floor(food.cost * 0.4 * level + (kind == "tray" and 400 or 250)) end
+function Config.kitchenUpgradeCost(kind, level) return (kind == "tray" and 1500 or 1000) * level * level end
 Config.SpiceLevels = { "🌶️", "🌶️🌶️", "🌶️🌶️🌶️" }
 -- เลเวลร้าน: need = รายได้สะสม, tables = โต๊ะที่เปิดใช้
 Config.Levels = {

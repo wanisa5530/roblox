@@ -26,9 +26,9 @@ Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }
 local plot = Plot.assign(fake)
 check("plot assigned", plot ~= nil and attrs.PlotIndex == 1)
 Plot.refresh(fake, { MooPing = true, PadThai = true })
-check("stalls built", plot.Stalls:FindFirstChild("MooPing") ~= nil and plot.Stalls:FindFirstChild("PadThai") ~= nil)
-check("stall has dish", plot.Stalls.MooPing:FindFirstChild("Dish_MooPing") ~= nil)
-check("stall has prompt", plot.Stalls.MooPing:FindFirstChildWhichIsA("ProximityPrompt", true) ~= nil)
+check("display shelf", plot.Stalls:FindFirstChild("MooPing") ~= nil and plot.Stalls.MooPing:FindFirstChild("Dish_MooPing") ~= nil)
+local kp = plot.Kitchen:FindFirstChildWhichIsA("ProximityPrompt", true)
+check("kitchen prompt", kp ~= nil and kp:GetAttribute("Kind") == "kitchen")
 
 -- 3) ลูกค้าเดินมาสั่ง
 check("tables built", #Plot.tables[fake] == Config.TablesPerPlot and Plot.freeTable(fake) ~= nil)
@@ -98,12 +98,12 @@ check("staff quit when broke", next(dd.staff) == nil)
 
 -- 6) อัปเกรดโต๊ะครัว + ข้อมูลหลายขั้นตอน
 dd.cash = 100000
-local okU = GS.upgradeStation(fake, "MooPing", "tray")
-check("upgrade tray", okU == true and dd.upg.MooPing.tray == 2)
-local okS = GS.upgradeStation(fake, "PadThai", "speed")
-check("upgrade speed", okS == true and dd.upg.PadThai.speed == 2)
+local okU = GS.upgradeStation(fake, "kitchen", "tray")
+check("upgrade tray", okU == true and dd.upg.kitchen.tray == 2)
+local okS = GS.upgradeStation(fake, "kitchen", "speed")
+check("upgrade speed", okS == true and dd.upg.kitchen.speed == 2)
 dd.cash = 0
-local okN, errN = GS.upgradeStation(fake, "MooPing", "speed")
+local okN, errN = GS.upgradeStation(fake, "kitchen", "speed")
 check("upgrade needs cash", okN == false and errN == "notEnough")
 local multi = 0
 for _, f in ipairs(Config.Foods) do if f.steps then multi += 1; check("steps valid " .. f.id, #f.steps >= 2) end end

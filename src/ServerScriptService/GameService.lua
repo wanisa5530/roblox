@@ -42,18 +42,18 @@ if G.started then return end; G.started = true
 		Remotes.Notify:FireClient(player, key, color, ...)
 	end
 	local function foodOf(id) for _, f in ipairs(Config.Foods) do if f.id == id then return f end end end
-	local function upgOf(player, foodId, kind)
-		local d = Data.get(player); local u = d and d.upg[foodId]
+	local function upgOf(player, _foodId, kind)
+		local d = Data.get(player); local u = d and d.upg.kitchen
 		return (u and u[kind]) or 1
 	end
-	local function upgradeStation(player, foodId, kind)
-		local d = Data.get(player); local f = foodOf(foodId)
-		if not d or not f or not d.foods[foodId] or (kind ~= "speed" and kind ~= "tray") then return false end
-		local lv = upgOf(player, foodId, kind)
+	local function upgradeStation(player, _foodId, kind)
+		local d = Data.get(player)
+		if not d or (kind ~= "speed" and kind ~= "tray") then return false end
+		local lv = upgOf(player, "kitchen", kind)
 		if lv >= Config.UpgradeMax then return false, "maxed" end
-		local cost = Config.upgradeCost(f, kind, lv)
+		local cost = Config.kitchenUpgradeCost(kind, lv)
 		if d.cash < cost then return false, "notEnough" end
-		d.cash -= cost; d.upg[foodId] = d.upg[foodId] or {}; d.upg[foodId][kind] = lv + 1
+		d.cash -= cost; d.upg.kitchen = d.upg.kitchen or {}; d.upg.kitchen[kind] = lv + 1
 		push(player); return true
 	end
 	Remotes.UpgradeStation.OnServerInvoke = upgradeStation
@@ -185,7 +185,17 @@ if G.started then return end; G.started = true
 		local d = Data.get(player); if d then d.rep = math.min(d.rep + 1, 1000); push(player) end
 	end
 	
-	-- ทำอาหาร: เริ่มมินิเกมที่ client แล้วรอผล
+	-- ทำอาหาร: กด E ที่ครัว → เลือกเมนู → มินิเกม
+	Plot.onKitchen = function(player)
+		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
+		if #tray(player) >= Config.TrayCapacity then notify(player, "trayFull", "red"); return end
+		if player:GetAttribute("Event") == "GasOut" and not player:GetAttribute("EventFixed") then notify(player, "noGas", "red"); return end
+		Remotes.OpenCook:FireClient(player)
+	end
+	Remotes.PickCook.OnServerEvent:Connect(function(player, foodId)
+		local d = Data.get(player)
+		if d and d.foods[foodId] and Plot.onCook then Plot.onCook(player, foodId) end
+	end)
 	Plot.onCook = function(player, foodId)
 		if cooking[player] and os.clock() - cooking[player].t0 < (cooking[player].time or 10) * 3 then return end
 		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end

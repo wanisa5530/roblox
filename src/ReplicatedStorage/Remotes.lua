@@ -2,7 +2,7 @@ local RS = game:GetService("ReplicatedStorage")
 local isServer = game:GetService("RunService"):IsServer()
 local names = { BuyFood="RemoteFunction", GetData="RemoteFunction", Collect="RemoteFunction",
 	DataUpdate="RemoteEvent", PromptPass="RemoteEvent", ClaimDaily="RemoteFunction", Leaderboard="RemoteEvent",
-	StartMinigame="RemoteEvent", MinigameResult="RemoteEvent", Notify="RemoteEvent", HireStaff="RemoteFunction", UpgradeStation="RemoteFunction", ClaimQuest="RemoteFunction" }
+	StartMinigame="RemoteEvent", MinigameResult="RemoteEvent", Notify="RemoteEvent", HireStaff="RemoteFunction", UpgradeStation="RemoteFunction", ClaimQuest="RemoteFunction", OpenCook="RemoteEvent", PickCook="RemoteEvent" }
 local folder
 if isServer then
 	folder = Instance.new("Folder"); folder.Name = "RemoteFolder"; folder.Parent = RS

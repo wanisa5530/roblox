@@ -54,7 +54,8 @@ local function localizePrompt(pp)
 		elseif kind == "wash" then pp.ActionText = Locale.get(L, "wash"); pp.ObjectText = ""
 		elseif kind == "pickup" then pp.ActionText = Locale.get(L, "pickup")
 		elseif kind == "umbrella" then pp.ActionText = Locale.get(L, "umbrella")
-		elseif kind == "gas" then pp.ActionText = Locale.get(L, "gas") end
+		elseif kind == "gas" then pp.ActionText = Locale.get(L, "gas")
+		elseif kind == "kitchen" then pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.get(L, "kitchen") end
 	end
 	apply(); player:GetAttributeChangedSignal("Lang"):Connect(apply)
 end
@@ -78,7 +79,7 @@ local function attachTable(tbl)
 			if not counts[item] then counts[item] = 0; order[#order + 1] = item end
 			counts[item] += 1
 		end
-		local n = tbl:GetAttribute("Guests") or 0
+		local n = tbl:GetAttribute("Guests") or #order
 		local lines = { "👥 " .. string.format(Locale.get(L, "people"), n) }
 		for _, item in ipairs(order) do
 			local id, sp = item:match("^(%w+):?(%d*)$")

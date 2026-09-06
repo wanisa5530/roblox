@@ -3,7 +3,7 @@ local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
 local Locale = require(RS.Locale)
 local Dish = require(RS.Dish)
-local P = { owners = {}, tables = {}, onCook = nil, onPack = nil, onClean = nil, onWash = nil, onPickup = nil, onFix = nil }
+local P = { owners = {}, tables = {}, onCook = nil, onPack = nil, onClean = nil, onWash = nil, onPickup = nil, onFix = nil, onKitchen = nil }
 local root = Instance.new("Folder"); root.Name = "Plots"; root.Parent = workspace
 
 local function part(props, parent)
@@ -128,6 +128,26 @@ function P.assign(player)
 			P.tables[player] = {}
 			local spots = { Vector3.new(-16, 0, -2), Vector3.new(16, 0, -2), Vector3.new(-16, 0, 12), Vector3.new(16, 0, 12) }
 			for k = 1, Config.TablesPerPlot do P.tables[player][k] = makeTable(m, o + spots[k], k, player) end
+			-- ครัวเดียว: เคาน์เตอร์ครัว เตา กระทะ หม้อ + ชั้นโชว์เมนู
+			local k = Instance.new("Model"); k.Name = "Kitchen"; k.Parent = m
+			local kb = part({ Size = Vector3.new(16, 2.6, 4), Position = o + Vector3.new(0, 1.7, -22), Color = Color3.fromRGB(190, 195, 200), Material = Enum.Material.Metal }, k)
+			part({ Size = Vector3.new(16.4, 0.2, 4.4), Position = o + Vector3.new(0, 3.1, -22), Color = Color3.fromRGB(60, 60, 65), Material = Enum.Material.Metal }, k)
+			for _, dx in ipairs({ -5, 0, 5 }) do
+				part({ Size = Vector3.new(2.6, 0.3, 2.6), Position = o + Vector3.new(dx, 3.35, -22), Color = Color3.fromRGB(30, 30, 30), Material = Enum.Material.Metal }, k)
+				local fire = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.2, 1.8, 1.8), Color = Color3.fromRGB(80, 160, 255), Material = Enum.Material.Neon }, k)
+				fire.CFrame = CFrame.new(o + Vector3.new(dx, 3.55, -22)) * CFrame.Angles(0, 0, math.rad(90))
+			end
+			local wok = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(2.4, 1.2, 2.4), Position = o + Vector3.new(-5, 3.9, -22), Color = Color3.fromRGB(40, 40, 40), Material = Enum.Material.Metal }, k)
+			wok.Name = "Wok"
+			part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(1.6, 2.2, 2.2), Color = Color3.fromRGB(200, 200, 205), Material = Enum.Material.Metal }, k).CFrame = CFrame.new(o + Vector3.new(0, 4.3, -22)) * CFrame.Angles(0, 0, math.rad(90))
+			part({ Size = Vector3.new(2.4, 0.4, 2.4), Position = o + Vector3.new(5, 3.7, -22), Color = Color3.fromRGB(50, 50, 50), Material = Enum.Material.Metal }, k)
+			part({ Size = Vector3.new(17, 0.25, 6), Position = o + Vector3.new(0, 6.2, -22), Color = Color3.fromRGB(240, 240, 230), Material = Enum.Material.Fabric }, k)
+			sign(k, "🍳 " .. Locale.get("th", "kitchen") .. " / " .. Locale.get("en", "kitchen"), Vector3.new(8, 1.2, 0.15), o + Vector3.new(0, 5.2, -19.8), Color3.fromRGB(255, 245, 220), Color3.fromRGB(140, 30, 30))
+			light(k, o + Vector3.new(-6, 5.8, -19.8), Color3.fromRGB(255, 120, 80)); light(k, o + Vector3.new(6, 5.8, -19.8), Color3.fromRGB(255, 120, 80))
+			prompt(kb, "Cook", "🍳", "kitchen", function(who) if who == player and P.onKitchen then P.onKitchen(player) end end)
+			-- ชั้นโชว์เมนูหลังครัว
+			part({ Size = Vector3.new(20, 0.3, 2), Position = o + Vector3.new(0, 4.5, -27), Color = Color3.fromRGB(150, 100, 60), Material = Enum.Material.Wood }, m)
+			part({ Size = Vector3.new(20, 0.3, 2), Position = o + Vector3.new(0, 2.2, -27), Color = Color3.fromRGB(150, 100, 60), Material = Enum.Material.Wood }, m)
 			local stalls = Instance.new("Folder"); stalls.Name = "Stalls"; stalls.Parent = m
 			player:SetAttribute("PlotIndex", i)
 			return m
@@ -215,18 +235,10 @@ function P.refresh(player, foods)
 		if foods[f.id] and not stalls:FindFirstChild(f.id) then
 			local g = Instance.new("Model"); g.Name = f.id; g.Parent = stalls
 			local k = idx - 1
-			local pos = o + Vector3.new(-20 + (k % 5) * 10, 0, -20 - math.floor(k / 5) * 9)
-			local body = part({ Size = Vector3.new(6, 2.6, 3), Position = pos + Vector3.new(0, 1.7, 0), Color = Color3.new(f.color[1], f.color[2], f.color[3]), Material = Enum.Material.Wood }, g)
-			part({ Size = Vector3.new(6.4, 0.2, 3.4), Position = pos + Vector3.new(0, 3.1, 0), Color = Color3.fromRGB(70, 70, 70), Material = Enum.Material.Metal }, g)
-			part({ Size = Vector3.new(7, 0.25, 4), Position = pos + Vector3.new(0, 5.4, 0), Color = Color3.fromRGB(240, 240, 230), Material = Enum.Material.Fabric }, g)
-			sign(g, f.emoji .. " " .. Locale.food("th", f.id) .. "\n" .. Locale.food("en", f.id), Vector3.new(6.4, 1.6, 0.15), pos + Vector3.new(0, 4.5, 1.7), Color3.fromRGB(255, 245, 220), Color3.fromRGB(140, 30, 30))
-			light(g, pos + Vector3.new(0, 5.9, 1.2), Color3.fromRGB(255, 120, 80))
-			P.menuBoard(player, foods)
-			local d = Dish.build(f.id); d.Parent = g
-			d:PivotTo(CFrame.new(pos + Vector3.new(0, 3.3, 0)))
+			local pos = o + Vector3.new(-8.5 + (k % 8) * 2.4, (k < 8) and 4.75 or 2.45, -27)
+			local d = Dish.build(f.id); d:ScaleTo(0.7); d.Parent = g
+			d:PivotTo(CFrame.new(pos))
 			for _, x in ipairs(d:GetDescendants()) do if x:IsA("BasePart") then x.Anchored = true end end
-			local pp = prompt(body, "Cook", Locale.food("en", f.id), "cook", function(who) if who == player and P.onCook then P.onCook(player, f.id) end end)
-			pp:SetAttribute("FoodId", f.id)
 		end
 	end
 end

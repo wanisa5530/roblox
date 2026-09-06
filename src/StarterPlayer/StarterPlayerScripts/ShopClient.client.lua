@@ -36,10 +36,10 @@ local function button(parent, text, size, pos, color, cb)
 	return b
 end
 
-local gui = Instance.new("ScreenGui"); gui.Name = "TycoonUI"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.Parent = player.PlayerGui
+local gui = Instance.new("ScreenGui"); gui.Name = "TycoonUI"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = false; gui.Parent = player.PlayerGui
 
 -- แถบด้านบน
-local top = frame(gui, UDim2.new(0, 600, 0, 64), UDim2.new(0.5, -300, 0, 12), C.bg); corner(top, 14); pad(top, 8)
+local top = frame(gui, UDim2.new(0, 600, 0, 64), UDim2.new(0.5, -300, 0, 6), C.bg); corner(top, 14); pad(top, 8)
 local cashLbl = label(top, "฿ 0", UDim2.new(0, 220, 0, 30), UDim2.new(0, 8, 0, 0), 28, C.accent)
 local incLbl = label(top, "", UDim2.new(0, 330, 0, 18), UDim2.new(0, 8, 0, 30), 13, C.green)
 local holdLbl = label(top, "", UDim2.new(0, 260, 0, 44), UDim2.new(1, -270, 0, 2), 14, C.text, Enum.TextXAlignment.Right)
@@ -94,6 +94,28 @@ Remotes.Notify.OnClientEvent:Connect(function(key, color, a, b)
 	notify(msg, color == "red" and C.red or C.green)
 end)
 
+-- เลือกเมนูที่จะทำ (กด E ที่ครัว)
+local cookPick = frame(gui, UDim2.new(0, 420, 0, 360), UDim2.new(0.5, -210, 0.5, -180), C.bg); corner(cookPick, 16); cookPick.Visible = false
+local cpTitle = label(cookPick, "", UDim2.new(1, -60, 0, 36), UDim2.new(0, 14, 0, 8), 20, C.accent)
+button(cookPick, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red, function() cookPick.Visible = false end)
+local cpList = Instance.new("ScrollingFrame"); cpList.Size = UDim2.new(1, -24, 1, -60); cpList.Position = UDim2.new(0, 12, 0, 52)
+cpList.BackgroundTransparency = 1; cpList.BorderSizePixel = 0; cpList.ScrollBarThickness = 6; cpList.AutomaticCanvasSize = Enum.AutomaticSize.Y; cpList.CanvasSize = UDim2.new(); cpList.Parent = cookPick
+local cpGrid = Instance.new("UIGridLayout"); cpGrid.CellSize = UDim2.new(0, 190, 0, 44); cpGrid.CellPadding = UDim2.new(0, 8, 0, 8); cpGrid.Parent = cpList
+Remotes.OpenCook.OnClientEvent:Connect(function()
+	local d = state.data; if not d then return end
+	for _, ch in ipairs(cpList:GetChildren()) do if ch:IsA("TextButton") then ch:Destroy() end end
+	cpTitle.Text = "🍳 " .. T("chooseDish")
+	for _, f in ipairs(Config.Foods) do
+		if d.foods[f.id] then
+			local b = button(cpList, f.emoji .. " " .. Locale.food(lang, f.id), UDim2.new(), UDim2.new(), C.card, function()
+				cookPick.Visible = false; Remotes.PickCook:FireServer(f.id)
+			end)
+			b.TextSize = 15
+		end
+	end
+	cookPick.Visible = true
+end)
+
 -- หน้าต่างร้านค้า
 local shop = frame(gui, UDim2.new(0, 520, 0, 520), UDim2.new(0.5, -260, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
@@ -120,6 +142,23 @@ local function renderShop()
 	for name, b in pairs(tabs) do b.BackgroundColor3 = name == state.tab and C.accent or C.card; b.Text = T(name) end
 	local d = state.data; if not d then return end
 	if state.tab == "menu" then
+		local kc = frame(list, UDim2.new(1, -8, 0, 64), UDim2.new(), C.card); corner(kc, 10)
+		label(kc, "🍳", UDim2.new(0, 44, 1, 0), UDim2.new(0, 8, 0, 0), 30, nil, Enum.TextXAlignment.Center)
+		label(kc, T("kitchen"), UDim2.new(0, 120, 0, 30), UDim2.new(0, 56, 0, 6), 18)
+		label(kc, T("upgSpeed") .. " / " .. T("upgTray"), UDim2.new(0, 160, 0, 20), UDim2.new(0, 56, 0, 34), 13, C.muted)
+		for i, kind in ipairs({ "speed", "tray" }) do
+			local lv = (d.upg and d.upg.kitchen and d.upg.kitchen[kind]) or 1
+			local maxed = lv >= Config.UpgradeMax
+			local cost = Config.kitchenUpgradeCost(kind, lv)
+			local ub = button(kc, (kind == "speed" and "⚡" or "🍱") .. " Lv" .. lv .. (maxed and " " .. T("maxed") or "  ฿" .. Locale.fmt(cost)),
+				UDim2.new(0, 130, 0, 40), UDim2.new(1, -280 + (i - 1) * 138, 0, 12), maxed and C.card or (d.cash >= cost and C.green or C.red),
+				function()
+					if maxed then return end
+					local ok, err = Remotes.UpgradeStation:InvokeServer("kitchen", kind)
+					if ok then notify(T("upg" .. (kind == "speed" and "Speed" or "Tray")) .. " Lv" .. (lv + 1), C.green) elseif err then notify(T(err), C.red) end
+				end)
+			ub.TextSize = 14
+		end
 		for _, f in ipairs(Config.Foods) do
 			local owned = d.foods[f.id]
 			local can = d.cash >= f.cost
@@ -130,23 +169,7 @@ local function renderShop()
 					local ok, err = Remotes.BuyFood:InvokeServer(f.id)
 					if ok then notify(string.format(T("bought"), Locale.food(lang, f.id)), C.green) elseif err then notify(T(err), C.red) end
 				end, f.emoji)
-			if owned then
-				b.Visible = false
-				local c = b.Parent
-				for i, kind in ipairs({ "speed", "tray" }) do
-					local lv = (d.upg and d.upg[f.id] and d.upg[f.id][kind]) or 1
-					local maxed = lv >= Config.UpgradeMax
-					local cost = Config.upgradeCost(f, kind, lv)
-					local ub = button(c, (kind == "speed" and "⚡" or "🍱") .. " Lv" .. lv .. (maxed and " " .. T("maxed") or "  ฿" .. Locale.fmt(cost)),
-						UDim2.new(0, 118, 0, 24), UDim2.new(1, -250 + (i - 1) * 124, 0, 20), maxed and C.card or (d.cash >= cost and C.green or C.red),
-						function()
-							if maxed then return end
-							local ok, err = Remotes.UpgradeStation:InvokeServer(f.id, kind)
-							if ok then notify(T("upg" .. (kind == "speed" and "Speed" or "Tray")) .. " Lv" .. (lv + 1), C.green) elseif err then notify(T(err), C.red) end
-						end)
-					ub.TextSize = 14
-				end
-			end
+			if owned then b.Visible = false end
 		end
 	elseif state.tab == "staff" then
 		for _, st in ipairs(Config.Staff) do

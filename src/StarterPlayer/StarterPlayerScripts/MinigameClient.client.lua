@@ -8,7 +8,7 @@ local Remotes = require(RS:WaitForChild("Remotes"))
 local player = Players.LocalPlayer
 local lang = Locale.detect(player.LocaleId)
 
-local gui = Instance.new("ScreenGui"); gui.Name = "MinigameUI"; gui.ResetOnSpawn = false; gui.Parent = player.PlayerGui
+local gui = Instance.new("ScreenGui"); gui.Name = "MinigameUI"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = false; gui.Parent = player.PlayerGui
 local box = Instance.new("Frame"); box.Size = UDim2.new(0, 420, 0, 150); box.Position = UDim2.new(0.5, -210, 0.7, 0)
 box.BackgroundColor3 = Color3.fromRGB(28, 24, 22); box.Visible = false; box.Parent = gui
 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 14)
