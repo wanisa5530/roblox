@@ -16,6 +16,13 @@ if G.started then return end; G.started = true
 	local LB = require(script.Parent.LeaderboardService)
 	
 	local passCache, cooking = {}, {}
+	-- บันทึกสถานะล่าสุดลง DataStore เพื่อให้ตรวจจากภายนอกได้ (ไม่มี Studio)
+	local diagLast = {}
+	function G.diag(msg)
+		if diagLast[msg] and os.clock() - diagLast[msg] < 60 then return end
+		diagLast[msg] = os.clock()
+		task.spawn(function() pcall(function() game:GetService("DataStoreService"):GetDataStore("Diag"):SetAsync(msg:sub(1, 40), os.date("%Y-%m-%d %H:%M:%S") .. " " .. msg) end) end)
+	end
 	local function ownsPass(player, key)
 		local id
 		for _, gp in ipairs(Config.GamePasses) do if gp.key == key then id = gp.id end end
@@ -463,21 +470,19 @@ if G.started then return end; G.started = true
 			if d.staff[st.key] and (d._staffNext[st.key] or 0) <= t then
 				d._staffNext[st.key] = t + st.interval * (ownsPass(player, "AutoChef") and 0.5 or 1)
 				if st.key == "Cook" then
-					local pending = {}
-					for _, g in ipairs(Customers.groups[player] or {}) do if g.alive then for _, e in ipairs(g.members) do if not e.served then pending[e.food.id] = true end end end end
-					Plot.cleanCounter(player, pending)
-					local done = false
+					local need = {}
 					for _, g in ipairs(Customers.groups[player] or {}) do
-						if done then break end
-						if g.alive and g.orderAt then
-							for _, e in ipairs(g.members) do
-								if not e.served and not e.cooking then
-									if Plot.putOnCounter(player, e.food.id) then e.cooking = true; done = true end
-									break
-								end
-							end
-						end
+						if g.alive and g.orderAt then for _, e in ipairs(g.members) do if not e.served and not e.claimed then need[e.food.id] = (need[e.food.id] or 0) + 1 end end end
 					end
+					Plot.cleanCounter(player, need)
+					local have = Plot.counterCounts(player)
+					local placed, reason = false, next(need) and "counterFull" or "noOrders"
+					for foodId, n in pairs(need) do
+						if (have[foodId] or 0) < n then
+							if Plot.putOnCounter(player, foodId) then placed = true; break end
+						else reason = "alreadyOnCounter" end
+					end
+					if not placed then G.diag("cook:" .. reason) end
 				elseif st.key == "Waiter" then
 					for _, g in ipairs(Customers.groups[player] or {}) do
 						if g.alive and g.orderAt then
@@ -554,7 +559,7 @@ if G.started then return end; G.started = true
 			while player.Parent do
 				task.wait(1)
 				local okT, errT = pcall(staffTick, player)
-				if not okT then warn("staffTick:", errT) end
+				if not okT then warn("staffTick:", errT); G.diag("staffTick:" .. tostring(errT)) end
 				if os.clock() - lastWage >= Config.WagePeriod then lastWage = os.clock(); payWages(player) end
 			end
 		end)

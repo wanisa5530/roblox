@@ -211,6 +211,12 @@ function P.cleanCounter(player, pendingFoods)
 		if not pendingFoods[c:GetAttribute("FoodId")] or age > 90 then c:Destroy() end
 	end
 end
+function P.counterCounts(player)
+	local m = root:FindFirstChild("Plot_" .. player.UserId); local ready = m and m:FindFirstChild("Ready")
+	local out = {}
+	if ready then for _, c in ipairs(ready:GetChildren()) do local f = c:GetAttribute("FoodId"); out[f] = (out[f] or 0) + 1 end end
+	return out
+end
 function P.takeFromCounter(player, foodId)
 	local m = root:FindFirstChild("Plot_" .. player.UserId); local ready = m and m:FindFirstChild("Ready")
 	if not ready then return end

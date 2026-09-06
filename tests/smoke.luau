@@ -55,3 +55,10 @@ check("datastore " .. tostring(err or ""), ok)
 
 print(#fails == 0 and "ALL PASS" or ("FAILED: " .. table.concat(fails, ", ")))
 return #fails == 0, fails
+
+-- อ่านบันทึกวินิจฉัยจากเซิร์ฟเวอร์จริง (เขียนโดย G.diag)
+pcall(function()
+	local ds = game:GetService("DataStoreService"):GetDataStore("Diag")
+	local pages = ds:ListKeysAsync()
+	for _, k in ipairs(pages:GetCurrentPage()) do print("DIAG", k.KeyName, ds:GetAsync(k.KeyName)) end
+end)
