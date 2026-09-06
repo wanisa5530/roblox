@@ -543,8 +543,11 @@ if G.started then return end; G.started = true
 			end
 		end
 	end)
+	G.diag("boot v" .. tostring(game.PlaceVersion))
 	local function onPlayer(player)
 		local d = Data.load(player)
+		local sk = {}; for k in pairs(d.staff or {}) do sk[#sk + 1] = k end
+		G.diag("join " .. tostring(player.Name) .. " v" .. tostring(game.PlaceVersion) .. " staff=" .. table.concat(sk, ","))
 		LB.setup(player, d)
 		Plot.assign(player)
 		Plot.refresh(player, d.foods, d.gold)
