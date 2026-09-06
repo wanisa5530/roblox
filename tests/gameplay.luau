@@ -72,6 +72,32 @@ check("group done callback", doneCalled)
 check("groups cleared", #(Customers.groups[fake] or {}) == 0)
 check("cash earned", Data.cache[fake.UserId].cash > 0 and Data.cache[fake.UserId].served == #g.members)
 
+-- 4.4) กด E ครั้งเดียวเสิร์ฟทุกจานในถาดให้ทั้งกลุ่ม
+Customers.forceOrders[fake] = 2
+local gA = Customers.spawn(fake, { MooPing = true })
+t0 = os.clock(); while gA and not gA.orderAt and os.clock() - t0 < 20 do task.wait(0.2) end
+for _ = 1, #gA.members do GS.addToTray(fake, "MooPing", 1, nil, 1) end
+if gA.kind == "takeaway" then Plot.onPack(fake) end
+local ppA = gA.npcs[1]:FindFirstChildWhichIsA("ProximityPrompt", true)
+check("group prompt exists", ppA ~= nil)
+-- จำลองการกด: เรียก handler เดียวกับ Triggered ผ่าน pickEntry loop
+local servedAll = true
+if ppA then
+	-- ไม่มี API ยิง Triggered จากเซิร์ฟเวอร์ จึงทดสอบตรรกะเดียวกันด้วย pickEntry + onServed วนจนหมด
+	local guard = 0
+	while guard < 10 do
+		guard += 1
+		local pending = {}
+		for _, e in ipairs(gA.members) do if not e.served then pending[#pending + 1] = e end end
+		if #pending == 0 then break end
+		local pick = Customers.pickEntry(fake, pending); if not pick then servedAll = false; break end
+		Customers.onServed(pick)
+	end
+end
+for _, e in ipairs(gA.members) do if not e.served then servedAll = false end end
+check("all group orders served from tray", servedAll and #GS.tray(fake) == 0)
+task.wait(0.5)
+
 -- 4.5) ถาดถือได้หลายจาน
 for _ = 1, Config.TrayCapacity do GS.addToTray(fake, "MooPing", 1, nil, 1) end
 check("tray capped", #GS.tray(fake) == Config.TrayCapacity and GS.addToTray(fake, "PadThai", 1, nil, 1) == false)

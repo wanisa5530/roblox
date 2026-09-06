@@ -76,11 +76,24 @@ local function addPrompt(npc, g)
 	pp.Parent = npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart")
 	pp.Triggered:Connect(function(who)
 		if who ~= g.player or not g.alive or not C.onServed then return end
-		local pending = {}
-		for _, e in ipairs(g.members) do if e.npc == npc and not e.served then pending[#pending + 1] = e end end
-		if #pending == 0 then return end
-		local pick = (C.pickEntry and C.pickEntry(who, pending)) or pending[1]
-		C.onServed(pick)
+		-- เสิร์ฟทุกจานในถาดที่ตรงกับออเดอร์ของทั้งกลุ่มในครั้งเดียว (เริ่มจากคนที่กด)
+		local served = 0
+		local function tryNpc(target)
+			while true do
+				local pending = {}
+				for _, e in ipairs(g.members) do if e.npc == target and not e.served then pending[#pending + 1] = e end end
+				if #pending == 0 then return end
+				local pick = C.pickEntry and C.pickEntry(who, pending)
+				if not pick then
+					if served == 0 and target == npc then C.onServed(pending[1]) end -- ไม่มีของตรง แจ้งเหตุผล
+					return
+				end
+				if C.onServed(pick) == false then return end
+				served += 1
+			end
+		end
+		tryNpc(npc)
+		for _, other in ipairs(g.npcs) do if other ~= npc then tryNpc(other) end end
 	end)
 end
 

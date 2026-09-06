@@ -251,18 +251,19 @@ if G.started then return end; G.started = true
 	end
 	Customers.onServed = function(entry)
 		local player = entry.group.player
-		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
-		if #tray(player) == 0 then notify(player, "noDish", "red"); return end
+		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return false end
+		if #tray(player) == 0 then notify(player, "noDish", "red"); return false end
 		local needBag = entry.group.kind == "takeaway"
 		local item = takeFromTray(player, entry.food.id, needBag)
 		if not item then
 			local anyMatch = false
 			for _, it in ipairs(tray(player)) do if it.f == entry.food.id then anyMatch = true end end
-			notify(player, anyMatch and "needBag" or "wrongDish", "red"); return
+			notify(player, anyMatch and "needBag" or "wrongDish", "red"); return false
 		end
 		local quality = item.q or 0.5
 		if entry.spice and item.s ~= entry.spice then quality = 0; notify(player, "wrongSpice", "red") end
 		serveEntry(player, entry, quality)
+		return true
 	end
 	-- หยิบจานจากเคาน์เตอร์ที่พ่อครัวทำไว้
 	Plot.onPickup = function(player, dish)
