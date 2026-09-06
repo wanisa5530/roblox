@@ -15,7 +15,7 @@ if G.started then return end; G.started = true
 	local Customers = require(script.Parent.CustomerService)
 	local LB = require(script.Parent.LeaderboardService)
 	
-	local passCache, cooking = {}, {}
+	local passCache, cooking, staffNext = {}, {}, {}
 	-- บันทึกสถานะล่าสุดลง DataStore เพื่อให้ตรวจจากภายนอกได้ (ไม่มี Studio)
 	local diagLast = {}
 	function G.diag(msg)
@@ -465,10 +465,12 @@ if G.started then return end; G.started = true
 			end
 		end
 		local t = os.clock()
-		d._staffNext = d._staffNext or {}
+		-- เวลาถัดไปของพนักงานเก็บใน memory เท่านั้น (ห้ามเก็บลง DataStore เพราะ os.clock ของแต่ละเซิร์ฟเวอร์ต่างกัน)
+		staffNext[player] = staffNext[player] or {}
+		local nx = staffNext[player]
 		for _, st in ipairs(Config.Staff) do
-			if d.staff[st.key] and (d._staffNext[st.key] or 0) <= t then
-				d._staffNext[st.key] = t + st.interval * (ownsPass(player, "AutoChef") and 0.5 or 1)
+			if d.staff[st.key] and (nx[st.key] or 0) <= t then
+				nx[st.key] = t + st.interval * (ownsPass(player, "AutoChef") and 0.5 or 1)
 				if st.key == "Cook" then
 					local need = {}
 					for _, g in ipairs(Customers.groups[player] or {}) do
@@ -526,7 +528,7 @@ if G.started then return end; G.started = true
 		showStaff(player, key); push(player)
 		return true
 	end
-	G.staffTick, G.payWages = staffTick, payWages
+	G.staffTick, G.payWages, G.staffNext = staffTick, payWages, staffNext
 	Customers.onLeft = function(g)
 		local d = Data.get(g.player)
 		if d then d.rep = math.max(d.rep - 2 * #g.members, 0); notify(g.player, "left", "red"); push(g.player) end
@@ -592,7 +594,7 @@ if G.started then return end; G.started = true
 	for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
 	Players.PlayerRemoving:Connect(function(p)
 		local d = Data.get(p); if d then LB.submit(p, d) end
-		Customers.clear(p); Plot.release(p); passCache[p] = nil; cooking[p] = nil; staffNpcs[p] = nil; trays[p] = nil
+		Customers.clear(p); Plot.release(p); passCache[p] = nil; cooking[p] = nil; staffNpcs[p] = nil; trays[p] = nil; staffNext[p] = nil
 	end)
 	task.spawn(function() while true do task.wait(120); for _, p in ipairs(Players:GetPlayers()) do local d = Data.get(p); if d then LB.submit(p, d) end end end end)
 	

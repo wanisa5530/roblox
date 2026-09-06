@@ -10,7 +10,7 @@ function D.load(p)
 	local ok, data = false, nil
 	if store then ok, data = pcall(store.GetAsync, store, "p_" .. p.UserId) end
 	local d = (ok and type(data) == "table") and data or default()
-	d.total = d.total or 0; d.rep = d.rep or 0; d.served = d.served or 0; d.pending = nil; d.staff = d.staff or {}; d.upg = d.upg or {}; d.level = d.level or 1; d.prestige = d.prestige or 0; d.branch = d.branch or 1; d.recipes = d.recipes or {}; d.gold = d.gold or {}; d.goldStreak = d.goldStreak or 0; d.expansions = d.expansions or 0; d.decor = d.decor or { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }; d.lastClaim = d.lastClaim or 0; d.streak = d.streak or 0
+	d.total = d.total or 0; d.rep = d.rep or 0; d.served = d.served or 0; d.pending = nil; d._staffNext = nil; d.staff = d.staff or {}; d.upg = d.upg or {}; d.level = d.level or 1; d.prestige = d.prestige or 0; d.branch = d.branch or 1; d.recipes = d.recipes or {}; d.gold = d.gold or {}; d.goldStreak = d.goldStreak or 0; d.expansions = d.expansions or 0; d.decor = d.decor or { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }; d.lastClaim = d.lastClaim or 0; d.streak = d.streak or 0
 	D.cache[p.UserId] = d
 	return d
 end
