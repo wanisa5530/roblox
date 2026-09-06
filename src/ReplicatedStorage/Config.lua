@@ -127,7 +127,7 @@ Config.Decor = {
 	{ key="Flag",     cat="prop", cost=300 },
 	{ key="LuckyCat", cat="prop", cost=0, premium=true },
 }
-Config.DecorPackProduct = 0 -- ไอดี Dev Product "Golden Decor Pack" (ใส่หลังสร้าง)
+Config.DecorPackProduct = 3711592303 -- ไอดี Dev Product "Golden Decor Pack" (ใส่หลังสร้าง)
 -- Game Pass (ใส่ไอดีจริงแทน 0)
 Config.GamePasses = {
 	{ key="DoubleIncome", id=1966256968, mult=2 },

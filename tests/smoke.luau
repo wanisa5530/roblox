@@ -36,6 +36,7 @@ for _, gp in ipairs(Config.GamePasses) do
 	local ok, info = pcall(MPS.GetProductInfo, MPS, gp.id, Enum.InfoType.GamePass)
 	check("pass info " .. gp.key .. " " .. tostring(ok and info.Name or info), ok and info.Name ~= nil)
 end
+do local ok, info = pcall(MPS.GetProductInfo, MPS, Config.DecorPackProduct, Enum.InfoType.Product); check("decor pack info " .. tostring(ok and info.Name or info), ok and info.Name ~= nil) end
 for _, dp in ipairs(Config.DevProducts) do
 	check("product id " .. dp.key, dp.id > 0)
 	local ok, info = pcall(MPS.GetProductInfo, MPS, dp.id, Enum.InfoType.Product)
