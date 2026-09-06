@@ -95,6 +95,28 @@ Config.Staff = {
 	{ key="Waiter", emoji="🧑‍💼", cost=900,  wage=80,  interval=6 },
 	{ key="Washer", emoji="🧽", cost=600,  wage=50,  interval=8 },
 }
+-- ของตกแต่งร้าน: cat = tent/chairs/sign/prop, cost = เงินในเกม, premium = ต้องมี Golden Decor Pack
+Config.Decor = {
+	{ key="TentRed",    cat="tent",   cost=0,    color={0.90,0.20,0.20} },
+	{ key="TentBlue",   cat="tent",   cost=300,  color={0.16,0.35,0.78} },
+	{ key="TentYellow", cat="tent",   cost=300,  color={0.98,0.78,0.16} },
+	{ key="TentGreen",  cat="tent",   cost=300,  color={0.20,0.67,0.35} },
+	{ key="TentPurple", cat="tent",   cost=600,  color={0.59,0.24,0.71} },
+	{ key="TentGold",   cat="tent",   cost=0,    color={1.00,0.84,0.30}, premium=true },
+	{ key="ChairPlastic", cat="chairs", cost=0 },
+	{ key="ChairWood",    cat="chairs", cost=800 },
+	{ key="ChairNeon",    cat="chairs", cost=1500 },
+	{ key="SignClassic", cat="sign", cost=0 },
+	{ key="SignNeon",    cat="sign", cost=1200 },
+	{ key="SignGold",    cat="sign", cost=0, premium=true },
+	{ key="Lanterns", cat="prop", cost=500 },
+	{ key="Plants",   cat="prop", cost=400 },
+	{ key="Fan",      cat="prop", cost=600 },
+	{ key="TV",       cat="prop", cost=1500 },
+	{ key="Flag",     cat="prop", cost=300 },
+	{ key="LuckyCat", cat="prop", cost=0, premium=true },
+}
+Config.DecorPackProduct = 0 -- ไอดี Dev Product "Golden Decor Pack" (ใส่หลังสร้าง)
 -- Game Pass (ใส่ไอดีจริงแทน 0)
 Config.GamePasses = {
 	{ key="DoubleIncome", id=1966256968, mult=2 },

@@ -166,6 +166,35 @@ if G.started then return end; G.started = true
 	end
 	G.progress, G.checkLevel, G.ensureQuests = progress, checkLevel, ensureQuests
 
+	-- ตกแต่งร้าน
+	local function decorItem(key) for _, d in ipairs(Config.Decor) do if d.key == key then return d end end end
+	local function decorAction(player, action, key)
+		local d = Data.get(player); local it = decorItem(key)
+		if not d or not it then return false end
+		local dc = d.decor
+		if action == "buy" then
+			if dc.owned[key] or it.cost == 0 and not it.premium then dc.owned[key] = true
+			elseif it.premium then if not dc.owned.Pack then return false, "buyPack" end; dc.owned[key] = true
+			else
+				if d.cash < it.cost then return false, "notEnough" end
+				d.cash -= it.cost; dc.owned[key] = true
+			end
+		end
+		if it.cat ~= "prop" then
+			if not dc.owned[key] and not (it.cost == 0 and not it.premium) then return false, "notEnough" end
+			dc[it.cat] = key
+		end
+		Plot.applyDecor(player, dc); push(player)
+		return true
+	end
+	Remotes.Decor.OnServerInvoke = function(player, action, key)
+		if action == "pack" then
+			if Config.DecorPackProduct ~= 0 then MPS:PromptProductPurchase(player, Config.DecorPackProduct) end
+			return true
+		end
+		return decorAction(player, action, key)
+	end
+	G.decorAction = decorAction
 	G.tray, G.addToTray = tray, addToTray
 	-- ใช้ชื่อเดิมให้โค้ดส่วนอื่น (ผู้เล่นเกิดใหม่)
 	local function setHolding(player) syncTray(player) end
@@ -374,6 +403,7 @@ if G.started then return end; G.started = true
 		Plot.assign(player)
 		Plot.refresh(player, d.foods)
 		ensureQuests(d); checkLevel(player)
+		Plot.applyDecor(player, d.decor)
 		for _, gp in ipairs(Config.GamePasses) do ownsPass(player, gp.key) end
 		push(player)
 		player.CharacterAdded:Connect(function() task.wait(0.5); setHolding(player) end)
@@ -456,6 +486,11 @@ if G.started then return end; G.started = true
 	MPS.ProcessReceipt = function(receipt)
 		local player = Players:GetPlayerByUserId(receipt.PlayerId)
 		if not player then return Enum.ProductPurchaseDecision.NotProcessedYet end
+		if Config.DecorPackProduct ~= 0 and receipt.ProductId == Config.DecorPackProduct then
+			local d = Data.get(player); if not d then return Enum.ProductPurchaseDecision.NotProcessedYet end
+			d.decor.owned.Pack = true; Data.save(player); push(player)
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
 		for _, p in ipairs(Config.DevProducts) do
 			if p.id == receipt.ProductId then
 				local d = Data.get(player); if not d then return Enum.ProductPurchaseDecision.NotProcessedYet end

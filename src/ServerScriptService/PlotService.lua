@@ -60,10 +60,10 @@ local function makeTable(m, pos, idx, player)
 	local seats = {}
 	local colors = { Color3.fromRGB(220, 50, 50), Color3.fromRGB(40, 80, 200), Color3.fromRGB(220, 50, 50), Color3.fromRGB(40, 80, 200) }
 	for k, off in ipairs({ Vector3.new(3, 0, 0), Vector3.new(-3, 0, 0), Vector3.new(0, 0, 3), Vector3.new(0, 0, -3) }) do
-		local seat = Instance.new("Seat"); seat.Size = Vector3.new(1.6, 0.3, 1.6); seat.Anchored = true; seat.Color = colors[k]; seat.Material = Enum.Material.SmoothPlastic
+		local seat = Instance.new("Seat"); seat.Name = "Chair"; seat.Size = Vector3.new(1.6, 0.3, 1.6); seat.Anchored = true; seat.Color = colors[k]; seat.Material = Enum.Material.SmoothPlastic
 		seat.CFrame = CFrame.new(pos + off + Vector3.new(0, 1.5, 0), pos + Vector3.new(0, 1.5, 0)); seat.Parent = g
 		for _, l in ipairs({ Vector3.new(0.6, 0, 0.6), Vector3.new(-0.6, 0, 0.6), Vector3.new(0.6, 0, -0.6), Vector3.new(-0.6, 0, -0.6) }) do
-			part({ Size = Vector3.new(0.15, 1.4, 0.15), Position = pos + off + l + Vector3.new(0, 0.7, 0), Color = colors[k] }, g)
+			part({ Size = Vector3.new(0.15, 1.4, 0.15), Position = pos + off + l + Vector3.new(0, 0.7, 0), Color = colors[k] }, g).Name = "ChairLeg"
 		end
 		seats[k] = seat
 	end
@@ -94,14 +94,14 @@ function P.assign(player)
 			part({ Size = Vector3.new(16, 3, 2), Position = o + Vector3.new(0, 1.9, -14), Color = Color3.fromRGB(200, 110, 50), Material = Enum.Material.Wood }, m)
 			local tentColors = { Color3.fromRGB(230, 50, 50), Color3.fromRGB(40, 90, 200), Color3.fromRGB(250, 200, 40), Color3.fromRGB(50, 170, 90), Color3.fromRGB(240, 120, 40), Color3.fromRGB(150, 60, 180) }
 			local tc = tentColors[(i - 1) % #tentColors + 1]
-			part({ Size = Vector3.new(18, 0.3, 6), Position = o + Vector3.new(0, 6, -15), Color = tc, Material = Enum.Material.Fabric }, m)
+			local roof = part({ Size = Vector3.new(18, 0.3, 6), Position = o + Vector3.new(0, 6, -15), Color = tc, Material = Enum.Material.Fabric }, m); roof.Name = "Roof"
 			for k = 0, 3 do
-				local w = Instance.new("WedgePart"); w.Anchored = true; w.Size = Vector3.new(k % 2 == 0 and 18 or 6, 2.2, (k % 2 == 0 and 6 or 18) / 2); w.Color = tc; w.Material = Enum.Material.Fabric
+				local w = Instance.new("WedgePart"); w.Name = "Roof"; w.Anchored = true; w.Size = Vector3.new(k % 2 == 0 and 18 or 6, 2.2, (k % 2 == 0 and 6 or 18) / 2); w.Color = tc; w.Material = Enum.Material.Fabric
 				w.CFrame = CFrame.new(o + Vector3.new(0, 7.2, -15)) * CFrame.Angles(0, math.rad(90 * k), 0) * CFrame.new(0, 0, (k % 2 == 0 and 6 or 18) / 4)
 				w.Parent = m
 			end
 			for _, dx in ipairs({ -8, 8 }) do part({ Size = Vector3.new(0.3, 6, 0.3), Position = o + Vector3.new(dx, 3, -12.5), Color = Color3.fromRGB(60, 60, 60) }, m) end
-			sign(m, "🍜 " .. player.DisplayName, Vector3.new(16, 1.4, 0.2), o + Vector3.new(0, 7, -12.4), Color3.fromRGB(60, 20, 10), Color3.fromRGB(255, 200, 60))
+			sign(m, "🍜 " .. player.DisplayName, Vector3.new(16, 1.4, 0.2), o + Vector3.new(0, 7, -12.4), Color3.fromRGB(60, 20, 10), Color3.fromRGB(255, 200, 60)).Name = "NameSign"
 			for k = -6, 6, 4 do light(m, o + Vector3.new(k, 5.6, -11.8), Color3.fromRGB(255, 210, 120)) end
 			-- ตกแต่ง: กระถางต้นไม้และโคมไฟกระดาษ
 			for _, c in ipairs({ Vector3.new(-23, 0, 22), Vector3.new(23, 0, 22), Vector3.new(-23, 0, -29), Vector3.new(23, 0, -29) }) do
@@ -199,6 +199,77 @@ function P.takeFromCounter(player, foodId)
 	if not ready then return end
 	for _, c in ipairs(ready:GetChildren()) do
 		if not foodId or c:GetAttribute("FoodId") == foodId then c:Destroy(); return c end
+	end
+end
+
+-- ใช้ของตกแต่งกับแปลง
+function P.applyDecor(player, decor)
+	local m = root:FindFirstChild("Plot_" .. player.UserId); if not m then return end
+	local o = P.origin(player:GetAttribute("PlotIndex"))
+	local function item(key) for _, d in ipairs(Config.Decor) do if d.key == key then return d end end end
+	-- เต็นท์
+	local tent = item(decor.tent)
+	if tent and tent.color then
+		local c = Color3.new(tent.color[1], tent.color[2], tent.color[3])
+		for _, x in ipairs(m:GetChildren()) do if x.Name == "Roof" then x.Color = c; x.Material = tent.premium and Enum.Material.Metal or Enum.Material.Fabric end end
+	end
+	-- เก้าอี้
+	local chairMat, chairColors = Enum.Material.SmoothPlastic, nil
+	if decor.chairs == "ChairWood" then chairMat = Enum.Material.Wood; chairColors = { Color3.fromRGB(150, 100, 60) }
+	elseif decor.chairs == "ChairNeon" then chairMat = Enum.Material.Neon; chairColors = { Color3.fromRGB(80, 220, 255), Color3.fromRGB(255, 90, 200) } end
+	for _, tb in ipairs(P.tables[player] or {}) do
+		for i, x in ipairs(tb.model:GetDescendants()) do
+			if x.Name == "Chair" or x.Name == "ChairLeg" then
+				x.Material = chairMat
+				if chairColors then x.Color = chairColors[i % #chairColors + 1] elseif x.Name == "Chair" then x.Color = (i % 2 == 0) and Color3.fromRGB(220, 50, 50) or Color3.fromRGB(40, 80, 200) end
+			end
+		end
+	end
+	-- ป้าย
+	local ns = m:FindFirstChild("NameSign")
+	if ns then
+		local tl = ns.SurfaceGui.TextLabel
+		if decor.sign == "SignNeon" then ns.Color = Color3.fromRGB(20, 20, 30); ns.Material = Enum.Material.SmoothPlastic; tl.TextColor3 = Color3.fromRGB(255, 80, 200)
+		elseif decor.sign == "SignGold" then ns.Color = Color3.fromRGB(255, 215, 80); ns.Material = Enum.Material.Metal; tl.TextColor3 = Color3.fromRGB(120, 40, 20)
+		else ns.Color = Color3.fromRGB(255, 200, 60); ns.Material = Enum.Material.SmoothPlastic; tl.TextColor3 = Color3.fromRGB(60, 20, 10) end
+	end
+	-- ของประดับ
+	local df = m:FindFirstChild("DecorProps") or Instance.new("Folder"); df.Name = "DecorProps"; df:ClearAllChildren(); df.Parent = m
+	if decor.owned.Lanterns then
+		for k = 0, 7 do
+			local c = ({ Color3.fromRGB(255, 80, 80), Color3.fromRGB(255, 200, 60), Color3.fromRGB(80, 200, 120), Color3.fromRGB(120, 150, 255) })[k % 4 + 1]
+			local lp = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(1.2, 1, 1), Color = c, Material = Enum.Material.Neon }, df)
+			lp.CFrame = CFrame.new(o + Vector3.new(-14 + k * 4, 9.5, -12)) * CFrame.Angles(0, 0, math.rad(90))
+			local l = Instance.new("PointLight"); l.Color = c; l.Range = 8; l.Parent = lp
+		end
+	end
+	if decor.owned.Plants then
+		for _, c in ipairs({ Vector3.new(-9, 0, -16.5), Vector3.new(9, 0, -16.5), Vector3.new(-23, 0, 2), Vector3.new(23, 0, 2) }) do
+			part({ Size = Vector3.new(1.4, 1.2, 1.4), Position = o + c + Vector3.new(0, 0.6, 0), Color = Color3.fromRGB(180, 90, 60), Material = Enum.Material.Slate }, df)
+			part({ Shape = Enum.PartType.Ball, Size = Vector3.new(2.2, 2.2, 2.2), Position = o + c + Vector3.new(0, 2.1, 0), Color = Color3.fromRGB(50, 150, 70), Material = Enum.Material.Grass }, df)
+		end
+	end
+	if decor.owned.Fan then
+		part({ Size = Vector3.new(0.3, 5, 0.3), Position = o + Vector3.new(-12, 2.5, -10), Color = Color3.fromRGB(200, 200, 200), Material = Enum.Material.Metal }, df)
+		local fan = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.4, 3, 3), Color = Color3.fromRGB(230, 230, 230), Material = Enum.Material.Metal }, df)
+		fan.CFrame = CFrame.new(o + Vector3.new(-12, 5, -9.7)) * CFrame.Angles(0, math.rad(90), 0)
+	end
+	if decor.owned.TV then
+		local tv = part({ Size = Vector3.new(6, 3.4, 0.3), Position = o + Vector3.new(6, 5.2, -12.3), Color = Color3.fromRGB(20, 20, 20), Material = Enum.Material.SmoothPlastic }, df)
+		local g = Instance.new("SurfaceGui"); g.Face = Enum.NormalId.Front; g.LightInfluence = 0; g.Brightness = 2; g.Parent = tv
+		local t = Instance.new("TextLabel"); t.Size = UDim2.fromScale(1, 1); t.BackgroundColor3 = Color3.fromRGB(30, 60, 120); t.Text = "📺 มวยไทย LIVE"; t.TextScaled = true; t.Font = Enum.Font.FredokaOne; t.TextColor3 = Color3.new(1, 1, 1); t.Parent = g
+	end
+	if decor.owned.Flag then
+		part({ Size = Vector3.new(0.2, 9, 0.2), Position = o + Vector3.new(-13, 4.5, -12.5), Color = Color3.fromRGB(220, 220, 220), Material = Enum.Material.Metal }, df)
+		for k, c in ipairs({ Color3.fromRGB(200, 30, 40), Color3.fromRGB(245, 245, 245), Color3.fromRGB(30, 50, 130), Color3.fromRGB(245, 245, 245), Color3.fromRGB(200, 30, 40) }) do
+			part({ Size = Vector3.new(0.05, k == 3 and 0.8 or 0.4, 3), Position = o + Vector3.new(-12.9, 8.9 - ({ 0.2, 0.6, 1.2, 1.8, 2.2 })[k], -11), Color = c, Material = Enum.Material.Fabric }, df)
+		end
+	end
+	if decor.owned.LuckyCat then
+		local cat = part({ Size = Vector3.new(1.6, 2, 1.4), Position = o + Vector3.new(7.5, 4.3, -14), Color = Color3.fromRGB(255, 215, 80), Material = Enum.Material.Metal }, df)
+		part({ Shape = Enum.PartType.Ball, Size = Vector3.new(1.5, 1.5, 1.5), Position = o + Vector3.new(7.5, 5.8, -14), Color = Color3.fromRGB(255, 215, 80), Material = Enum.Material.Metal }, df)
+		part({ Size = Vector3.new(0.4, 1.2, 0.4), CFrame = CFrame.new(o + Vector3.new(8.3, 6, -14)) * CFrame.Angles(0, 0, math.rad(-20)), Color = Color3.fromRGB(255, 215, 80), Material = Enum.Material.Metal }, df)
+		local l = Instance.new("PointLight"); l.Color = Color3.fromRGB(255, 220, 120); l.Range = 8; l.Parent = cat
 	end
 end
 

@@ -22,7 +22,7 @@ function fake:SetAttribute(k, v) attrs[k] = v end
 function fake:GetAttribute(k) return attrs[k] end
 function fake:FindFirstChild() return nil end
 local Data = require(SSS.DataService)
-Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {} }
+Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" } }
 local plot = Plot.assign(fake)
 check("plot assigned", plot ~= nil and attrs.PlotIndex == 1)
 Plot.refresh(fake, { MooPing = true, PadThai = true })
@@ -82,7 +82,7 @@ if gA.kind == "takeaway" then Plot.onPack(fake) end
 local ppA = gA.npcs[1]:FindFirstChildWhichIsA("ProximityPrompt", true)
 check("group prompt exists", ppA ~= nil)
 -- จำลองการกด: เรียก handler เดียวกับ Triggered ผ่าน pickEntry loop
-local servedAll = true
+local _servedAll = true
 if ppA then
 	-- ไม่มี API ยิง Triggered จากเซิร์ฟเวอร์ จึงทดสอบตรรกะเดียวกันด้วย pickEntry + onServed วนจนหมด
 	local guard = 0
@@ -166,7 +166,18 @@ check("level 3 at 10k opens 4 tables", dd.level == 3 and Plot.tables[fake][4].cl
 dd.total = 0; GS.checkLevel(fake)
 check("level 1 opens 2 tables", dd.level == 1 and Plot.tables[fake][3].closed == true)
 
--- 9) คิวซื้อกลับไม่เกิน MaxQueue
+-- 9) ตกแต่งร้าน
+dd.cash = 5000
+check("buy tent", GS.decorAction(fake, "buy", "TentBlue") == true and dd.decor.tent == "TentBlue" and dd.cash == 4700)
+check("roof recolored", plot:FindFirstChild("Roof") ~= nil and math.abs(plot.Roof.Color.B - 0.78) < 0.05)
+check("buy prop", GS.decorAction(fake, "buy", "Plants") == true and plot.DecorProps ~= nil and #plot.DecorProps:GetChildren() > 0)
+local okP, errP = GS.decorAction(fake, "buy", "LuckyCat")
+check("premium locked", okP == false and errP == "buyPack")
+dd.decor.owned.Pack = true
+check("premium unlocked by pack", GS.decorAction(fake, "buy", "LuckyCat") == true)
+check("equip chairs needs purchase", select(1, GS.decorAction(fake, "equip", "ChairNeon")) == false)
+
+-- 10) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil

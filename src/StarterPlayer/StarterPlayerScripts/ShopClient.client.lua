@@ -120,9 +120,9 @@ end)
 local shop = frame(gui, UDim2.new(0, 520, 0, 520), UDim2.new(0.5, -260, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
 local tabs = {}
-local tabNames = { "menu", "staff", "quests", "passes", "robux" }
+local tabNames = { "menu", "decor", "staff", "quests", "passes", "robux" }
 for i, name in ipairs(tabNames) do
-	tabs[name] = button(shop, T(name), UDim2.new(0, 88, 0, 36), UDim2.new(0, 10 + (i - 1) * 92, 0, 8), C.card)
+	tabs[name] = button(shop, T(name), UDim2.new(0, 76, 0, 36), UDim2.new(0, 8 + (i - 1) * 80, 0, 8), C.card)
 end
 local list = Instance.new("ScrollingFrame"); list.Size = UDim2.new(1, -24, 1, -64); list.Position = UDim2.new(0, 12, 0, 54)
 list.BackgroundTransparency = 1; list.BorderSizePixel = 0; list.ScrollBarThickness = 6; list.CanvasSize = UDim2.new(); list.AutomaticCanvasSize = Enum.AutomaticSize.Y; list.Parent = shop
@@ -170,6 +170,22 @@ local function renderShop()
 					if ok then notify(string.format(T("bought"), Locale.food(lang, f.id)), C.green) elseif err then notify(T(err), C.red) end
 				end, f.emoji)
 			if owned then b.Visible = false end
+		end
+	elseif state.tab == "decor" then
+		local dc = d.decor or { owned = {} }
+		if not dc.owned.Pack then
+			card(T("premiumItem"), T("TentGold") .. " · " .. T("SignGold") .. " · " .. T("LuckyCat"), "Robux", C.accent, function() Remotes.Decor:InvokeServer("pack") end, "👑")
+		end
+		for _, it in ipairs(Config.Decor) do
+			local owned = dc.owned[it.key] or (it.cost == 0 and not it.premium)
+			local inUse = it.cat ~= "prop" and dc[it.cat] == it.key
+			local btnText = inUse and T("equipped") or (owned and (it.cat == "prop" and T("owned") or T("equip")) or (it.premium and "👑" or ("฿ " .. Locale.fmt(it.cost))))
+			local color = inUse and C.card or (owned and C.green or (it.premium and (dc.owned.Pack and C.green or C.card) or (d.cash >= it.cost and C.green or C.red)))
+			card(T(it.key), it.premium and T("premiumItem") or "", btnText, color, function()
+				if inUse or (owned and it.cat == "prop") then return end
+				local ok, err = Remotes.Decor:InvokeServer(owned and "equip" or "buy", it.key)
+				if ok then notify(T(it.key), C.green); renderShop() elseif err then notify(T(err), C.red) end
+			end, ({ tent = "⛺", chairs = "🪑", sign = "🪧", prop = "🎏" })[it.cat])
 		end
 	elseif state.tab == "staff" then
 		if player:GetAttribute("Pass_AutoChef") then
