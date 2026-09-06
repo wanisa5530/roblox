@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
-local Locale = require(RS.Locale)
+local _Locale = require(RS.Locale)
 local Plot = require(script.Parent.PlotService)
 local C = { queues = {}, onServed = nil, onLeft = nil }
 local folder = Instance.new("Folder"); folder.Name = "Customers"; folder.Parent = workspace

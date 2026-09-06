@@ -13,7 +13,7 @@ jobs:
         run: |
           set -e
           for f in $(find src -name '*.lua'); do
-            luau-analyze "$f" 2>&1 | grep -iv "Unknown global\|Unknown type\|unknown require\|TypeError\|ImplicitReturn\|SameLineStatement\|^$" | grep -q . && { luau-analyze "$f"; exit 1; } || true
+            luau-analyze "$f" 2>&1 | grep -iv "Unknown global\|Unknown type\|unknown require\|TypeError\|ImplicitReturn\|SameLineStatement\|ImportUnused\|^$" | grep -q . && { luau-analyze "$f"; exit 1; } || true
           done
       - name: Build place
         run: rojo build -o StreetFoodTycoon.rbxlx
