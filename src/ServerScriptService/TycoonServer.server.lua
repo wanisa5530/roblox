@@ -173,7 +173,7 @@ Remotes.BuyFood.OnServerInvoke = function(player, foodId)
 	if d.foods[foodId] then return false, "owned" end
 	if d.cash < f.cost then return false, "notEnough" end
 	d.cash -= f.cost; d.foods[foodId] = true
-	Plot.refresh(player, d.foods)
+	Plot.refresh(player, d.foods); Plot.menuBoard(player, d.foods)
 	push(player)
 	return true
 end

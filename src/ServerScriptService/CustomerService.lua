@@ -70,13 +70,15 @@ function C.spawn(player, foods)
 	local anyFood = next(foods) ~= nil
 	if not anyFood then return end
 	local pts = Plot.points(player:GetAttribute("PlotIndex"))
+	C.groups[player] = C.groups[player] or {}
+	if #C.groups[player] >= Config.MaxGroups then return end
+	for _, og in ipairs(C.groups[player]) do if og.alive and not og.orderAt then return end end
 	local tbl = (math.random() < Config.DineInChance) and Plot.freeTable(player) or nil
 	local q = C.queue(player)
 	if not tbl and #q >= Config.MaxQueue then return end
 	local size = tbl and math.random(Config.GroupSize[1], Config.GroupSize[2]) or 1
 	local g = { player = player, members = {}, table = tbl, kind = tbl and "dine" or "takeaway", alive = true, t0 = os.clock() }
 	if tbl then tbl.group = g end
-	C.groups[player] = C.groups[player] or {}
 	table.insert(C.groups[player], g)
 	for k = 1, size do
 		local npc = makeNpc(pts.spawn + Vector3.new((k - 1) * 2.5, 0, 0))

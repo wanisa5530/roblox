@@ -2,9 +2,10 @@
 local Config = {}
 Config.StartingCash = 50
 -- ลูกค้า
-Config.CustomerInterval = { min = 6, max = 12 } -- วินาทีระหว่างลูกค้าแต่ละคน
+Config.CustomerInterval = { min = 14, max = 22 } -- วินาทีระหว่างลูกค้าแต่ละคน
 Config.Patience = 45           -- วินาทีที่ลูกค้ารอได้
-Config.MaxQueue = 4
+Config.MaxQueue = 3
+Config.MaxGroups = 3 -- กลุ่มที่อยู่ในร้านพร้อมกันสูงสุด (รวมที่นั่งโต๊ะ)
 Config.TablesPerPlot = 4
 Config.DineInChance = 0.6   -- โอกาสลูกค้านั่งทานที่ร้าน
 Config.EatTime = 12         -- วินาทีที่นั่งกิน
