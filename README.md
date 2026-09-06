@@ -3,11 +3,11 @@
 เกม Tycoon ร้านอาหารข้างทางไทย เริ่มจากรถเข็นผัดไท ขยายเมนูเพื่อเพิ่มรายได้
 
 ## โครงสร้าง
-- `src/ReplicatedStorage/Config.lua` เมนู ราคา ไอดี Game Pass / Dev Product
-- `src/ReplicatedStorage/Remotes.lua` Remote สำหรับ client-server
-- `src/ServerScriptService/DataService.lua` DataStore บันทึกอัตโนมัติ
-- `src/ServerScriptService/TycoonServer.server.lua` รายได้ ซื้อเมนู Game Pass Dev Product
-- `src/StarterPlayer/StarterPlayerScripts/ShopClient.client.lua` UI ชั่วคราว
+
+
+
+
+
 
 ## วิธีใช้
 1. ติดตั้ง [Rojo](https://rojo.space) แล้วรัน `rojo serve` และเชื่อมกับ Roblox Studio
@@ -19,3 +19,9 @@
 - Game Pass: รายได้ x2, ลูกจ้างอัตโนมัติ, ร้านที่ 2
 - Dev Product: ซื้อเงินในเกม 1k / 10k / 50k
 - Premium Payouts: เกมเล่นวนได้ยาว
+
+## เวอร์ชัน 2
+- เมนูอาหารข้างทางไทย 15 อย่าง (หมูปิ้ง ถึง รถเข็นทุเรียน)
+- 5 ภาษา: ไทย อังกฤษ ญี่ปุ่น จีน อินโดนีเซีย (`src/ReplicatedStorage/Locale.lua`) ตรวจจากภาษาเครื่องผู้เล่น สลับได้ด้วยปุ่ม 🌐
+- แปลงร้านส่วนตัวสูงสุด 8 คน แผงอาหารโผล่ตามเมนูที่ซื้อ (`src/ServerScriptService/PlotService.lua`)
+- เก็บเงินได้ 2 ทาง: ปุ่มบน UI หรือเดินเหยียบแผ่นเหลืองหน้าร้าน

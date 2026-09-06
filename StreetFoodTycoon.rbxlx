@@ -6,327 +6,530 @@
     <Item class="ModuleScript" referent="1">
       <Properties>
         <string name="Name">Config</string>
-        <string name="Source"><![CDATA[-- ค่าคอนฟิกกลางของเกม แก้ไอดี Game Pass / Dev Product ที่นี่หลังสร้างใน Creator Hub
+        <string name="Source"><![CDATA[-- คอนฟิกกลาง: เมนูอาหาร, ราคา, Game Pass, Dev Product
 local Config = {}
+Config.StartingCash = 50
+Config.PayoutInterval = 1 -- วินาที
+Config.MaxPlots = 8
+Config.DefaultLocale = "en"
 
-Config.StartingCash = 100
-Config.PayoutInterval = 2 -- วินาทีต่อรอบขายอาหาร
-
--- เมนูอาหาร: ราคาซื้อ, รายได้ต่อรอบ
+-- เมนูอาหารข้างทางไทย เรียงจากถูกไปแพง (cost = ราคาซื้อ, income = รายได้/วินาที)
 Config.Foods = {
-	{ id = "PadThai",   name = "ผัดไท",   cost = 0,     income = 5 },
-	{ id = "SomTam",    name = "ส้มตำ",   cost = 250,   income = 15 },
-	{ id = "MooPing",   name = "หมูปิ้ง", cost = 1000,  income = 45 },
-	{ id = "TomYum",    name = "ต้มยำ",   cost = 5000,  income = 180 },
-	{ id = "MangoRice", name = "ข้าวเหนียวมะม่วง", cost = 25000, income = 800 },
+	{ id="MooPing",     emoji="🍢", cost=0,       income=1,    color={0.80,0.45,0.20} },
+	{ id="KhanomKrok",  emoji="🥥", cost=60,      income=2,    color={0.95,0.90,0.75} },
+	{ id="PadThai",     emoji="🍜", cost=200,     income=5,    color={0.95,0.65,0.25} },
+	{ id="SomTam",      emoji="🥗", cost=600,     income=12,   color={0.55,0.80,0.35} },
+	{ id="KaiJeow",     emoji="🍳", cost=1500,    income=25,   color={0.98,0.85,0.30} },
+	{ id="Roti",        emoji="🥞", cost=3500,    income=50,   color={0.90,0.75,0.45} },
+	{ id="Satay",       emoji="🍡", cost=8000,    income=100,  color={0.75,0.50,0.25} },
+	{ id="BoatNoodle",  emoji="🍲", cost=18000,   income=200,  color={0.50,0.25,0.15} },
+	{ id="KhaoManGai",  emoji="🍗", cost=40000,   income=400,  color={0.95,0.85,0.60} },
+	{ id="PadKrapao",   emoji="🌶️", cost=90000,   income=800,  color={0.85,0.25,0.20} },
+	{ id="TomYum",      emoji="🦐", cost=200000,  income=1600, color={0.95,0.45,0.30} },
+	{ id="HoiTod",      emoji="🦪", cost=450000,  income=3200, color={0.85,0.70,0.40} },
+	{ id="MangoRice",   emoji="🥭", cost=1000000, income=6500, color={1.00,0.75,0.20} },
+	{ id="ThaiTea",     emoji="🧋", cost=2200000, income=13000,color={0.90,0.50,0.20} },
+	{ id="DurianCart",  emoji="🍈", cost=5000000, income=30000,color={0.75,0.80,0.35} },
 }
 
--- Game Pass (ซื้อครั้งเดียว) ใส่ไอดีจริงแทน 0
+-- ชื่อเมนูหลายภาษา
+Config.FoodNames = {
+	MooPing    = { en="Moo Ping (Grilled Pork)",  th="หมูปิ้ง",           ja="ムーピン（豚串焼き）",   zh="烤猪肉串",     id="Sate Babi Thailand" },
+	KhanomKrok = { en="Khanom Krok",              th="ขนมครก",           ja="カノムクロック",       zh="椰香小煎饼",   id="Khanom Krok" },
+	PadThai    = { en="Pad Thai",                 th="ผัดไทย",            ja="パッタイ",             zh="泰式炒河粉",   id="Pad Thai" },
+	SomTam     = { en="Som Tam (Papaya Salad)",   th="ส้มตำ",             ja="ソムタム",             zh="青木瓜沙拉",   id="Som Tam" },
+	KaiJeow    = { en="Kai Jeow (Thai Omelette)", th="ไข่เจียว",           ja="カイチアオ（卵焼き）",  zh="泰式煎蛋",     id="Telur Dadar Thailand" },
+	Roti       = { en="Roti Banana",              th="โรตีกล้วย",          ja="ロティ",               zh="香蕉煎饼",     id="Roti Pisang" },
+	Satay      = { en="Chicken Satay",            th="สะเต๊ะไก่",          ja="サテ",                 zh="沙嗲鸡肉串",   id="Sate Ayam" },
+	BoatNoodle = { en="Boat Noodles",             th="ก๋วยเตี๋ยวเรือ",       ja="ボートヌードル",       zh="船面",         id="Mi Perahu" },
+	KhaoManGai = { en="Khao Man Gai",             th="ข้าวมันไก่",          ja="カオマンガイ",         zh="海南鸡饭",     id="Nasi Ayam Hainan" },
+	PadKrapao  = { en="Pad Krapao",               th="ผัดกะเพรา",          ja="ガパオライス",         zh="打抛猪肉饭",   id="Pad Krapao" },
+	TomYum     = { en="Tom Yum Goong",            th="ต้มยำกุ้ง",           ja="トムヤムクン",         zh="冬阴功汤",     id="Tom Yum Udang" },
+	HoiTod     = { en="Hoi Tod (Mussel Pancake)", th="หอยทอด",            ja="ホイトード",           zh="蚵仔煎",       id="Hoi Tod" },
+	MangoRice  = { en="Mango Sticky Rice",        th="ข้าวเหนียวมะม่วง",     ja="マンゴースティッキーライス", zh="芒果糯米饭", id="Ketan Mangga" },
+	ThaiTea    = { en="Thai Iced Tea",            th="ชาไทย",             ja="タイティー",           zh="泰式奶茶",     id="Teh Thailand" },
+	DurianCart = { en="Durian Cart",              th="รถเข็นทุเรียน",        ja="ドリアン屋台",         zh="榴莲车",       id="Gerobak Durian" },
+}
+
+-- Game Pass (ใส่ไอดีจริงแทน 0)
 Config.GamePasses = {
-	DoubleIncome = { id = 0, name = "รายได้ x2" },
-	AutoWorker   = { id = 0, name = "ลูกจ้างอัตโนมัติ" },
-	SecondStall  = { id = 0, name = "ร้านที่ 2" },
+	{ key="DoubleIncome", id=0, mult=2 },
+	{ key="AutoCollect",  id=0 },
+	{ key="VIP",          id=0, mult=1.5 },
 }
-
--- Dev Product (ซื้อซ้ำได้)
+-- Dev Product
 Config.DevProducts = {
-	Cash1k  = { id = 0, cash = 1000 },
-	Cash10k = { id = 0, cash = 10000 },
-	Cash50k = { id = 0, cash = 50000 },
+	{ key="Cash1",  id=0, cash=5000 },
+	{ key="Cash2",  id=0, cash=50000 },
+	{ key="Cash3",  id=0, cash=500000 },
 }
-
 return Config
 ]]></string>
       </Properties>
     </Item>
     <Item class="ModuleScript" referent="2">
       <Properties>
+        <string name="Name">Locale</string>
+        <string name="Source"><![CDATA[-- ข้อความ UI หลายภาษา
+local L = {}
+L.Supported = { "en", "th", "ja", "zh", "id" }
+L.Names = { en="English", th="ไทย", ja="日本語", zh="中文", id="Indonesia" }
+L.Strings = {
+	en = { title="Street Food Tycoon", cash="Cash", perSec="/sec", collect="Collect", owned="OWNED", buy="Buy", menu="Menu", passes="Passes", robux="Robux", notEnough="Not enough cash!", bought="Opened: %s",
+		DoubleIncome="2x Income", AutoCollect="Auto Collect", VIP="VIP (+50%)", Cash1="+5,000 Cash", Cash2="+50,000 Cash", Cash3="+500,000 Cash", lang="Language" },
+	th = { title="สตรีทฟู้ดไทคูน", cash="เงิน", perSec="/วิ", collect="เก็บเงิน", owned="มีแล้ว", buy="ซื้อ", menu="เมนู", passes="แพ็กเกจ", robux="Robux", notEnough="เงินไม่พอ!", bought="เปิดร้าน: %s",
+		DoubleIncome="รายได้ x2", AutoCollect="เก็บเงินอัตโนมัติ", VIP="VIP (+50%)", Cash1="+5,000 เงิน", Cash2="+50,000 เงิน", Cash3="+500,000 เงิน", lang="ภาษา" },
+	ja = { title="屋台タイクーン", cash="所持金", perSec="/秒", collect="回収", owned="所有済み", buy="購入", menu="メニュー", passes="パス", robux="Robux", notEnough="お金が足りません！", bought="開店: %s",
+		DoubleIncome="収入2倍", AutoCollect="自動回収", VIP="VIP (+50%)", Cash1="+5,000", Cash2="+50,000", Cash3="+500,000", lang="言語" },
+	zh = { title="街头小吃大亨", cash="现金", perSec="/秒", collect="收取", owned="已拥有", buy="购买", menu="菜单", passes="通行证", robux="Robux", notEnough="现金不足！", bought="开张: %s",
+		DoubleIncome="双倍收入", AutoCollect="自动收取", VIP="VIP (+50%)", Cash1="+5,000 现金", Cash2="+50,000 现金", Cash3="+500,000 现金", lang="语言" },
+	id = { title="Street Food Tycoon", cash="Uang", perSec="/dtk", collect="Ambil", owned="DIMILIKI", buy="Beli", menu="Menu", passes="Pass", robux="Robux", notEnough="Uang tidak cukup!", bought="Dibuka: %s",
+		DoubleIncome="Pendapatan 2x", AutoCollect="Ambil Otomatis", VIP="VIP (+50%)", Cash1="+5.000 Uang", Cash2="+50.000 Uang", Cash3="+500.000 Uang", lang="Bahasa" },
+}
+function L.detect(localeId)
+	local p = string.sub(localeId or "en", 1, 2)
+	for _, s in ipairs(L.Supported) do if s == p then return s end end
+	return "en"
+end
+function L.get(lang, key) return (L.Strings[lang] or L.Strings.en)[key] or L.Strings.en[key] or key end
+function L.food(lang, id)
+	local n = require(script.Parent.Config).FoodNames[id]
+	return n and (n[lang] or n.en) or id
+end
+function L.fmt(n)
+	n = math.floor(n)
+	if n >= 1e9 then return string.format("%.2fB", n/1e9) end
+	if n >= 1e6 then return string.format("%.2fM", n/1e6) end
+	if n >= 1e4 then return string.format("%.1fK", n/1e3) end
+	return tostring(n)
+end
+return L
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="3">
+      <Properties>
         <string name="Name">Remotes</string>
-        <string name="Source"><![CDATA[-- Remote ให้ client-server คุยกัน: เซิร์ฟเวอร์สร้าง ฝั่งผู้เล่นรอ
-local RS = game:GetService("ReplicatedStorage")
+        <string name="Source"><![CDATA[local RS = game:GetService("ReplicatedStorage")
 local isServer = game:GetService("RunService"):IsServer()
 local names = { BuyFood="RemoteFunction", GetData="RemoteFunction", Collect="RemoteFunction",
 	DataUpdate="RemoteEvent", PromptPass="RemoteEvent" }
-
 local folder
 if isServer then
 	folder = Instance.new("Folder"); folder.Name = "RemoteFolder"; folder.Parent = RS
-	for name, class in pairs(names) do
-		local r = Instance.new(class); r.Name = name; r.Parent = folder
-	end
+	for name, class in pairs(names) do local r = Instance.new(class); r.Name = name; r.Parent = folder end
 else
 	folder = RS:WaitForChild("RemoteFolder")
 end
-
-local Remotes = {}
-for name in pairs(names) do Remotes[name] = folder:WaitForChild(name) end
-return Remotes
+local R = {}
+for name in pairs(names) do R[name] = folder:WaitForChild(name) end
+return R
 ]]></string>
       </Properties>
     </Item>
   </Item>
-  <Item class="ServerScriptService" referent="3">
+  <Item class="ServerScriptService" referent="4">
     <Properties>
       <string name="Name">ServerScriptService</string>
     </Properties>
-    <Item class="ModuleScript" referent="4">
+    <Item class="ModuleScript" referent="5">
       <Properties>
         <string name="Name">DataService</string>
-        <string name="Source"><![CDATA[-- โหลด/บันทึกข้อมูลผู้เล่นด้วย DataStore
+        <string name="Source"><![CDATA[-- โหลด/บันทึกข้อมูลผู้เล่น (DataStore ใช้ได้เฉพาะเกมที่ publish แล้ว)
 local DSS = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local Config = require(game.ReplicatedStorage.Config)
-
--- ถ้าเปิดจากไฟล์ที่ยังไม่ publish DataStore จะใช้ไม่ได้ ให้เล่นได้โดยไม่บันทึก
-local okStore, store = pcall(DSS.GetDataStore, DSS, "StreetFoodTycoon_v1")
+local okStore, store = pcall(DSS.GetDataStore, DSS, "StreetFoodTycoon_v2")
 if not okStore then warn("DataStore unavailable:", store); store = nil end
-local DataService = { cache = {} }
-
-local function default()
-	return { cash = Config.StartingCash, foods = { PadThai = true }, pending = 0 }
-end
-
-function DataService.load(player)
+local D = { cache = {} }
+local function default() return { cash = Config.StartingCash, foods = { MooPing = true }, pending = 0, total = 0 } end
+function D.load(p)
 	local ok, data = false, nil
-	if store then ok, data = pcall(store.GetAsync, store, "p_" .. player.UserId) end
-	DataService.cache[player.UserId] = (ok and data) or default()
-	return DataService.cache[player.UserId]
+	if store then ok, data = pcall(store.GetAsync, store, "p_" .. p.UserId) end
+	local d = (ok and type(data) == "table") and data or default()
+	d.total = d.total or 0
+	D.cache[p.UserId] = d
+	return d
 end
-
-function DataService.save(player)
-	local data = DataService.cache[player.UserId]
-	if not data or not store then return end
-	pcall(store.SetAsync, store, "p_" .. player.UserId, data)
+function D.save(p)
+	local d = D.cache[p.UserId]
+	if d and store then pcall(store.SetAsync, store, "p_" .. p.UserId, d) end
 end
-
-function DataService.get(player)
-	return DataService.cache[player.UserId]
-end
-
-Players.PlayerRemoving:Connect(function(p)
-	DataService.save(p)
-	DataService.cache[p.UserId] = nil
-end)
-
-game:BindToClose(function()
-	for _, p in ipairs(Players:GetPlayers()) do DataService.save(p) end
-end)
-
--- บันทึกอัตโนมัติทุก 60 วิ
-task.spawn(function()
-	while true do
-		task.wait(60)
-		for _, p in ipairs(Players:GetPlayers()) do DataService.save(p) end
-	end
-end)
-
-return DataService
+function D.get(p) return D.cache[p.UserId] end
+Players.PlayerRemoving:Connect(function(p) D.save(p); D.cache[p.UserId] = nil end)
+game:BindToClose(function() for _, p in ipairs(Players:GetPlayers()) do D.save(p) end end)
+task.spawn(function() while true do task.wait(60); for _, p in ipairs(Players:GetPlayers()) do D.save(p) end end end)
+return D
 ]]></string>
       </Properties>
     </Item>
-    <Item class="Script" referent="5">
+    <Item class="ModuleScript" referent="6">
+      <Properties>
+        <string name="Name">PlotService</string>
+        <string name="Source"><![CDATA[-- แปลงร้านของผู้เล่นแต่ละคน: สร้างรถเข็น + แผงอาหารตามเมนูที่ซื้อ
+local Config = require(game.ReplicatedStorage.Config)
+local Locale = require(game.ReplicatedStorage.Locale)
+local P = { owners = {} }
+local root = Instance.new("Folder"); root.Name = "Plots"; root.Parent = workspace
+
+local function part(props, parent)
+	local x = Instance.new("Part")
+	x.Anchored = true; x.TopSurface = Enum.SurfaceType.Smooth; x.BottomSurface = Enum.SurfaceType.Smooth
+	for k, v in pairs(props) do x[k] = v end
+	x.Parent = parent
+	return x
+end
+local function sign(parent, text, size, pos, color)
+	local s = part({ Size = size, Position = pos, Color = Color3.new(1, 0.95, 0.6), Material = Enum.Material.SmoothPlastic }, parent)
+	local g = Instance.new("SurfaceGui"); g.Face = Enum.NormalId.Front; g.Parent = s
+	local t = Instance.new("TextLabel"); t.Size = UDim2.fromScale(1, 1); t.BackgroundTransparency = 1
+	t.Text = text; t.TextScaled = true; t.Font = Enum.Font.FredokaOne; t.TextColor3 = color or Color3.new(0.15, 0.1, 0.05); t.Parent = g
+	return s
+end
+
+function P.origin(i)
+	local row, col = math.floor((i - 1) / 4), (i - 1) % 4
+	return Vector3.new(-90 + col * 60, 0, 30 + row * 70)
+end
+
+function P.assign(player)
+	for i = 1, Config.MaxPlots do
+		if not P.owners[i] then
+			P.owners[i] = player
+			local o = P.origin(i)
+			local m = Instance.new("Model"); m.Name = "Plot_" .. player.UserId; m.Parent = root
+			part({ Size = Vector3.new(50, 0.4, 50), Position = o + Vector3.new(0, 0.2, 0), Color = Color3.fromRGB(190, 170, 140), Material = Enum.Material.Cobblestone }, m)
+			-- รถเข็นหลัก
+			part({ Size = Vector3.new(8, 3, 4), Position = o + Vector3.new(0, 1.9, -18), Color = Color3.fromRGB(200, 110, 50), Material = Enum.Material.Wood }, m)
+			part({ Size = Vector3.new(9, 0.3, 5), Position = o + Vector3.new(0, 5.4, -18), Color = Color3.fromRGB(210, 50, 50), Material = Enum.Material.Fabric }, m)
+			for _, dx in ipairs({ -4, 4 }) do part({ Size = Vector3.new(0.3, 5, 0.3), Position = o + Vector3.new(dx, 2.9, -16), Color = Color3.fromRGB(60, 60, 60) }, m) end
+			sign(m, player.DisplayName .. "'s Stall", Vector3.new(9, 1.2, 0.2), o + Vector3.new(0, 6.3, -16))
+			-- จุดยืนเก็บเงิน
+			local pad = part({ Size = Vector3.new(6, 0.3, 6), Position = o + Vector3.new(0, 0.55, -10), Color = Color3.fromRGB(255, 215, 60), Material = Enum.Material.Neon }, m)
+			pad.Name = "CollectPad"
+			local stalls = Instance.new("Folder"); stalls.Name = "Stalls"; stalls.Parent = m
+			player:SetAttribute("PlotIndex", i)
+			return m, pad
+		end
+	end
+end
+
+function P.release(player)
+	for i, o in pairs(P.owners) do if o == player then P.owners[i] = nil end end
+	local m = root:FindFirstChild("Plot_" .. player.UserId)
+	if m then m:Destroy() end
+end
+
+-- วางแผงอาหารตามเมนูที่มี
+function P.refresh(player, foods)
+	local m = root:FindFirstChild("Plot_" .. player.UserId)
+	if not m then return end
+	local o = P.origin(player:GetAttribute("PlotIndex"))
+	local stalls = m.Stalls
+	for idx, f in ipairs(Config.Foods) do
+		if foods[f.id] and not stalls:FindFirstChild(f.id) then
+			local g = Instance.new("Model"); g.Name = f.id; g.Parent = stalls
+			local k = idx - 1
+			local pos = o + Vector3.new(-21 + (k % 5) * 10.5, 0, -2 + math.floor(k / 5) * 9)
+			part({ Size = Vector3.new(6, 2.4, 3), Position = pos + Vector3.new(0, 1.6, 0), Color = Color3.new(f.color[1], f.color[2], f.color[3]), Material = Enum.Material.Wood }, g)
+			part({ Size = Vector3.new(7, 0.25, 4), Position = pos + Vector3.new(0, 4.4, 0), Color = Color3.fromRGB(240, 240, 230), Material = Enum.Material.Fabric }, g)
+			sign(g, f.emoji .. " " .. Locale.food("en", f.id), Vector3.new(6, 0.9, 0.15), pos + Vector3.new(0, 3.2, 1.6))
+		end
+	end
+end
+return P
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="Script" referent="7">
       <Properties>
         <string name="Name">TycoonServer</string>
         <token name="RunContext">0</token>
-        <string name="Source"><![CDATA[-- ตรรกะหลักของ Tycoon: รายได้, ซื้อเมนู, Game Pass, Dev Product
+        <string name="Source"><![CDATA[-- ตรรกะหลัก: รายได้, ซื้อเมนู, Game Pass, Dev Product, แปลงร้าน
 local Players = game:GetService("Players")
 local MPS = game:GetService("MarketplaceService")
-local Config = require(game.ReplicatedStorage.Config)
-local Remotes = require(game.ReplicatedStorage.Remotes)
+local RS = game.ReplicatedStorage
+local Config = require(RS.Config)
+local Remotes = require(RS.Remotes)
 local Data = require(script.Parent.DataService)
+local Plot = require(script.Parent.PlotService)
 
+local passCache = {}
 local function ownsPass(player, key)
-	local id = Config.GamePasses[key].id
-	if id == 0 then return false end
-	local ok, res = pcall(MPS.UserOwnsGamePassAsync, MPS, player.UserId, id)
-	return ok and res
+	local id
+	for _, gp in ipairs(Config.GamePasses) do if gp.key == key then id = gp.id end end
+	if not id or id == 0 then return false end
+	passCache[player] = passCache[player] or {}
+	if passCache[player][key] == nil then
+		local ok, res = pcall(MPS.UserOwnsGamePassAsync, MPS, player.UserId, id)
+		passCache[player][key] = ok and res or false
+	end
+	return passCache[player][key]
+end
+
+local function incomePerSec(player)
+	local d = Data.get(player); if not d then return 0 end
+	local total = 0
+	for _, f in ipairs(Config.Foods) do if d.foods[f.id] then total += f.income end end
+	for _, gp in ipairs(Config.GamePasses) do if gp.mult and ownsPass(player, gp.key) then total *= gp.mult end end
+	return math.floor(total)
 end
 
 local function push(player)
 	local d = Data.get(player)
-	if d then Remotes.DataUpdate:FireClient(player, d) end
+	if d then Remotes.DataUpdate:FireClient(player, d, incomePerSec(player)) end
 end
 
-local function incomePerTick(player)
-	local d = Data.get(player)
-	local total = 0
-	for _, f in ipairs(Config.Foods) do
-		if d.foods[f.id] then total += f.income end
-	end
-	if ownsPass(player, "DoubleIncome") then total *= 2 end
-	if ownsPass(player, "SecondStall") then total *= 1.5 end
-	return math.floor(total)
+local function collect(player)
+	local d = Data.get(player); if not d or d.pending <= 0 then return end
+	d.cash += d.pending; d.total += d.pending; d.pending = 0
+	push(player)
 end
 
 local function onPlayer(player)
-	Data.load(player)
+	local d = Data.load(player)
+	local _, pad = Plot.assign(player)
+	Plot.refresh(player, d.foods)
 	push(player)
+	-- เหยียบแผ่นเหลืองเพื่อเก็บเงิน
+	local last = 0
+	pad.Touched:Connect(function(hit)
+		local p = Players:GetPlayerFromCharacter(hit.Parent)
+		if p == player and os.clock() - last > 0.5 then last = os.clock(); collect(player) end
+	end)
 	task.spawn(function()
 		while player.Parent do
 			task.wait(Config.PayoutInterval)
-			local d = Data.get(player)
-			if not d then break end
-			local earned = incomePerTick(player)
-			if ownsPass(player, "AutoWorker") then
-				d.cash += earned -- เข้ากระเป๋าโดยตรง
-			else
-				d.pending += earned -- ต้องมากดเก็บเอง
-			end
+			local dd = Data.get(player); if not dd then break end
+			local earned = incomePerSec(player) * Config.PayoutInterval
+			if ownsPass(player, "AutoCollect") then dd.cash += earned; dd.total += earned else dd.pending += earned end
 			push(player)
 		end
 	end)
 end
-
 Players.PlayerAdded:Connect(onPlayer)
 for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
+Players.PlayerRemoving:Connect(function(p) Plot.release(p); passCache[p] = nil end)
 
 Remotes.GetData.OnServerInvoke = function(player)
-	return Data.get(player) or Data.load(player)
+	local d = Data.get(player) or Data.load(player)
+	return d, incomePerSec(player)
 end
-
-Remotes.Collect.OnServerInvoke = function(player)
-	local d = Data.get(player)
-	d.cash += d.pending
-	d.pending = 0
-	push(player)
-	return d.cash
-end
-
+Remotes.Collect.OnServerInvoke = function(player) collect(player); return true end
 Remotes.BuyFood.OnServerInvoke = function(player, foodId)
-	local d = Data.get(player)
+	local d = Data.get(player); if not d then return false end
 	for _, f in ipairs(Config.Foods) do
 		if f.id == foodId then
-			if d.foods[foodId] then return false, "มีแล้ว" end
-			if d.cash < f.cost then return false, "เงินไม่พอ" end
-			d.cash -= f.cost
-			d.foods[foodId] = true
+			if d.foods[foodId] then return false, "owned" end
+			if d.cash < f.cost then return false, "notEnough" end
+			d.cash -= f.cost; d.foods[foodId] = true
+			Plot.refresh(player, d.foods)
 			push(player)
 			return true
 		end
 	end
-	return false, "ไม่พบเมนู"
+	return false
 end
-
--- ขอเปิดหน้าต่างซื้อ
 Remotes.PromptPass.OnServerEvent:Connect(function(player, kind, key)
-	if kind == "pass" and Config.GamePasses[key] then
-		MPS:PromptGamePassPurchase(player, Config.GamePasses[key].id)
-	elseif kind == "product" and Config.DevProducts[key] then
-		MPS:PromptProductPurchase(player, Config.DevProducts[key].id)
+	local list = kind == "pass" and Config.GamePasses or Config.DevProducts
+	for _, item in ipairs(list) do
+		if item.key == key and item.id ~= 0 then
+			if kind == "pass" then MPS:PromptGamePassPurchase(player, item.id) else MPS:PromptProductPurchase(player, item.id) end
+		end
 	end
 end)
-
--- รับเงินจาก Dev Product
 MPS.ProcessReceipt = function(receipt)
 	local player = Players:GetPlayerByUserId(receipt.PlayerId)
 	if not player then return Enum.ProductPurchaseDecision.NotProcessedYet end
-	for _, p in pairs(Config.DevProducts) do
+	for _, p in ipairs(Config.DevProducts) do
 		if p.id == receipt.ProductId then
-			local d = Data.get(player)
-			d.cash += p.cash
-			Data.save(player)
-			push(player)
+			local d = Data.get(player); if not d then return Enum.ProductPurchaseDecision.NotProcessedYet end
+			d.cash += p.cash; Data.save(player); push(player)
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
 	end
 	return Enum.ProductPurchaseDecision.NotProcessedYet
 end
-
 MPS.PromptGamePassPurchaseFinished:Connect(function(player, _, bought)
-	if bought then push(player) end
+	if bought then passCache[player] = nil; push(player) end
 end)
 ]]></string>
       </Properties>
     </Item>
   </Item>
-  <Item class="StarterGui" referent="6">
+  <Item class="StarterGui" referent="8">
     <Properties>
       <string name="Name">StarterGui</string>
     </Properties>
   </Item>
-  <Item class="StarterPlayer" referent="7">
+  <Item class="StarterPlayer" referent="9">
     <Properties>
       <string name="Name">StarterPlayer</string>
     </Properties>
-    <Item class="StarterPlayerScripts" referent="8">
+    <Item class="StarterPlayerScripts" referent="10">
       <Properties>
         <string name="Name">StarterPlayerScripts</string>
       </Properties>
-      <Item class="LocalScript" referent="9">
+      <Item class="LocalScript" referent="11">
         <Properties>
           <string name="Name">ShopClient</string>
-          <string name="Source"><![CDATA[-- UI ฝั่งผู้เล่น: แสดงเงิน ปุ่มเก็บเงิน ซื้อเมนู และปุ่มซื้อ Robux
+          <string name="Source"><![CDATA[-- UI หลัก: แถบเงินด้านบน, ร้านค้าแบบแท็บ, สลับภาษา, แจ้งเตือน
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local RS = game:GetService("ReplicatedStorage")
 local Config = require(RS:WaitForChild("Config"))
+local Locale = require(RS:WaitForChild("Locale"))
 local Remotes = require(RS:WaitForChild("Remotes"))
+local player = Players.LocalPlayer
+local lang = Locale.detect(player.LocaleId)
+local T = function(k) return Locale.get(lang, k) end
+local state = { data = nil, income = 0, tab = "menu" }
 
-local gui = Instance.new("ScreenGui"); gui.Name = "TycoonUI"; gui.ResetOnSpawn = false
-gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+local C = { bg = Color3.fromRGB(28, 24, 22), panel = Color3.fromRGB(42, 36, 32), card = Color3.fromRGB(58, 50, 44),
+	accent = Color3.fromRGB(255, 170, 40), green = Color3.fromRGB(90, 200, 110), red = Color3.fromRGB(220, 80, 70),
+	text = Color3.fromRGB(250, 245, 235), muted = Color3.fromRGB(180, 170, 160) }
+local FONT = Enum.Font.FredokaOne
 
-local function btn(text, y, cb)
-	local b = Instance.new("TextButton")
-	b.Size = UDim2.new(0, 200, 0, 28); b.Position = UDim2.new(1, -210, 0, y)
-	b.Text = text; b.TextScaled = true; b.Parent = gui
-	b.MouseButton1Click:Connect(cb)
+local function corner(o, r) local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, r or 10); c.Parent = o end
+local function pad(o, p) local u = Instance.new("UIPadding"); u.PaddingTop = UDim.new(0, p); u.PaddingBottom = UDim.new(0, p); u.PaddingLeft = UDim.new(0, p); u.PaddingRight = UDim.new(0, p); u.Parent = o end
+local function frame(parent, size, pos, color)
+	local f = Instance.new("Frame"); f.Size = size; f.Position = pos; f.BackgroundColor3 = color or C.panel; f.BorderSizePixel = 0; f.Parent = parent; return f
+end
+local function label(parent, text, size, pos, textSize, color, xalign)
+	local l = Instance.new("TextLabel"); l.Size = size; l.Position = pos; l.BackgroundTransparency = 1; l.Text = text
+	l.Font = FONT; l.TextSize = textSize or 18; l.TextColor3 = color or C.text; l.TextXAlignment = xalign or Enum.TextXAlignment.Left
+	l.TextTruncate = Enum.TextTruncate.AtEnd; l.Parent = parent; return l
+end
+local function button(parent, text, size, pos, color, cb)
+	local b = Instance.new("TextButton"); b.Size = size; b.Position = pos; b.BackgroundColor3 = color or C.accent; b.Text = text
+	b.Font = FONT; b.TextSize = 18; b.TextColor3 = C.text; b.AutoButtonColor = false; b.BorderSizePixel = 0; b.Parent = parent
+	corner(b, 8)
+	b.MouseEnter:Connect(function() TweenService:Create(b, TweenInfo.new(0.1), { BackgroundColor3 = color and color:Lerp(Color3.new(1,1,1), 0.15) or C.accent:Lerp(Color3.new(1,1,1), 0.15) }):Play() end)
+	b.MouseLeave:Connect(function() TweenService:Create(b, TweenInfo.new(0.1), { BackgroundColor3 = color or C.accent }):Play() end)
+	if cb then b.MouseButton1Click:Connect(cb) end
 	return b
 end
 
-local cashLabel = Instance.new("TextLabel")
-cashLabel.Size = UDim2.new(0, 200, 0, 36); cashLabel.Position = UDim2.new(1, -210, 0, 10)
-cashLabel.BackgroundColor3 = Color3.fromRGB(255, 220, 80); cashLabel.Text = "เงิน: ..."
-cashLabel.TextScaled = true; cashLabel.Parent = gui
+local gui = Instance.new("ScreenGui"); gui.Name = "TycoonUI"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.Parent = player.PlayerGui
 
-local collect = btn("เก็บเงิน (0)", 60, function() Remotes.Collect:InvokeServer() end)
+-- แถบด้านบน
+local top = frame(gui, UDim2.new(0, 520, 0, 64), UDim2.new(0.5, -260, 0, 12), C.bg); corner(top, 14); pad(top, 8)
+local cashLbl = label(top, "฿ 0", UDim2.new(0, 220, 0, 30), UDim2.new(0, 8, 0, 0), 28, C.accent)
+local incLbl = label(top, "+0 /sec", UDim2.new(0, 220, 0, 18), UDim2.new(0, 8, 0, 30), 15, C.green)
+local collectBtn = button(top, T("collect"), UDim2.new(0, 150, 0, 44), UDim2.new(1, -160, 0, 2), C.green, function() Remotes.Collect:InvokeServer() end)
+local titleLbl = label(top, T("title"), UDim2.new(0, 130, 0, 48), UDim2.new(0, 230, 0, 0), 14, C.muted, Enum.TextXAlignment.Center)
+titleLbl.TextWrapped = true
 
-local y = 110
-local foodButtons = {}
-for _, f in ipairs(Config.Foods) do
-	foodButtons[f.id] = btn(f.name .. " - " .. f.cost, y, function()
-		local ok, err = Remotes.BuyFood:InvokeServer(f.id)
-		if not ok and err then warn(err) end
-	end)
-	y += 32
+-- ปุ่มเปิดร้าน + ภาษา (ซ้ายล่าง)
+local shopOpen = false
+local shopBtn = button(gui, "🛒 " .. T("menu"), UDim2.new(0, 150, 0, 44), UDim2.new(0, 16, 1, -64), C.accent)
+local langBtn = button(gui, "🌐 " .. Locale.Names[lang], UDim2.new(0, 130, 0, 44), UDim2.new(0, 176, 1, -64), C.card)
+
+-- แจ้งเตือน
+local toast = label(gui, "", UDim2.new(0, 400, 0, 36), UDim2.new(0.5, -200, 0, 90), 18, C.text, Enum.TextXAlignment.Center)
+toast.BackgroundTransparency = 0.2; toast.BackgroundColor3 = C.bg; toast.Visible = false; corner(toast, 8)
+local function notify(msg, color)
+	toast.Text = msg; toast.TextColor3 = color or C.text; toast.Visible = true
+	task.delay(2, function() if toast.Text == msg then toast.Visible = false end end)
 end
 
-y += 10
-for key, p in pairs(Config.GamePasses) do
-	btn("[Pass] " .. p.name, y, function() Remotes.PromptPass:FireServer("pass", key) end); y += 32
+-- หน้าต่างร้านค้า
+local shop = frame(gui, UDim2.new(0, 460, 0, 520), UDim2.new(0.5, -230, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
+local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
+local tabs = {}
+local tabNames = { "menu", "passes", "robux" }
+for i, name in ipairs(tabNames) do
+	tabs[name] = button(shop, T(name), UDim2.new(0, 120, 0, 36), UDim2.new(0, 12 + (i - 1) * 126, 0, 8), C.card)
 end
-for key, p in pairs(Config.DevProducts) do
-	btn("[Robux] +" .. p.cash .. " เงิน", y, function() Remotes.PromptPass:FireServer("product", key) end); y += 32
+local list = Instance.new("ScrollingFrame"); list.Size = UDim2.new(1, -24, 1, -64); list.Position = UDim2.new(0, 12, 0, 54)
+list.BackgroundTransparency = 1; list.BorderSizePixel = 0; list.ScrollBarThickness = 6; list.CanvasSize = UDim2.new(); list.AutomaticCanvasSize = Enum.AutomaticSize.Y; list.Parent = shop
+local layout = Instance.new("UIListLayout"); layout.Padding = UDim.new(0, 8); layout.Parent = list
+
+local function card(title, sub, btnText, btnColor, cb, emoji)
+	local c = frame(list, UDim2.new(1, -8, 0, 64), UDim2.new(), C.card); corner(c, 10)
+	label(c, emoji or "", UDim2.new(0, 44, 1, 0), UDim2.new(0, 8, 0, 0), 30, nil, Enum.TextXAlignment.Center)
+	label(c, title, UDim2.new(1, -200, 0, 30), UDim2.new(0, 56, 0, 6), 18)
+	label(c, sub, UDim2.new(1, -200, 0, 20), UDim2.new(0, 56, 0, 34), 14, C.muted)
+	local b = button(c, btnText, UDim2.new(0, 120, 0, 40), UDim2.new(1, -130, 0, 12), btnColor, cb)
+	return c, b
 end
 
-local function render(d)
-	cashLabel.Text = "เงิน: " .. d.cash
-	collect.Text = "เก็บเงิน (" .. d.pending .. ")"
-	for id, b in pairs(foodButtons) do
-		if d.foods[id] and not b.Text:find("✓") then b.Text = b.Text:gsub(" %- %d+$", "") .. " ✓" end
+local function renderShop()
+	for _, ch in ipairs(list:GetChildren()) do if ch:IsA("Frame") then ch:Destroy() end end
+	for name, b in pairs(tabs) do b.BackgroundColor3 = name == state.tab and C.accent or C.card; b.Text = T(name) end
+	local d = state.data; if not d then return end
+	if state.tab == "menu" then
+		for _, f in ipairs(Config.Foods) do
+			local owned = d.foods[f.id]
+			local can = d.cash >= f.cost
+			local _, b = card(Locale.food(lang, f.id), "+" .. Locale.fmt(f.income) .. " " .. T("perSec"),
+				owned and T("owned") or ("฿ " .. Locale.fmt(f.cost)), owned and C.card or (can and C.green or C.red),
+				function()
+					if owned then return end
+					local ok, err = Remotes.BuyFood:InvokeServer(f.id)
+					if ok then notify(string.format(T("bought"), Locale.food(lang, f.id)), C.green) elseif err then notify(T(err), C.red) end
+				end, f.emoji)
+			if owned then b.AutoButtonColor = false end
+		end
+	elseif state.tab == "passes" then
+		for _, gp in ipairs(Config.GamePasses) do
+			card(T(gp.key), "Game Pass", "Robux", C.accent, function() Remotes.PromptPass:FireServer("pass", gp.key) end, "⭐")
+		end
+	else
+		for _, dp in ipairs(Config.DevProducts) do
+			card(T(dp.key), "฿ " .. Locale.fmt(dp.cash), "Robux", C.accent, function() Remotes.PromptPass:FireServer("product", dp.key) end, "💰")
+		end
 	end
 end
 
-Remotes.DataUpdate.OnClientEvent:Connect(render)
-local ok, d = pcall(function() return Remotes.GetData:InvokeServer() end)
-if ok and d then render(d) else cashLabel.Text = "ERR: " .. tostring(d) end
+local function renderTop()
+	local d = state.data; if not d then return end
+	cashLbl.Text = "฿ " .. Locale.fmt(d.cash)
+	incLbl.Text = "+" .. Locale.fmt(state.income) .. " " .. T("perSec")
+	collectBtn.Text = T("collect") .. " (" .. Locale.fmt(d.pending) .. ")"
+end
+
+local function applyLang()
+	titleLbl.Text = T("title"); shopBtn.Text = "🛒 " .. T("menu"); langBtn.Text = "🌐 " .. Locale.Names[lang]
+	renderTop(); renderShop()
+end
+
+for name, b in pairs(tabs) do b.MouseButton1Click:Connect(function() state.tab = name; renderShop() end) end
+shopBtn.MouseButton1Click:Connect(function() shopOpen = not shopOpen; shop.Visible = shopOpen; if shopOpen then renderShop() end end)
+closeBtn.MouseButton1Click:Connect(function() shopOpen = false; shop.Visible = false end)
+langBtn.MouseButton1Click:Connect(function()
+	local i = table.find(Locale.Supported, lang) or 1
+	lang = Locale.Supported[i % #Locale.Supported + 1]; applyLang()
+end)
+
+local lastCash
+Remotes.DataUpdate.OnClientEvent:Connect(function(d, income)
+	state.data, state.income = d, income or 0
+	renderTop()
+	if shopOpen and d.cash ~= lastCash then renderShop() end
+	lastCash = d.cash
+end)
+local ok, d, income = pcall(function() return Remotes.GetData:InvokeServer() end)
+if ok and d then state.data, state.income = d, income or 0; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
 ]]></string>
         </Properties>
       </Item>
     </Item>
   </Item>
-  <Item class="Workspace" referent="10">
+  <Item class="Workspace" referent="12">
     <Properties>
       <string name="Name">Workspace</string>
       <bool name="NeedsPivotMigration">false</bool>
     </Properties>
-    <Item class="Folder" referent="11">
+    <Item class="Folder" referent="13">
       <Properties>
         <string name="Name">Map</string>
       </Properties>
-      <Item class="Part" referent="12">
+      <Item class="Part" referent="14">
         <Properties>
-          <string name="Name">Baseplate</string>
+          <string name="Name">Ground</string>
           <bool name="Anchored">true</bool>
-          <Color3uint8 name="Color3uint8">9220966</Color3uint8>
+          <Color3uint8 name="Color3uint8">7577177</Color3uint8>
           <token name="Material">1280</token>
           <Vector3 name="Position">
             <X>0</X>
@@ -334,35 +537,18 @@ if ok and d then render(d) else cashLabel.Text = "ERR: " .. tostring(d) end
             <Z>0</Z>
           </Vector3>
           <Vector3 name="size">
-            <X>200</X>
+            <X>400</X>
             <Y>2</Y>
-            <Z>200</Z>
+            <Z>400</Z>
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="SpawnLocation" referent="13">
-        <Properties>
-          <string name="Name">SpawnLocation</string>
-          <bool name="Anchored">true</bool>
-          <Color3uint8 name="Color3uint8">15132390</Color3uint8>
-          <Vector3 name="Position">
-            <X>0</X>
-            <Y>0.5</Y>
-            <Z>20</Z>
-          </Vector3>
-          <Vector3 name="size">
-            <X>8</X>
-            <Y>1</Y>
-            <Z>8</Z>
-          </Vector3>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="14">
+      <Item class="Part" referent="15">
         <Properties>
           <string name="Name">Road</string>
           <bool name="Anchored">true</bool>
-          <Color3uint8 name="Color3uint8">5066061</Color3uint8>
+          <Color3uint8 name="Color3uint8">4210757</Color3uint8>
           <token name="Material">1376</token>
           <Vector3 name="Position">
             <X>0</X>
@@ -370,127 +556,77 @@ if ok and d then render(d) else cashLabel.Text = "ERR: " .. tostring(d) end
             <Z>0</Z>
           </Vector3>
           <Vector3 name="size">
-            <X>200</X>
+            <X>400</X>
             <Y>0.2</Y>
-            <Z>14</Z>
+            <Z>16</Z>
           </Vector3>
         </Properties>
       </Item>
-      <Item class="Model" referent="15">
+      <Item class="SpawnLocation" referent="16">
         <Properties>
-          <string name="Name">Cart</string>
-          <bool name="NeedsPivotMigration">false</bool>
+          <string name="Name">SpawnLocation</string>
+          <bool name="Anchored">true</bool>
+          <Color3uint8 name="Color3uint8">15921906</Color3uint8>
+          <token name="Material">272</token>
+          <Vector3 name="Position">
+            <X>0</X>
+            <Y>0.5</Y>
+            <Z>-20</Z>
+          </Vector3>
+          <Vector3 name="size">
+            <X>10</X>
+            <Y>1</Y>
+            <Z>10</Z>
+          </Vector3>
         </Properties>
-        <Item class="Part" referent="16">
+      </Item>
+      <Item class="Part" referent="17">
+        <Properties>
+          <string name="Name">Welcome</string>
+          <bool name="Anchored">true</bool>
+          <Color3uint8 name="Color3uint8">16772505</Color3uint8>
+          <token name="Material">272</token>
+          <Vector3 name="Position">
+            <X>0</X>
+            <Y>8</Y>
+            <Z>-30</Z>
+          </Vector3>
+          <Vector3 name="size">
+            <X>24</X>
+            <Y>4</Y>
+            <Z>0.4</Z>
+          </Vector3>
+        </Properties>
+        <Item class="SurfaceGui" referent="18">
           <Properties>
-            <string name="Name">Body</string>
-            <bool name="Anchored">true</bool>
-            <Color3uint8 name="Color3uint8">15106099</Color3uint8>
-            <token name="Material">512</token>
-            <Vector3 name="Position">
-              <X>0</X>
-              <Y>1.5</Y>
-              <Z>-10</Z>
-            </Vector3>
-            <Vector3 name="size">
-              <X>8</X>
-              <Y>3</Y>
-              <Z>4</Z>
-            </Vector3>
+            <string name="Name">Gui</string>
+            <token name="Face">5</token>
           </Properties>
-        </Item>
-        <Item class="Part" referent="17">
-          <Properties>
-            <string name="Name">Roof</string>
-            <bool name="Anchored">true</bool>
-            <Color3uint8 name="Color3uint8">14234419</Color3uint8>
-            <token name="Material">1312</token>
-            <Vector3 name="Position">
-              <X>0</X>
-              <Y>5</Y>
-              <Z>-10</Z>
-            </Vector3>
-            <Vector3 name="size">
-              <X>9</X>
-              <Y>0.4</Y>
-              <Z>5</Z>
-            </Vector3>
-          </Properties>
-        </Item>
-        <Item class="Part" referent="18">
-          <Properties>
-            <string name="Name">Pole1</string>
-            <bool name="Anchored">true</bool>
-            <Color3uint8 name="Color3uint8">5066061</Color3uint8>
-            <Vector3 name="Position">
-              <X>-4</X>
-              <Y>2.5</Y>
-              <Z>-8</Z>
-            </Vector3>
-            <Vector3 name="size">
-              <X>0.3</X>
-              <Y>5</Y>
-              <Z>0.3</Z>
-            </Vector3>
-          </Properties>
-        </Item>
-        <Item class="Part" referent="19">
-          <Properties>
-            <string name="Name">Pole2</string>
-            <bool name="Anchored">true</bool>
-            <Color3uint8 name="Color3uint8">5066061</Color3uint8>
-            <Vector3 name="Position">
-              <X>4</X>
-              <Y>2.5</Y>
-              <Z>-8</Z>
-            </Vector3>
-            <Vector3 name="size">
-              <X>0.3</X>
-              <Y>5</Y>
-              <Z>0.3</Z>
-            </Vector3>
-          </Properties>
-        </Item>
-        <Item class="Part" referent="20">
-          <Properties>
-            <string name="Name">Sign</string>
-            <bool name="Anchored">true</bool>
-            <Color3uint8 name="Color3uint8">16770637</Color3uint8>
-            <Vector3 name="Position">
-              <X>0</X>
-              <Y>5.8</Y>
-              <Z>-8</Z>
-            </Vector3>
-            <Vector3 name="size">
-              <X>8</X>
-              <Y>1.2</Y>
-              <Z>0.2</Z>
-            </Vector3>
-          </Properties>
-          <Item class="SurfaceGui" referent="21">
+          <Item class="TextLabel" referent="19">
             <Properties>
-              <string name="Name">Label</string>
-              <token name="Face">5</token>
+              <string name="Name">Text</string>
+              <float name="BackgroundTransparency">1</float>
+              <Font name="FontFace">
+                <Family>
+                  <url>rbxasset://fonts/families/FredokaOne.json</url>
+                </Family>
+                <Weight>400</Weight>
+                <Style>Normal</Style>
+              </Font>
+              <UDim2 name="Size">
+                <XS>1</XS>
+                <XO>0</XO>
+                <YS>1</YS>
+                <YO>0</YO>
+              </UDim2>
+              <string name="Text">🍜 Street Food Tycoon 🍢</string>
+              <Color3 name="TextColor3">
+                <R>0.3</R>
+                <G>0.15</G>
+                <B>0.05</B>
+              </Color3>
+              <bool name="TextScaled">true</bool>
             </Properties>
-            <Item class="TextLabel" referent="22">
-              <Properties>
-                <string name="Name">Text</string>
-                <float name="BackgroundTransparency">1</float>
-                <UDim2 name="Size">
-                  <XS>1</XS>
-                  <XO>0</XO>
-                  <YS>1</YS>
-                  <YO>0</YO>
-                </UDim2>
-                <string name="Text">Street Food Tycoon</string>
-                <Color3 name="TextColor3">
-                  <R>0.1</R>
-                  <G>0.1</G>
-                  <B>0.1</B>
-                </Color3>
-                <bool name="TextScaled">true</bool>
-              </Properties>
-            </Item>
           </Item>
         </Item>
       </Item>
