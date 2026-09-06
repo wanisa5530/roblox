@@ -244,3 +244,61 @@ local atm = Instance.new("Atmosphere"); atm.Density = 0.32; atm.Offset = 0.2; at
 local bloom = Instance.new("BloomEffect"); bloom.Intensity = 0.4; bloom.Size = 24; bloom.Threshold = 1.2; bloom.Parent = Lighting
 local cc = Instance.new("ColorCorrectionEffect"); cc.Saturation = 0.15; cc.Contrast = 0.1; cc.TintColor = Color3.fromRGB(255, 245, 235); cc.Parent = Lighting
 Lighting.Brightness = 0.8; Lighting.ExposureCompensation = -0.2
+
+
+-- ===== วงจรกลางวัน-กลางคืน (1 วันเกม = 24 นาทีจริง) เปิด/ปิดไฟอัตโนมัติ =====
+local DAY_MINUTES = 24
+local lights = {}
+task.defer(function()
+	for _, x in ipairs(workspace:GetDescendants()) do if x:IsA("PointLight") or x:IsA("SurfaceLight") then lights[#lights + 1] = x end end
+	workspace.DescendantAdded:Connect(function(x) if x:IsA("PointLight") or x:IsA("SurfaceLight") then lights[#lights + 1] = x end end)
+end)
+task.spawn(function()
+	while true do
+		local t = (os.time() % (DAY_MINUTES * 60)) / (DAY_MINUTES * 60) -- 0..1
+		local hour = 6 + t * 24 -- เริ่ม 6 โมงเช้า
+		if hour >= 24 then hour -= 24 end
+		Lighting.ClockTime = hour
+		local night = hour < 6 or hour >= 18.5
+		Lighting.Brightness = night and 0.8 or 2.2
+		Lighting.Ambient = night and Color3.fromRGB(70, 60, 80) or Color3.fromRGB(150, 150, 150)
+		Lighting.OutdoorAmbient = night and Color3.fromRGB(80, 70, 90) or Color3.fromRGB(170, 170, 175)
+		atm.Density = night and 0.32 or 0.22; atm.Color = night and Color3.fromRGB(199, 170, 150) or Color3.fromRGB(215, 225, 240)
+		for _, l in ipairs(lights) do if l.Parent then l.Enabled = night end end
+		task.wait(5)
+	end
+end)
+
+-- ===== แม่น้ำเจ้าพระยา + เรือหางยาว + พระปรางค์วัดอรุณ (หลังโซนเต็นท์) =====
+part({ Size = Vector3.new(700, 1, 90), Position = Vector3.new(0, -0.6, 300), Color = Color3.fromRGB(70, 110, 120), Material = Enum.Material.Glass, Transparency = 0.15 })
+part({ Size = Vector3.new(700, 2, 6), Position = Vector3.new(0, 0.5, 252), Color = Color3.fromRGB(160, 150, 140), Material = Enum.Material.Concrete })
+for x = -300, 300, 12 do part({ Size = Vector3.new(0.4, 2, 0.4), Position = Vector3.new(x, 2.5, 252), Color = Color3.fromRGB(230, 230, 230), Material = Enum.Material.Metal }) end
+part({ Size = Vector3.new(700, 0.15, 0.15), Position = Vector3.new(0, 3.4, 252), Color = Color3.fromRGB(230, 230, 230) })
+-- ท่าเรือ
+part({ Size = Vector3.new(20, 1, 14), Position = Vector3.new(40, 0.3, 262), Color = Color3.fromRGB(120, 85, 55), Material = Enum.Material.WoodPlanks })
+neonSign("🛥️ ท่าเรือ PIER", Vector3.new(8, 1.6, 0.2), CFrame.new(40, 5, 255), Color3.fromRGB(255, 255, 255), Color3.fromRGB(0, 100, 170))
+-- พระปรางค์ (ฝั่งตรงข้ามแม่น้ำ)
+for k = 0, 7 do local w = 30 - k * 3.4; part({ Size = Vector3.new(w, 7, w), Position = Vector3.new(-40, 3.5 + k * 7, 380), Color = Color3.fromRGB(225, 215, 200), Material = Enum.Material.Concrete }) end
+part({ Size = Vector3.new(2, 14, 2), Position = Vector3.new(-40, 66, 380), Color = Color3.fromRGB(255, 215, 90), Material = Enum.Material.Metal })
+for _, dx in ipairs({ -22, 22 }) do for k = 0, 4 do local w = 12 - k * 2; part({ Size = Vector3.new(w, 5, w), Position = Vector3.new(-40 + dx, 2.5 + k * 5, 380), Color = Color3.fromRGB(225, 215, 200), Material = Enum.Material.Concrete }) end end
+local pl = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(2, 2, 2), Position = Vector3.new(-40, 74, 380), Color = Color3.fromRGB(255, 230, 150), Material = Enum.Material.Neon }); local pll = Instance.new("PointLight"); pll.Range = 60; pll.Brightness = 2; pll.Color = Color3.fromRGB(255, 220, 140); pll.Parent = pl
+-- เรือหางยาววิ่งไปมา
+local function longtail(z, dir, delay)
+	local m = Instance.new("Model"); m.Parent = deco
+	local hull = part({ Size = Vector3.new(3, 1.6, 16), Position = Vector3.new(0, 0.6, z), Color = Color3.fromRGB(150, 90, 50), Material = Enum.Material.Wood }, m)
+	part({ Size = Vector3.new(3.2, 0.3, 8), Position = Vector3.new(0, 2.6, z - 1), Color = Color3.fromRGB(200, 50, 50), Material = Enum.Material.Fabric }, m)
+	for _, dz in ipairs({ -3.5, 3.5 }) do part({ Size = Vector3.new(0.2, 2, 0.2), Position = Vector3.new(0, 1.6, z - 1 + dz), Color = Color3.fromRGB(200, 200, 200) }, m) end
+	part({ Size = Vector3.new(0.3, 0.3, 5), CFrame = CFrame.new(0, 1.2, z + 9) * CFrame.Angles(math.rad(-20), 0, 0), Color = Color3.fromRGB(60, 60, 60), Material = Enum.Material.Metal }, m)
+	for _, c in ipairs({ Color3.fromRGB(255, 120, 120), Color3.fromRGB(255, 220, 120), Color3.fromRGB(120, 200, 255) }) do part({ Size = Vector3.new(0.6, 1.2, 0.6), Position = Vector3.new(0, 1.8, z - 6), Color = c, Material = Enum.Material.Fabric }, m) end
+	m.PrimaryPart = hull
+	for _, p in ipairs(m:GetChildren()) do if p ~= hull then local w = Instance.new("WeldConstraint"); w.Part0 = hull; w.Part1 = p; w.Parent = p; p.Anchored = false end end
+	task.spawn(function()
+		task.wait(delay)
+		while true do
+			m:PivotTo(CFrame.new(-330 * dir, 0.6, z) * CFrame.Angles(0, math.rad(dir > 0 and -90 or 90), 0))
+			local tw = TweenService:Create(hull, TweenInfo.new(60, Enum.EasingStyle.Linear), { CFrame = CFrame.new(330 * dir, 0.6, z) * CFrame.Angles(0, math.rad(dir > 0 and -90 or 90), 0) })
+			tw:Play(); tw.Completed:Wait(); task.wait(5)
+		end
+	end)
+end
+longtail(285, 1, 0); longtail(315, -1, 20); longtail(300, 1, 40)

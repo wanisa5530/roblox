@@ -419,15 +419,21 @@ if G.started then return end; G.started = true
 		if npc:GetAttribute("Busy") then return end
 		npc:SetAttribute("Busy", true)
 		task.spawn(function()
-			local h = npc:FindFirstChildOfClass("Humanoid")
-			local home = npc:GetPivot().Position
+			local root = npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart")
+			local home = npc:GetPivot()
 			local function go(pos)
-				if not h then return end
-				h:MoveTo(pos); local t0 = os.clock(); local done = false
-				local c; c = h.MoveToFinished:Connect(function() done = true; c:Disconnect() end)
-				while not done and os.clock() - t0 < 8 and npc.Parent do task.wait(0.1) end
+				if not root then return end
+				root.Anchored = true
+				local from = npc:GetPivot().Position; local flat = Vector3.new(pos.X, from.Y, pos.Z)
+				local dist = (flat - from).Magnitude; local dur = math.max(dist / 9, 0.3)
+				local t0 = os.clock()
+				while os.clock() - t0 < dur and npc.Parent do
+					local a = (os.clock() - t0) / dur
+					npc:PivotTo(CFrame.lookAt(from:Lerp(flat, a), flat + Vector3.new(0, 0, 0.001)) * CFrame.new(0, math.abs(math.sin(a * dist * 1.5)) * 0.25, 0))
+					task.wait()
+				end
 			end
-			go(target); task.wait(0.6); cb(); go(home)
+			go(target); task.wait(0.8); cb(); go(home.Position); npc:PivotTo(home)
 			npc:SetAttribute("Busy", nil)
 		end)
 	end
