@@ -44,7 +44,7 @@ local function render(d)
 	cashLabel.Text = "เงิน: " .. d.cash
 	collect.Text = "เก็บเงิน (" .. d.pending .. ")"
 	for id, b in pairs(foodButtons) do
-		if d.foods[id] then b.Text = b.Text:gsub(" %- %d+$", "") .. " ✓"; b.Active = false end
+		if d.foods[id] and not b.Text:find("✓") then b.Text = b.Text:gsub(" %- %d+$", "") .. " ✓" end
 	end
 end
 
