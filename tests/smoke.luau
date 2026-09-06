@@ -20,6 +20,11 @@ check("detect th", Locale.detect("th-th") == "th")
 check("detect fallback", Locale.detect("xx") == "en")
 check("fmt", Locale.fmt(1500000) == "1.50M")
 
+local Sounds = require(RS.Sounds)
+local n = 0
+for name, cfg in pairs(Sounds) do n += 1; check("sound cfg " .. name, type(cfg.id) == "string" and (cfg.id == "" or cfg.id:match("^rbxasset")) ~= nil) end
+check("sounds >= 8", n >= 8)
+
 local DSS = game:GetService("DataStoreService")
 local store = DSS:GetDataStore("StreetFoodTycoon_v2")
 local ok, err = pcall(function()
