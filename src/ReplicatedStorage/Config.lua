@@ -34,7 +34,7 @@ Config.Foods = {
 	{ id="TomYum",      emoji="🦐", spicy=true, game="mash", steps={"mash","flip"}, cookTime=4, price=450, batch=1, cost=200000,  income=1600, color={0.95,0.45,0.30} },
 	{ id="HoiTod",      emoji="🦪", game="timing", steps={"timing","flip"}, cookTime=3, price=600, batch=1, cost=450000,  income=3200, color={0.85,0.70,0.40} },
 	{ id="MangoRice",   emoji="🥭", game="flip", steps={"mash","timing","flip"}, cookTime=4, price=800, batch=1, cost=1000000, income=6500, color={1.00,0.75,0.20} },
-	{ id="ThaiTea",     emoji="🧋", game="mash", steps={"mash","timing"}, cookTime=3, price=1000, batch=1, cost=2200000, income=13000,color={0.90,0.50,0.20} },
+	{ id="ThaiTea",     emoji="🥤", game="mash", steps={"mash","timing"}, cookTime=3, price=1000, batch=1, cost=2200000, income=13000,color={0.90,0.50,0.20} },
 	{ id="DurianCart",  emoji="🍈", game="flip", steps={"mash","timing","flip"}, cookTime=5, price=1500, batch=1, cost=5000000, income=30000,color={0.75,0.80,0.35} },
 }
 
