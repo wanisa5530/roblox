@@ -5,6 +5,7 @@ local Dish = require(RS.Dish)
 local SSS = game:GetService("ServerScriptService")
 local Plot = require(SSS.PlotService)
 local Customers = require(SSS.CustomerService)
+require(SSS.GameService).init()
 local fails = {}
 local function check(name, ok) if not ok then table.insert(fails, name) end; print((ok and "PASS " or "FAIL ") .. name) end
 
