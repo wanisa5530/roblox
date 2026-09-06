@@ -450,7 +450,7 @@ if G.started then return end; G.started = true
 		d._staffNext = d._staffNext or {}
 		for _, st in ipairs(Config.Staff) do
 			if d.staff[st.key] and (d._staffNext[st.key] or 0) <= t then
-				d._staffNext[st.key] = t + st.interval
+				d._staffNext[st.key] = t + st.interval * (ownsPass(player, "AutoChef") and 0.5 or 1)
 				if st.key == "Cook" then
 					for _, g in ipairs(Customers.groups[player] or {}) do
 						if g.alive and g.orderAt then
@@ -485,6 +485,7 @@ if G.started then return end; G.started = true
 	end
 	local function payWages(player)
 		local d = Data.get(player); if not d then return end
+		if ownsPass(player, "AutoChef") then return end
 		for _, st in ipairs(Config.Staff) do
 			if d.staff[st.key] then
 				if d.cash >= st.wage then d.cash -= st.wage else d.staff[st.key] = nil; notify(player, "staffQuit", "red", st.key); showStaff(player, st.key) end
@@ -493,7 +494,6 @@ if G.started then return end; G.started = true
 		push(player)
 	end
 	Remotes.HireStaff.OnServerInvoke = function(player, key)
-		if key == "ToggleAutoChef" then player:SetAttribute("AutoChefOn", player:GetAttribute("AutoChefOn") == false); return true end
 		local d = Data.get(player); local st = staffCfg(key)
 		if not d or not st then return false end
 		if d.staff[key] then return false, "owned" end
@@ -547,26 +547,6 @@ if G.started then return end; G.started = true
 				Customers.spawn(player, dd.foods)
 				local repBonus = math.min(dd.rep / 1000, 0.5)
 				task.wait(math.random(Config.CustomerInterval.min, Config.CustomerInterval.max) * (1 - repBonus))
-			end
-		end)
-		-- พ่อครัวอัตโนมัติ (Game Pass): เสิร์ฟให้เองช้า ๆ
-		task.spawn(function()
-			while player.Parent do
-				task.wait(10)
-				if ownsPass(player, "AutoChef") then
-					for _, g in ipairs(Customers.groups[player] or {}) do
-						if g.alive and g.orderAt then
-							for _, e in ipairs(g.members) do
-								if not e.served then
-									local dd = Data.get(player)
-									if dd then dd.cash += e.food.price; dd.total += e.food.price; dd.served += 1; Customers.markServed(e); push(player) end
-									break
-								end
-							end
-							break
-						end
-					end
-				end
 			end
 		end)
 	end

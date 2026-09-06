@@ -195,13 +195,11 @@ local function renderShop()
 			end, ({ tent = "⛺", chairs = "🪑", sign = "🪧", prop = "🎏" })[it.cat])
 		end
 	elseif state.tab == "staff" then
-		if player:GetAttribute("Pass_AutoChef") then
-			local on = player:GetAttribute("AutoChefOn") ~= false
-			card("🤖 " .. T("AutoChef"), "Game Pass", on and "ON" or "OFF", on and C.green or C.card, function() Remotes.HireStaff:InvokeServer("ToggleAutoChef"); task.wait(0.1); renderShop() end, "⭐")
-		end
+		local hasPrem = player:GetAttribute("Pass_AutoChef")
+		card(T("AutoChef"), T("autoChefDesc"), hasPrem and T("owned") or "Robux", hasPrem and C.card or C.accent, function() if not hasPrem then Remotes.PromptPass:FireServer("pass", "AutoChef") end end, "⭐")
 		for _, st in ipairs(Config.Staff) do
 			local hired = d.staff and d.staff[st.key]
-			card(T(st.key), T(st.key:lower() .. "Desc") .. "  ·  ฿" .. Locale.fmt(st.wage) .. " " .. T("wage"),
+			card(T(st.key), T(st.key:lower() .. "Desc") .. "  ·  " .. (player:GetAttribute("Pass_AutoChef") and T("noWage") or ("฿" .. Locale.fmt(st.wage) .. " " .. T("wage"))),
 				hired and T("hired") or ("฿ " .. Locale.fmt(st.cost)), hired and C.card or (d.cash >= st.cost and C.green or C.red),
 				function()
 					if hired then return end
