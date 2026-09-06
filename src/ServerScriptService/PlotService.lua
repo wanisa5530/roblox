@@ -3,7 +3,7 @@ local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
 local Locale = require(RS.Locale)
 local Dish = require(RS.Dish)
-local P = { owners = {}, tables = {}, onCook = nil, onPack = nil, onClean = nil, onWash = nil }
+local P = { owners = {}, tables = {}, onCook = nil, onPack = nil, onClean = nil, onWash = nil, onPickup = nil }
 local root = Instance.new("Folder"); root.Name = "Plots"; root.Parent = workspace
 
 local function part(props, parent)
@@ -42,6 +42,8 @@ function P.points(i)
 		origin = o,
 		spawn = Vector3.new(o.X, 3, 2),
 		queue = function(n) return o + Vector3.new(4, 3, -10 + (n - 1) * 3.5) end,
+		counterSlot = function(n) return o + Vector3.new(-5 + (n - 1) * 3.5, 3.6, -14) end,
+		staff = { Cook = o + Vector3.new(0, 3, -24), Waiter = o + Vector3.new(-3, 3, -16.5), Washer = o + Vector3.new(-11, 3, -20.5) },
 	}
 end
 
@@ -142,6 +144,29 @@ function P.menuBoard(player, foods)
 	local lines = { "📋 MENU" }
 	for _, f in ipairs(Config.Foods) do if foods[f.id] then lines[#lines + 1] = f.emoji .. " " .. Locale.food("th", f.id) .. "  ฿" .. f.price end end
 	board.SurfaceGui.TextLabel.Text = table.concat(lines, "\n")
+end
+
+-- จานที่พ่อครัวทำเสร็จ วางบนเคาน์เตอร์ (สูงสุด 3 ช่อง)
+function P.putOnCounter(player, foodId)
+	local m = root:FindFirstChild("Plot_" .. player.UserId); if not m then return false end
+	local ready = m:FindFirstChild("Ready") or Instance.new("Folder"); ready.Name = "Ready"; ready.Parent = m
+	if #ready:GetChildren() >= 3 then return false end
+	local pts = P.points(player:GetAttribute("PlotIndex"))
+	local used = {}
+	for _, c in ipairs(ready:GetChildren()) do used[c:GetAttribute("Slot")] = true end
+	local slot = 1; while used[slot] do slot += 1 end
+	local d = Dish.build(foodId); d:SetAttribute("Slot", slot); d.Parent = ready
+	d:PivotTo(CFrame.new(pts.counterSlot(slot)))
+	for _, x in ipairs(d:GetDescendants()) do if x:IsA("BasePart") then x.Anchored = true end end
+	prompt(d.PrimaryPart, "Pick up", Locale.food("en", foodId), "pickup", function(who) if who == player and P.onPickup then P.onPickup(player, d) end end)
+	return true
+end
+function P.takeFromCounter(player, foodId)
+	local m = root:FindFirstChild("Plot_" .. player.UserId); local ready = m and m:FindFirstChild("Ready")
+	if not ready then return end
+	for _, c in ipairs(ready:GetChildren()) do
+		if not foodId or c:GetAttribute("FoodId") == foodId then c:Destroy(); return c end
+	end
 end
 
 function P.freeTable(player)

@@ -68,7 +68,25 @@ check("group done callback", doneCalled)
 check("groups cleared", #(Customers.groups[fake] or {}) == 0)
 check("cash earned", Data.cache[fake.UserId].cash > 0 and Data.cache[fake.UserId].served == #g.members)
 
--- 5) คิวซื้อกลับไม่เกิน MaxQueue
+-- 5) พนักงาน: จ้าง พ่อครัววางจาน พนักงานเสิร์ฟ เด็กล้างจาน
+local GS = require(SSS.GameService)
+local dd = Data.cache[fake.UserId]; dd.cash = 10000
+for _, st in ipairs(Config.Staff) do dd.staff[st.key] = true end
+local g2 = Customers.spawn(fake, { MooPing = true })
+t0 = os.clock(); while g2 and not g2.orderAt and os.clock() - t0 < 20 do task.wait(0.2) end
+check("group2 ordered", g2 and g2.orderAt ~= nil)
+GS.staffTick(fake); task.wait(0.2)
+local plot2 = workspace.Plots:FindFirstChild("Plot_1")
+check("cook put dish on counter", plot2 and plot2:FindFirstChild("Ready") and #plot2.Ready:GetChildren() >= 1)
+dd._staffNext.Waiter = 0; GS.staffTick(fake)
+check("waiter served", g2.members[1].served == true)
+if g2.table then g2.table.setDirty(true); dd._staffNext.Washer = 0; GS.staffTick(fake); check("washer cleaned", g2.table.dirty == false) end
+local before = dd.cash; GS.payWages(fake)
+check("wages paid", dd.cash < before)
+dd.cash = 0; GS.payWages(fake)
+check("staff quit when broke", next(dd.staff) == nil)
+
+-- 6) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil

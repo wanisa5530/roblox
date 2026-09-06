@@ -55,6 +55,13 @@ Config.FoodNames = {
 	DurianCart = { en="Durian Cart",              th="รถเข็นทุเรียน",        ja="ドリアン屋台",         zh="榴莲车",       id="Gerobak Durian" },
 }
 
+-- พนักงาน: cost = ค่าจ้างครั้งแรก, wage = ค่าแรงต่อคาบ, interval = วินาทีต่อการทำงาน 1 ครั้ง
+Config.WagePeriod = 300
+Config.Staff = {
+	{ key="Cook",   emoji="👨‍🍳", cost=1500, wage=120, interval=9 },
+	{ key="Waiter", emoji="🧑‍💼", cost=900,  wage=80,  interval=6 },
+	{ key="Washer", emoji="🧽", cost=600,  wage=50,  interval=8 },
+}
 -- Game Pass (ใส่ไอดีจริงแทน 0)
 Config.GamePasses = {
 	{ key="DoubleIncome", id=0, mult=2 },

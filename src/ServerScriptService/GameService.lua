@@ -111,26 +111,103 @@ if G.started then return end; G.started = true
 	end)
 	
 	-- เสิร์ฟ
-	Customers.onServed = function(entry)
-		local player = entry.group.player
-		local holding = player:GetAttribute("Holding")
-		if not holding then notify(player, "noDish", "red"); return end
-		if holding ~= entry.food.id then notify(player, "wrongDish", "red"); return end
-		if entry.group.kind == "takeaway" and not player:GetAttribute("Bagged") then notify(player, "needBag", "red"); return end
+	local function serveEntry(player, entry, quality)
 		local d = Data.get(player); if not d then return end
-		local quality = player:GetAttribute("Quality") or 0.5
 		local patience = Customers.patienceLeft(entry)
 		local base = entry.food.price
 		local tip = math.floor(base * Config.TipMax * (quality * 0.6 + patience * 0.4))
 		local earned = math.floor((base + tip) * mult(player))
 		d.cash += earned; d.total += earned; d.served += 1
 		d.rep = math.min(d.rep + (quality > 0.85 and 2 or 1), 1000)
-		local left = (player:GetAttribute("HoldCount") or 1) - 1
-		if left > 0 then setHolding(player, holding, left, player:GetAttribute("Bagged")) else setHolding(player, nil) end
 		Customers.markServed(entry)
 		notify(player, "tip", "green", earned, tip)
 		push(player)
 	end
+	Customers.onServed = function(entry)
+		local player = entry.group.player
+		local holding = player:GetAttribute("Holding")
+		if not holding or holding == "Dirty" then notify(player, holding and "handsFull" or "noDish", "red"); return end
+		if holding ~= entry.food.id then notify(player, "wrongDish", "red"); return end
+		if entry.group.kind == "takeaway" and not player:GetAttribute("Bagged") then notify(player, "needBag", "red"); return end
+		local left = (player:GetAttribute("HoldCount") or 1) - 1
+		if left > 0 then setHolding(player, holding, left, player:GetAttribute("Bagged")) else setHolding(player, nil) end
+		serveEntry(player, entry, player:GetAttribute("Quality") or 0.5)
+	end
+	-- หยิบจานจากเคาน์เตอร์ที่พ่อครัวทำไว้
+	Plot.onPickup = function(player, dish)
+		if player:GetAttribute("Holding") then notify(player, "handsFull", "red"); return end
+		local id = dish:GetAttribute("FoodId"); dish:Destroy()
+		player:SetAttribute("Quality", 0.6)
+		setHolding(player, id, 1, false)
+	end
+
+	-- พนักงาน
+	local staffNpcs = {}
+	local function staffCfg(key) for _, st in ipairs(Config.Staff) do if st.key == key then return st end end end
+	local function showStaff(player, key)
+		local d = Data.get(player); if not d then return end
+		staffNpcs[player] = staffNpcs[player] or {}
+		local existing = staffNpcs[player][key]
+		if d.staff[key] and not existing and isReal(player) then
+			local pts = Plot.points(player:GetAttribute("PlotIndex"))
+			local desc = Instance.new("HumanoidDescription"); desc.TorsoColor = Color3.fromRGB(250, 250, 250); desc.HeadColor = Color3.fromRGB(240, 200, 170)
+			local ok, npc = pcall(Players.CreateHumanoidModelFromDescription, Players, desc, Enum.HumanoidRigType.R15)
+			if ok then
+				npc.Name = staffCfg(key).emoji .. " " .. key; npc:PivotTo(CFrame.new(pts.staff[key], pts.staff[key] + Vector3.new(0, 0, 10)))
+				npc.Parent = workspace.Plots:FindFirstChild("Plot_" .. player.UserId)
+				local h = npc:FindFirstChildOfClass("Humanoid"); if h then h.DisplayName = npc.Name end
+				staffNpcs[player][key] = npc
+			end
+		elseif not d.staff[key] and existing then existing:Destroy(); staffNpcs[player][key] = nil end
+	end
+	local function staffTick(player)
+		local d = Data.get(player); if not d then return end
+		local t = os.clock()
+		d._staffNext = d._staffNext or {}
+		for _, st in ipairs(Config.Staff) do
+			if d.staff[st.key] and (d._staffNext[st.key] or 0) <= t then
+				d._staffNext[st.key] = t + st.interval
+				if st.key == "Cook" then
+					for _, g in ipairs(Customers.groups[player] or {}) do
+						if g.alive and g.orderAt then
+							for _, e in ipairs(g.members) do
+								if not e.served and not e.cooking then e.cooking = true; Plot.putOnCounter(player, e.food.id); break end
+							end
+						end
+					end
+				elseif st.key == "Waiter" then
+					for _, g in ipairs(Customers.groups[player] or {}) do
+						if g.alive and g.orderAt then
+							for _, e in ipairs(g.members) do
+								if not e.served and Plot.takeFromCounter(player, e.food.id) then serveEntry(player, e, 0.6); return end
+							end
+						end
+					end
+				elseif st.key == "Washer" then
+					for _, tb in ipairs(Plot.tables[player] or {}) do if tb.dirty then tb.setDirty(false); break end end
+				end
+			end
+		end
+	end
+	local function payWages(player)
+		local d = Data.get(player); if not d then return end
+		for _, st in ipairs(Config.Staff) do
+			if d.staff[st.key] then
+				if d.cash >= st.wage then d.cash -= st.wage else d.staff[st.key] = nil; notify(player, "staffQuit", "red", st.key); showStaff(player, st.key) end
+			end
+		end
+		push(player)
+	end
+	Remotes.HireStaff.OnServerInvoke = function(player, key)
+		local d = Data.get(player); local st = staffCfg(key)
+		if not d or not st then return false end
+		if d.staff[key] then return false, "owned" end
+		if d.cash < st.cost then return false, "notEnough" end
+		d.cash -= st.cost; d.staff[key] = true
+		showStaff(player, key); push(player)
+		return true
+	end
+	G.staffTick, G.payWages = staffTick, payWages
 	Customers.onLeft = function(g)
 		local d = Data.get(g.player)
 		if d then d.rep = math.max(d.rep - 2 * #g.members, 0); notify(g.player, "left", "red"); push(g.player) end
@@ -143,6 +220,14 @@ if G.started then return end; G.started = true
 		Plot.refresh(player, d.foods)
 		push(player)
 		player.CharacterAdded:Connect(function() task.wait(0.5); if player:GetAttribute("Holding") then setHolding(player, player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")) end end)
+		for _, st in ipairs(Config.Staff) do showStaff(player, st.key) end
+		task.spawn(function()
+			local lastWage = os.clock()
+			while player.Parent do
+				task.wait(1); staffTick(player)
+				if os.clock() - lastWage >= Config.WagePeriod then lastWage = os.clock(); payWages(player) end
+			end
+		end)
 		-- ลูกค้าเดินเข้ามาเรื่อย ๆ ชื่อเสียงสูงมาถี่ขึ้น
 		task.spawn(function()
 			task.wait(4)
@@ -178,7 +263,7 @@ if G.started then return end; G.started = true
 	for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
 	Players.PlayerRemoving:Connect(function(p)
 		local d = Data.get(p); if d then LB.submit(p, d) end
-		Customers.clear(p); Plot.release(p); passCache[p] = nil; cooking[p] = nil
+		Customers.clear(p); Plot.release(p); passCache[p] = nil; cooking[p] = nil; staffNpcs[p] = nil
 	end)
 	task.spawn(function() while true do task.wait(120); for _, p in ipairs(Players:GetPlayers()) do local d = Data.get(p); if d then LB.submit(p, d) end end end end)
 	

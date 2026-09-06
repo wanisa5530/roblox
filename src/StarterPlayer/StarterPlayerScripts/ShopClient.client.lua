@@ -98,9 +98,9 @@ end)
 local shop = frame(gui, UDim2.new(0, 460, 0, 520), UDim2.new(0.5, -230, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
 local tabs = {}
-local tabNames = { "menu", "passes", "robux" }
+local tabNames = { "menu", "staff", "passes", "robux" }
 for i, name in ipairs(tabNames) do
-	tabs[name] = button(shop, T(name), UDim2.new(0, 120, 0, 36), UDim2.new(0, 12 + (i - 1) * 126, 0, 8), C.card)
+	tabs[name] = button(shop, T(name), UDim2.new(0, 92, 0, 36), UDim2.new(0, 12 + (i - 1) * 98, 0, 8), C.card)
 end
 local list = Instance.new("ScrollingFrame"); list.Size = UDim2.new(1, -24, 1, -64); list.Position = UDim2.new(0, 12, 0, 54)
 list.BackgroundTransparency = 1; list.BorderSizePixel = 0; list.ScrollBarThickness = 6; list.CanvasSize = UDim2.new(); list.AutomaticCanvasSize = Enum.AutomaticSize.Y; list.Parent = shop
@@ -131,6 +131,17 @@ local function renderShop()
 					if ok then notify(string.format(T("bought"), Locale.food(lang, f.id)), C.green) elseif err then notify(T(err), C.red) end
 				end, f.emoji)
 			if owned then b.AutoButtonColor = false end
+		end
+	elseif state.tab == "staff" then
+		for _, st in ipairs(Config.Staff) do
+			local hired = d.staff and d.staff[st.key]
+			card(T(st.key), T(st.key:lower() .. "Desc") .. "  ·  ฿" .. Locale.fmt(st.wage) .. " " .. T("wage"),
+				hired and T("hired") or ("฿ " .. Locale.fmt(st.cost)), hired and C.card or (d.cash >= st.cost and C.green or C.red),
+				function()
+					if hired then return end
+					local ok, err = Remotes.HireStaff:InvokeServer(st.key)
+					if ok then notify(T("hired") .. ": " .. T(st.key), C.green) elseif err then notify(T(err), C.red) end
+				end, st.emoji)
 		end
 	elseif state.tab == "passes" then
 		for _, gp in ipairs(Config.GamePasses) do
