@@ -10,6 +10,8 @@ local prev = -1
 for _, f in ipairs(Config.Foods) do
 	check("food name " .. f.id, Config.FoodNames[f.id] ~= nil and Config.FoodNames[f.id].en ~= nil)
 	check("cost ascending " .. f.id, f.cost > prev); prev = f.cost
+	check("gameplay fields " .. f.id, f.price and f.cookTime and (f.game == "timing" or f.game == "mash" or f.game == "flip"))
+	check("dish model " .. f.id, require(RS.Dish).Parts[f.id] ~= nil)
 end
 for _, lang in ipairs(Locale.Supported) do
 	check("locale " .. lang, Locale.get(lang, "collect") ~= "collect")

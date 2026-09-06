@@ -9,29 +9,34 @@
         <string name="Source"><![CDATA[-- คอนฟิกกลาง: เมนูอาหาร, ราคา, Game Pass, Dev Product
 local Config = {}
 Config.StartingCash = 50
-Config.PayoutInterval = 1 -- วินาที
+-- ลูกค้า
+Config.CustomerInterval = { min = 6, max = 12 } -- วินาทีระหว่างลูกค้าแต่ละคน
+Config.Patience = 45           -- วินาทีที่ลูกค้ารอได้
+Config.MaxQueue = 4
+Config.TipMax = 0.5            -- ทิปสูงสุด 50% ของราคา
+-- มินิเกม: timing = กดเมื่อเข็มอยู่โซนเขียว, mash = คลิกรัว, flip = รอให้แถบเต็มแล้วกดก่อนไหม้
 Config.MaxPlots = 8
 Config.DefaultLocale = "en"
 -- รางวัลล็อกอินรายวัน ตามจำนวนวันติดต่อกัน (วนซ้ำหลังวันที่ 7)
 Config.DailyRewards = { 200, 400, 700, 1000, 1500, 2500, 5000 }
 
--- เมนูอาหารข้างทางไทย เรียงจากถูกไปแพง (cost = ราคาซื้อ, income = รายได้/วินาที)
+-- เมนูอาหารข้างทางไทย (cost = ราคาปลดล็อกโต๊ะครัว, price = ราคาขายต่อจาน, income ใช้กับพนักงานอัตโนมัติ)
 Config.Foods = {
-	{ id="MooPing",     emoji="🍢", cost=0,       income=1,    color={0.80,0.45,0.20} },
-	{ id="KhanomKrok",  emoji="🥥", cost=60,      income=2,    color={0.95,0.90,0.75} },
-	{ id="PadThai",     emoji="🍜", cost=200,     income=5,    color={0.95,0.65,0.25} },
-	{ id="SomTam",      emoji="🥗", cost=600,     income=12,   color={0.55,0.80,0.35} },
-	{ id="KaiJeow",     emoji="🍳", cost=1500,    income=25,   color={0.98,0.85,0.30} },
-	{ id="Roti",        emoji="🥞", cost=3500,    income=50,   color={0.90,0.75,0.45} },
-	{ id="Satay",       emoji="🍡", cost=8000,    income=100,  color={0.75,0.50,0.25} },
-	{ id="BoatNoodle",  emoji="🍲", cost=18000,   income=200,  color={0.50,0.25,0.15} },
-	{ id="KhaoManGai",  emoji="🍗", cost=40000,   income=400,  color={0.95,0.85,0.60} },
-	{ id="PadKrapao",   emoji="🌶️", cost=90000,   income=800,  color={0.85,0.25,0.20} },
-	{ id="TomYum",      emoji="🦐", cost=200000,  income=1600, color={0.95,0.45,0.30} },
-	{ id="HoiTod",      emoji="🦪", cost=450000,  income=3200, color={0.85,0.70,0.40} },
-	{ id="MangoRice",   emoji="🥭", cost=1000000, income=6500, color={1.00,0.75,0.20} },
-	{ id="ThaiTea",     emoji="🧋", cost=2200000, income=13000,color={0.90,0.50,0.20} },
-	{ id="DurianCart",  emoji="🍈", cost=5000000, income=30000,color={0.75,0.80,0.35} },
+	{ id="MooPing",     emoji="🍢", game="flip", cookTime=3, price=12, cost=0,       income=1,    color={0.80,0.45,0.20} },
+	{ id="KhanomKrok",  emoji="🥥", game="flip", cookTime=3, price=18, cost=60,      income=2,    color={0.95,0.90,0.75} },
+	{ id="PadThai",     emoji="🍜", game="timing", cookTime=3, price=30, cost=200,     income=5,    color={0.95,0.65,0.25} },
+	{ id="SomTam",      emoji="🥗", game="mash", cookTime=3, price=45, cost=600,     income=12,   color={0.55,0.80,0.35} },
+	{ id="KaiJeow",     emoji="🍳", game="timing", cookTime=2.5, price=60, cost=1500,    income=25,   color={0.98,0.85,0.30} },
+	{ id="Roti",        emoji="🥞", game="mash", cookTime=3, price=85, cost=3500,    income=50,   color={0.90,0.75,0.45} },
+	{ id="Satay",       emoji="🍡", game="flip", cookTime=3.5, price=120, cost=8000,    income=100,  color={0.75,0.50,0.25} },
+	{ id="BoatNoodle",  emoji="🍲", game="timing", cookTime=3, price=170, cost=18000,   income=200,  color={0.50,0.25,0.15} },
+	{ id="KhaoManGai",  emoji="🍗", game="timing", cookTime=3, price=240, cost=40000,   income=400,  color={0.95,0.85,0.60} },
+	{ id="PadKrapao",   emoji="🌶️", game="timing", cookTime=2.5, price=320, cost=90000,   income=800,  color={0.85,0.25,0.20} },
+	{ id="TomYum",      emoji="🦐", game="mash", cookTime=4, price=450, cost=200000,  income=1600, color={0.95,0.45,0.30} },
+	{ id="HoiTod",      emoji="🦪", game="timing", cookTime=3, price=600, cost=450000,  income=3200, color={0.85,0.70,0.40} },
+	{ id="MangoRice",   emoji="🥭", game="flip", cookTime=4, price=800, cost=1000000, income=6500, color={1.00,0.75,0.20} },
+	{ id="ThaiTea",     emoji="🧋", game="mash", cookTime=3, price=1000, cost=2200000, income=13000,color={0.90,0.50,0.20} },
+	{ id="DurianCart",  emoji="🍈", game="flip", cookTime=5, price=1500, cost=5000000, income=30000,color={0.75,0.80,0.35} },
 }
 
 -- ชื่อเมนูหลายภาษา
@@ -56,7 +61,7 @@ Config.FoodNames = {
 -- Game Pass (ใส่ไอดีจริงแทน 0)
 Config.GamePasses = {
 	{ key="DoubleIncome", id=0, mult=2 },
-	{ key="AutoCollect",  id=0 },
+	{ key="AutoChef",  id=0 },
 	{ key="VIP",          id=0, mult=1.5 },
 }
 -- Dev Product
@@ -71,22 +76,111 @@ return Config
     </Item>
     <Item class="ModuleScript" referent="2">
       <Properties>
+        <string name="Name">Dish</string>
+        <string name="Source"><![CDATA[-- สร้างโมเดลอาหารจาก Part (ใช้ทั้งโชว์บนโต๊ะครัวและถือในมือ)
+local _Config = require(script.Parent.Config)
+local Dish = {}
+local function p(parent, shape, size, offset, color, material)
+	local x = Instance.new("Part")
+	x.Shape = shape or Enum.PartType.Block
+	x.Size = size; x.CFrame = CFrame.new(offset); x.Color = color
+	x.Material = material or Enum.Material.SmoothPlastic
+	x.Anchored = false; x.CanCollide = false; x.Massless = true
+	x.TopSurface = Enum.SurfaceType.Smooth; x.BottomSurface = Enum.SurfaceType.Smooth
+	x.Parent = parent
+	return x
+end
+-- รายการชิ้นส่วนต่อเมนู: {shape, size, offset, color}
+local B, C, S = Enum.PartType.Block, Enum.PartType.Cylinder, Enum.PartType.Ball
+local plate = { C, Vector3.new(0.15, 2.2, 2.2), Vector3.new(0, 0.07, 0), Color3.fromRGB(245, 245, 240) }
+local bowl = { C, Vector3.new(0.9, 1.8, 1.8), Vector3.new(0, 0.45, 0), Color3.fromRGB(70, 90, 140) }
+local stick = function(z) return { B, Vector3.new(0.08, 0.08, 2.4), Vector3.new(0, 0.3, z), Color3.fromRGB(200, 180, 140) } end
+Dish.Parts = {
+	MooPing = { plate, stick(0), stick(0.4), stick(-0.4),
+		{ B, Vector3.new(0.35, 0.3, 1.4), Vector3.new(0, 0.3, 0), Color3.fromRGB(150, 80, 40) },
+		{ B, Vector3.new(0.35, 0.3, 1.4), Vector3.new(0, 0.3, 0.4), Color3.fromRGB(160, 85, 45) },
+		{ B, Vector3.new(0.35, 0.3, 1.4), Vector3.new(0, 0.3, -0.4), Color3.fromRGB(140, 75, 40) } },
+	KhanomKrok = { plate, { S, Vector3.new(0.6, 0.6, 0.6), Vector3.new(0.4, 0.35, 0.4), Color3.fromRGB(250, 240, 210) },
+		{ S, Vector3.new(0.6, 0.6, 0.6), Vector3.new(-0.4, 0.35, 0.4), Color3.fromRGB(250, 240, 210) },
+		{ S, Vector3.new(0.6, 0.6, 0.6), Vector3.new(0.4, 0.35, -0.4), Color3.fromRGB(250, 240, 210) },
+		{ S, Vector3.new(0.6, 0.6, 0.6), Vector3.new(-0.4, 0.35, -0.4), Color3.fromRGB(250, 240, 210) } },
+	PadThai = { plate, { C, Vector3.new(0.5, 1.6, 1.6), Vector3.new(0, 0.35, 0), Color3.fromRGB(235, 160, 60) },
+		{ S, Vector3.new(0.5, 0.5, 0.5), Vector3.new(0.4, 0.7, 0.2), Color3.fromRGB(255, 220, 120) },
+		{ B, Vector3.new(0.3, 0.1, 0.5), Vector3.new(-0.5, 0.65, -0.3), Color3.fromRGB(120, 200, 80) } },
+	SomTam = { plate, { C, Vector3.new(0.6, 1.5, 1.5), Vector3.new(0, 0.4, 0), Color3.fromRGB(160, 210, 90) },
+		{ S, Vector3.new(0.35, 0.35, 0.35), Vector3.new(0.3, 0.75, 0.3), Color3.fromRGB(220, 50, 50) },
+		{ S, Vector3.new(0.35, 0.35, 0.35), Vector3.new(-0.3, 0.75, -0.2), Color3.fromRGB(220, 50, 50) } },
+	KaiJeow = { plate, { C, Vector3.new(0.4, 1.7, 1.7), Vector3.new(0, 0.3, 0), Color3.fromRGB(240, 200, 70), Enum.Material.Sand },
+		{ B, Vector3.new(1, 0.6, 1), Vector3.new(0.6, 0.35, 0.6), Color3.fromRGB(250, 250, 250) } },
+	Roti = { plate, { B, Vector3.new(1.4, 0.2, 1.4), Vector3.new(0, 0.2, 0), Color3.fromRGB(225, 190, 120) },
+		{ B, Vector3.new(1.2, 0.15, 1.2), Vector3.new(0, 0.4, 0), Color3.fromRGB(230, 200, 130) },
+		{ B, Vector3.new(0.9, 0.05, 0.9), Vector3.new(0, 0.5, 0), Color3.fromRGB(120, 80, 40) } },
+	Satay = { plate, stick(0.3), stick(-0.3), { B, Vector3.new(0.3, 0.3, 1.2), Vector3.new(0, 0.3, 0.3), Color3.fromRGB(230, 170, 70) },
+		{ B, Vector3.new(0.3, 0.3, 1.2), Vector3.new(0, 0.3, -0.3), Color3.fromRGB(230, 170, 70) },
+		{ C, Vector3.new(0.4, 0.7, 0.7), Vector3.new(0.7, 0.3, 0), Color3.fromRGB(190, 120, 50) } },
+	BoatNoodle = { bowl, { C, Vector3.new(0.2, 1.5, 1.5), Vector3.new(0, 0.9, 0), Color3.fromRGB(90, 40, 30) },
+		{ B, Vector3.new(0.5, 0.2, 0.5), Vector3.new(0.3, 1.05, 0.2), Color3.fromRGB(150, 60, 50) },
+		{ B, Vector3.new(0.4, 0.15, 0.4), Vector3.new(-0.3, 1.03, -0.2), Color3.fromRGB(110, 190, 90) } },
+	KhaoManGai = { plate, { C, Vector3.new(0.5, 1.4, 1.4), Vector3.new(-0.2, 0.35, 0), Color3.fromRGB(250, 245, 230) },
+		{ B, Vector3.new(0.6, 0.3, 1.2), Vector3.new(0.6, 0.45, 0), Color3.fromRGB(240, 220, 170) },
+		{ B, Vector3.new(0.3, 0.3, 0.3), Vector3.new(-0.5, 0.75, 0.5), Color3.fromRGB(80, 160, 70) } },
+	PadKrapao = { plate, { C, Vector3.new(0.5, 1.4, 1.4), Vector3.new(-0.3, 0.35, 0), Color3.fromRGB(250, 245, 230) },
+		{ B, Vector3.new(0.9, 0.35, 1.1), Vector3.new(0.5, 0.45, 0), Color3.fromRGB(120, 60, 40) },
+		{ B, Vector3.new(0.7, 0.15, 0.7), Vector3.new(-0.3, 0.7, 0), Color3.fromRGB(255, 200, 80) },
+		{ B, Vector3.new(0.15, 0.15, 0.5), Vector3.new(0.6, 0.7, 0.3), Color3.fromRGB(220, 40, 40) } },
+	TomYum = { bowl, { C, Vector3.new(0.2, 1.5, 1.5), Vector3.new(0, 0.9, 0), Color3.fromRGB(230, 90, 50) },
+		{ B, Vector3.new(0.5, 0.3, 0.3), Vector3.new(0.3, 1.1, 0.2), Color3.fromRGB(255, 150, 120) },
+		{ B, Vector3.new(0.5, 0.3, 0.3), Vector3.new(-0.3, 1.1, -0.2), Color3.fromRGB(255, 150, 120) },
+		{ B, Vector3.new(0.3, 0.1, 0.3), Vector3.new(0, 1.05, -0.4), Color3.fromRGB(100, 180, 80) } },
+	HoiTod = { plate, { C, Vector3.new(0.4, 1.7, 1.7), Vector3.new(0, 0.3, 0), Color3.fromRGB(235, 190, 90), Enum.Material.Sand },
+		{ B, Vector3.new(0.5, 0.2, 0.5), Vector3.new(0.4, 0.6, 0.3), Color3.fromRGB(200, 140, 60) },
+		{ B, Vector3.new(0.7, 0.1, 0.7), Vector3.new(-0.4, 0.55, -0.3), Color3.fromRGB(170, 220, 120) } },
+	MangoRice = { plate, { B, Vector3.new(1, 0.4, 0.8), Vector3.new(-0.5, 0.35, 0), Color3.fromRGB(250, 245, 235) },
+		{ B, Vector3.new(0.5, 0.35, 1.3), Vector3.new(0.4, 0.35, 0), Color3.fromRGB(255, 190, 40) },
+		{ B, Vector3.new(0.5, 0.35, 1.3), Vector3.new(0.75, 0.35, 0.15), Color3.fromRGB(255, 180, 30) } },
+	ThaiTea = { { C, Vector3.new(0.1, 1.2, 1.2), Vector3.new(0, 0.05, 0), Color3.fromRGB(245, 245, 240) },
+		{ C, Vector3.new(2, 1, 1), Vector3.new(0, 1.05, 0), Color3.fromRGB(225, 130, 60), Enum.Material.Glass },
+		{ B, Vector3.new(0.12, 2.4, 0.12), Vector3.new(0.2, 1.6, 0), Color3.fromRGB(240, 100, 100) } },
+	DurianCart = { plate, { S, Vector3.new(1.4, 1.2, 1.6), Vector3.new(0, 0.6, 0), Color3.fromRGB(210, 200, 90) },
+		{ B, Vector3.new(0.6, 0.3, 0.8), Vector3.new(0, 1.25, 0), Color3.fromRGB(250, 235, 150) } },
+}
+-- แก้ให้ Cylinder แนวนอนกลายเป็นแนวตั้ง (Cylinder ใน Roblox หมุนตามแกน X)
+function Dish.build(foodId)
+	local parts = Dish.Parts[foodId] or Dish.Parts.PadThai
+	local m = Instance.new("Model"); m.Name = "Dish_" .. foodId
+	local root
+	for i, d in ipairs(parts) do
+		local x = p(m, d[1], d[2], d[3], d[4], d[5])
+		if d[1] == Enum.PartType.Cylinder then x.CFrame = CFrame.new(d[3]) * CFrame.Angles(0, 0, math.rad(90)) end
+		if i == 1 then root = x; m.PrimaryPart = x else
+			local w = Instance.new("Weld"); w.Part0 = root; w.Part1 = x; w.C0 = root.CFrame:Inverse() * x.CFrame; w.Parent = x
+		end
+	end
+	m:SetAttribute("FoodId", foodId)
+	return m
+end
+return Dish
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="3">
+      <Properties>
         <string name="Name">Locale</string>
         <string name="Source"><![CDATA[-- ข้อความ UI หลายภาษา
 local L = {}
 L.Supported = { "en", "th", "ja", "zh", "id" }
 L.Names = { en="English", th="ไทย", ja="日本語", zh="中文", id="Indonesia" }
 L.Strings = {
-	en = { daily="Daily Reward", day="Day %d", claim="Claim", claimed="Come back tomorrow!", top="Top Tycoons", you="You", title="Street Food Tycoon", cash="Cash", perSec="/sec", collect="Collect", owned="OWNED", buy="Buy", menu="Menu", passes="Passes", robux="Robux", notEnough="Not enough cash!", bought="Opened: %s",
-		DoubleIncome="2x Income", AutoCollect="Auto Collect", VIP="VIP (+50%)", Cash1="+5,000 Cash", Cash2="+50,000 Cash", Cash3="+500,000 Cash", lang="Language" },
-	th = { daily="รางวัลรายวัน", day="วันที่ %d", claim="รับรางวัล", claimed="พรุ่งนี้มาใหม่นะ!", top="เศรษฐีอันดับต้น", you="คุณ", title="สตรีทฟู้ดไทคูน", cash="เงิน", perSec="/วิ", collect="เก็บเงิน", owned="มีแล้ว", buy="ซื้อ", menu="เมนู", passes="แพ็กเกจ", robux="Robux", notEnough="เงินไม่พอ!", bought="เปิดร้าน: %s",
-		DoubleIncome="รายได้ x2", AutoCollect="เก็บเงินอัตโนมัติ", VIP="VIP (+50%)", Cash1="+5,000 เงิน", Cash2="+50,000 เงิน", Cash3="+500,000 เงิน", lang="ภาษา" },
-	ja = { daily="デイリー報酬", day="%d日目", claim="受け取る", claimed="また明日！", top="トップ長者", you="あなた", title="屋台タイクーン", cash="所持金", perSec="/秒", collect="回収", owned="所有済み", buy="購入", menu="メニュー", passes="パス", robux="Robux", notEnough="お金が足りません！", bought="開店: %s",
-		DoubleIncome="収入2倍", AutoCollect="自動回収", VIP="VIP (+50%)", Cash1="+5,000", Cash2="+50,000", Cash3="+500,000", lang="言語" },
-	zh = { daily="每日奖励", day="第 %d 天", claim="领取", claimed="明天再来！", top="富豪榜", you="你", title="街头小吃大亨", cash="现金", perSec="/秒", collect="收取", owned="已拥有", buy="购买", menu="菜单", passes="通行证", robux="Robux", notEnough="现金不足！", bought="开张: %s",
-		DoubleIncome="双倍收入", AutoCollect="自动收取", VIP="VIP (+50%)", Cash1="+5,000 现金", Cash2="+50,000 现金", Cash3="+500,000 现金", lang="语言" },
-	id = { daily="Hadiah Harian", day="Hari %d", claim="Ambil", claimed="Kembali besok!", top="Taipan Teratas", you="Kamu", title="Street Food Tycoon", cash="Uang", perSec="/dtk", collect="Ambil", owned="DIMILIKI", buy="Beli", menu="Menu", passes="Pass", robux="Robux", notEnough="Uang tidak cukup!", bought="Dibuka: %s",
-		DoubleIncome="Pendapatan 2x", AutoCollect="Ambil Otomatis", VIP="VIP (+50%)", Cash1="+5.000 Uang", Cash2="+50.000 Uang", Cash3="+500.000 Uang", lang="Bahasa" },
+	en = { cook="Cook", serve="Serve", holding="Holding", rep="Reputation", served="Served", wrongDish="Wrong dish!", noDish="Cook the order first", left="Customer left", tip="Tip", burnt="Burnt!", mgTiming="Press SPACE in the green zone!", mgMash="Click fast!", mgFlip="Wait... then press SPACE before it burns!", perfect="Perfect!", good="Good", ok="Okay", AutoChef="Auto Chef", customer="Customer", daily="Daily Reward", day="Day %d", claim="Claim", claimed="Come back tomorrow!", top="Top Tycoons", you="You", title="Street Food Tycoon", cash="Cash", perSec="/sec", collect="Collect", owned="OWNED", buy="Buy", menu="Menu", passes="Passes", robux="Robux", notEnough="Not enough cash!", bought="Opened: %s",
+		DoubleIncome="2x Income", VIP="VIP (+50%)", Cash1="+5,000 Cash", Cash2="+50,000 Cash", Cash3="+500,000 Cash", lang="Language" },
+	th = { cook="ทำอาหาร", serve="เสิร์ฟ", holding="ถืออยู่", rep="ชื่อเสียง", served="เสิร์ฟแล้ว", wrongDish="ผิดเมนู!", noDish="ทำอาหารตามออเดอร์ก่อน", left="ลูกค้าเดินหนี", tip="ทิป", burnt="ไหม้!", mgTiming="กด SPACE ตอนเข็มอยู่โซนเขียว!", mgMash="คลิกรัว ๆ!", mgFlip="รอ... แล้วกด SPACE ก่อนไหม้!", perfect="สุดยอด!", good="ดี", ok="พอใช้", AutoChef="พ่อครัวอัตโนมัติ", customer="ลูกค้า", daily="รางวัลรายวัน", day="วันที่ %d", claim="รับรางวัล", claimed="พรุ่งนี้มาใหม่นะ!", top="เศรษฐีอันดับต้น", you="คุณ", title="สตรีทฟู้ดไทคูน", cash="เงิน", perSec="/วิ", collect="เก็บเงิน", owned="มีแล้ว", buy="ซื้อ", menu="เมนู", passes="แพ็กเกจ", robux="Robux", notEnough="เงินไม่พอ!", bought="เปิดร้าน: %s",
+		DoubleIncome="รายได้ x2", VIP="VIP (+50%)", Cash1="+5,000 เงิน", Cash2="+50,000 เงิน", Cash3="+500,000 เงิน", lang="ภาษา" },
+	ja = { cook="調理", serve="提供", holding="所持", rep="評判", served="提供数", wrongDish="違う料理！", noDish="先に注文を調理", left="客が帰った", tip="チップ", burnt="焦げた！", mgTiming="緑ゾーンでSPACE！", mgMash="連打！", mgFlip="待って…焦げる前にSPACE！", perfect="完璧！", good="良い", ok="まあまあ", AutoChef="自動シェフ", customer="客", daily="デイリー報酬", day="%d日目", claim="受け取る", claimed="また明日！", top="トップ長者", you="あなた", title="屋台タイクーン", cash="所持金", perSec="/秒", collect="回収", owned="所有済み", buy="購入", menu="メニュー", passes="パス", robux="Robux", notEnough="お金が足りません！", bought="開店: %s",
+		DoubleIncome="収入2倍", VIP="VIP (+50%)", Cash1="+5,000", Cash2="+50,000", Cash3="+500,000", lang="言語" },
+	zh = { cook="烹饪", serve="上菜", holding="手持", rep="声誉", served="已上菜", wrongDish="菜错了！", noDish="先做订单的菜", left="顾客走了", tip="小费", burnt="糊了！", mgTiming="绿区按SPACE！", mgMash="快速点击！", mgFlip="等待…糊之前按SPACE！", perfect="完美！", good="不错", ok="一般", AutoChef="自动厨师", customer="顾客", daily="每日奖励", day="第 %d 天", claim="领取", claimed="明天再来！", top="富豪榜", you="你", title="街头小吃大亨", cash="现金", perSec="/秒", collect="收取", owned="已拥有", buy="购买", menu="菜单", passes="通行证", robux="Robux", notEnough="现金不足！", bought="开张: %s",
+		DoubleIncome="双倍收入", VIP="VIP (+50%)", Cash1="+5,000 现金", Cash2="+50,000 现金", Cash3="+500,000 现金", lang="语言" },
+	id = { cook="Masak", serve="Sajikan", holding="Dipegang", rep="Reputasi", served="Tersaji", wrongDish="Salah menu!", noDish="Masak pesanan dulu", left="Pelanggan pergi", tip="Tip", burnt="Gosong!", mgTiming="Tekan SPACE di zona hijau!", mgMash="Klik cepat!", mgFlip="Tunggu... tekan SPACE sebelum gosong!", perfect="Sempurna!", good="Bagus", ok="Lumayan", AutoChef="Koki Otomatis", customer="Pelanggan", daily="Hadiah Harian", day="Hari %d", claim="Ambil", claimed="Kembali besok!", top="Taipan Teratas", you="Kamu", title="Street Food Tycoon", cash="Uang", perSec="/dtk", collect="Ambil", owned="DIMILIKI", buy="Beli", menu="Menu", passes="Pass", robux="Robux", notEnough="Uang tidak cukup!", bought="Dibuka: %s",
+		DoubleIncome="Pendapatan 2x", VIP="VIP (+50%)", Cash1="+5.000 Uang", Cash2="+50.000 Uang", Cash3="+500.000 Uang", lang="Bahasa" },
 }
 function L.detect(localeId)
 	local p = string.sub(localeId or "en", 1, 2)
@@ -109,13 +203,14 @@ return L
 ]]></string>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="3">
+    <Item class="ModuleScript" referent="4">
       <Properties>
         <string name="Name">Remotes</string>
         <string name="Source"><![CDATA[local RS = game:GetService("ReplicatedStorage")
 local isServer = game:GetService("RunService"):IsServer()
 local names = { BuyFood="RemoteFunction", GetData="RemoteFunction", Collect="RemoteFunction",
-	DataUpdate="RemoteEvent", PromptPass="RemoteEvent", ClaimDaily="RemoteFunction", Leaderboard="RemoteEvent" }
+	DataUpdate="RemoteEvent", PromptPass="RemoteEvent", ClaimDaily="RemoteFunction", Leaderboard="RemoteEvent",
+	StartMinigame="RemoteEvent", MinigameResult="RemoteEvent", Notify="RemoteEvent" }
 local folder
 if isServer then
 	folder = Instance.new("Folder"); folder.Name = "RemoteFolder"; folder.Parent = RS
@@ -130,11 +225,140 @@ return R
       </Properties>
     </Item>
   </Item>
-  <Item class="ServerScriptService" referent="4">
+  <Item class="ServerScriptService" referent="5">
     <Properties>
       <string name="Name">ServerScriptService</string>
     </Properties>
-    <Item class="ModuleScript" referent="5">
+    <Item class="ModuleScript" referent="6">
+      <Properties>
+        <string name="Name">CustomerService</string>
+        <string name="Source"><![CDATA[-- ลูกค้า NPC: เดินมาต่อคิว สั่งอาหาร รอ แล้วเดินออก
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RS = game.ReplicatedStorage
+local Config = require(RS.Config)
+local Locale = require(RS.Locale)
+local Plot = require(script.Parent.PlotService)
+local C = { queues = {}, onServed = nil, onLeft = nil }
+local folder = Instance.new("Folder"); folder.Name = "Customers"; folder.Parent = workspace
+
+local NAMES = { "Somchai", "Nid", "Ploy", "Ken", "Yuki", "Mei", "Budi", "Anna", "Tom", "Fah" }
+local SHIRTS = { Color3.fromRGB(230, 80, 80), Color3.fromRGB(80, 140, 230), Color3.fromRGB(90, 190, 110), Color3.fromRGB(240, 190, 60), Color3.fromRGB(180, 100, 220) }
+
+local function makeNpc(pos)
+	local desc = Instance.new("HumanoidDescription")
+	desc.HeadColor = Color3.fromRGB(240, 200, 170); desc.TorsoColor = SHIRTS[math.random(#SHIRTS)]
+	desc.LeftArmColor = desc.HeadColor; desc.RightArmColor = desc.HeadColor
+	desc.LeftLegColor = Color3.fromRGB(60, 60, 80); desc.RightLegColor = desc.LeftLegColor
+	local ok, model = pcall(Players.CreateHumanoidModelFromDescription, Players, desc, Enum.HumanoidRigType.R15)
+	if not ok then -- สำรอง: กล่องเดินได้
+		model = Instance.new("Model")
+		local p = Instance.new("Part"); p.Name = "HumanoidRootPart"; p.Size = Vector3.new(2, 5, 1); p.Color = SHIRTS[math.random(#SHIRTS)]; p.Anchored = true; p.Parent = model
+		model.PrimaryPart = p
+		local h = Instance.new("Humanoid"); h.Parent = model
+	end
+	model.Name = NAMES[math.random(#NAMES)]
+	model:PivotTo(CFrame.new(pos))
+	model.Parent = folder
+	return model
+end
+local function walkTo(model, target)
+	local h = model:FindFirstChildOfClass("Humanoid")
+	local root = model.PrimaryPart or model:FindFirstChild("HumanoidRootPart")
+	if h and root and not root.Anchored then
+		h:MoveTo(target)
+		local done = false
+		local conn; conn = h.MoveToFinished:Connect(function() done = true; conn:Disconnect() end)
+		local t0 = os.clock()
+		while not done and os.clock() - t0 < 12 and model.Parent do task.wait(0.1) end
+	else
+		local dist = (target - model:GetPivot().Position).Magnitude
+		local tw = TweenService:Create(root, TweenInfo.new(dist / 8, Enum.EasingStyle.Linear), { CFrame = CFrame.new(target) })
+		tw:Play(); tw.Completed:Wait()
+	end
+end
+
+local function bubble(model, text)
+	local head = model:FindFirstChild("Head") or model.PrimaryPart
+	local bg = Instance.new("BillboardGui"); bg.Name = "Order"; bg.Size = UDim2.new(0, 160, 0, 70); bg.StudsOffset = Vector3.new(0, 3, 0); bg.AlwaysOnTop = true; bg.Parent = head
+	local f = Instance.new("Frame"); f.Size = UDim2.fromScale(1, 1); f.BackgroundColor3 = Color3.fromRGB(255, 250, 235); f.Parent = bg
+	local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, 12); c.Parent = f
+	local t = Instance.new("TextLabel"); t.Size = UDim2.new(1, -10, 0, 44); t.Position = UDim2.new(0, 5, 0, 2); t.BackgroundTransparency = 1
+	t.Text = text; t.TextScaled = true; t.Font = Enum.Font.FredokaOne; t.TextColor3 = Color3.fromRGB(40, 30, 20); t.Parent = f
+	local barBg = Instance.new("Frame"); barBg.Size = UDim2.new(1, -16, 0, 10); barBg.Position = UDim2.new(0, 8, 1, -16); barBg.BackgroundColor3 = Color3.fromRGB(220, 215, 200); barBg.BorderSizePixel = 0; barBg.Parent = f
+	local bar = Instance.new("Frame"); bar.Name = "Bar"; bar.Size = UDim2.fromScale(1, 1); bar.BackgroundColor3 = Color3.fromRGB(90, 200, 110); bar.BorderSizePixel = 0; bar.Parent = barBg
+	return bg, bar, t
+end
+
+function C.queue(player) C.queues[player] = C.queues[player] or {}; return C.queues[player] end
+
+-- ลูกค้าเดินเข้ามาสั่ง; คืน entry ที่ให้ระบบเสิร์ฟใช้
+function C.spawn(player, foods)
+	local q = C.queue(player)
+	if #q >= Config.MaxQueue then return end
+	local owned = {}
+	for _, f in ipairs(Config.Foods) do if foods[f.id] then owned[#owned + 1] = f end end
+	if #owned == 0 then return end
+	local food = owned[math.random(#owned)]
+	local pts = Plot.points(player:GetAttribute("PlotIndex"))
+	local npc = makeNpc(pts.spawn)
+	local entry = { npc = npc, food = food, player = player, alive = true, t0 = os.clock() }
+	table.insert(q, entry)
+	local slot = #q
+	task.spawn(function()
+		walkTo(npc, pts.queue(slot))
+		if not entry.alive then return end
+		local bg, bar, label = bubble(npc, food.emoji .. " " .. Locale.food("en", food.id))
+		entry.bubble = bg; entry.label = label
+		entry.orderAt = os.clock()
+		-- ปุ่มเสิร์ฟ
+		local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Serve"; pp.ObjectText = npc.Name; pp.KeyboardKeyCode = Enum.KeyCode.E
+		pp.HoldDuration = 0; pp.MaxActivationDistance = 7; pp.RequiresLineOfSight = false; pp.Parent = npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart")
+		pp.Triggered:Connect(function(who) if who == player and entry.alive and C.onServed then C.onServed(entry) end end)
+		-- แถบความอดทน
+		while entry.alive and npc.Parent do
+			local left = 1 - (os.clock() - entry.orderAt) / Config.Patience
+			if left <= 0 then break end
+			bar.Size = UDim2.fromScale(left, 1)
+			bar.BackgroundColor3 = left > 0.5 and Color3.fromRGB(90, 200, 110) or (left > 0.25 and Color3.fromRGB(240, 190, 60) or Color3.fromRGB(220, 80, 70))
+			task.wait(0.25)
+		end
+		if entry.alive then entry.alive = false; if C.onLeft then C.onLeft(entry) end; C.leave(entry, "😠") end
+	end)
+	return entry
+end
+
+function C.patienceLeft(entry)
+	if not entry.orderAt then return 1 end
+	return math.clamp(1 - (os.clock() - entry.orderAt) / Config.Patience, 0, 1)
+end
+
+function C.leave(entry, mood)
+	entry.alive = false
+	local q = C.queues[entry.player]
+	if q then
+		local i = table.find(q, entry); if i then table.remove(q, i) end
+		-- เลื่อนคิว
+		local pts = Plot.points(entry.player:GetAttribute("PlotIndex"))
+		for n, e in ipairs(q) do if e.orderAt then task.spawn(walkTo, e.npc, pts.queue(n)) end end
+	end
+	task.spawn(function()
+		if entry.label then entry.label.Text = mood end
+		local pts = Plot.points(entry.player:GetAttribute("PlotIndex"))
+		walkTo(entry.npc, pts.spawn)
+		entry.npc:Destroy()
+	end)
+end
+
+function C.clear(player)
+	for _, e in ipairs(C.queues[player] or {}) do e.alive = false; e.npc:Destroy() end
+	C.queues[player] = nil
+end
+return C
+]]></string>
+      </Properties>
+    </Item>
+    <Item class="ModuleScript" referent="7">
       <Properties>
         <string name="Name">DataService</string>
         <string name="Source"><![CDATA[-- โหลด/บันทึกข้อมูลผู้เล่น (DataStore ใช้ได้เฉพาะเกมที่ publish แล้ว)
@@ -144,12 +368,12 @@ local Config = require(game.ReplicatedStorage.Config)
 local okStore, store = pcall(DSS.GetDataStore, DSS, "StreetFoodTycoon_v2")
 if not okStore then warn("DataStore unavailable:", store); store = nil end
 local D = { cache = {} }
-local function default() return { cash = Config.StartingCash, foods = { MooPing = true }, pending = 0, total = 0, lastClaim = 0, streak = 0 } end
+local function default() return { cash = Config.StartingCash, foods = { MooPing = true }, total = 0, rep = 0, served = 0, lastClaim = 0, streak = 0 } end
 function D.load(p)
 	local ok, data = false, nil
 	if store then ok, data = pcall(store.GetAsync, store, "p_" .. p.UserId) end
 	local d = (ok and type(data) == "table") and data or default()
-	d.total = d.total or 0; d.lastClaim = d.lastClaim or 0; d.streak = d.streak or 0
+	d.total = d.total or 0; d.rep = d.rep or 0; d.served = d.served or 0; d.pending = nil; d.lastClaim = d.lastClaim or 0; d.streak = d.streak or 0
 	D.cache[p.UserId] = d
 	return d
 end
@@ -165,7 +389,7 @@ return D
 ]]></string>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="6">
+    <Item class="ModuleScript" referent="8">
       <Properties>
         <string name="Name">LeaderboardService</string>
         <string name="Source"><![CDATA[-- Leaderboard: leaderstats ในเกม + อันดับรวมทุกเซิร์ฟเวอร์ (OrderedDataStore) + ป้ายในแมพ
@@ -179,11 +403,11 @@ local LB = { top = {} }
 function LB.setup(player, d)
 	local ls = Instance.new("Folder"); ls.Name = "leaderstats"; ls.Parent = player
 	local cash = Instance.new("NumberValue"); cash.Name = "Cash"; cash.Parent = ls
-	local inc = Instance.new("NumberValue"); inc.Name = "Income/s"; inc.Parent = ls
+	local inc = Instance.new("NumberValue"); inc.Name = "Served"; inc.Parent = ls
 end
 function LB.update(player, d, income)
 	local ls = player:FindFirstChild("leaderstats"); if not ls then return end
-	ls.Cash.Value = math.floor(d.cash); ls["Income/s"].Value = income
+	ls.Cash.Value = math.floor(d.cash); ls.Served.Value = income
 end
 function LB.submit(player, d)
 	if ods then pcall(ods.SetAsync, ods, tostring(player.UserId), math.floor(d.total)) end
@@ -220,13 +444,15 @@ return LB
 ]]></string>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="7">
+    <Item class="ModuleScript" referent="9">
       <Properties>
         <string name="Name">PlotService</string>
-        <string name="Source"><![CDATA[-- แปลงร้านของผู้เล่นแต่ละคน: สร้างรถเข็น + แผงอาหารตามเมนูที่ซื้อ
-local Config = require(game.ReplicatedStorage.Config)
-local Locale = require(game.ReplicatedStorage.Locale)
-local P = { owners = {} }
+        <string name="Source"><![CDATA[-- แปลงร้าน: รถเข็น, โต๊ะครัวของแต่ละเมนูพร้อมโมเดลอาหารและปุ่มทำอาหาร, จุดคิวลูกค้า
+local RS = game.ReplicatedStorage
+local Config = require(RS.Config)
+local Locale = require(RS.Locale)
+local Dish = require(RS.Dish)
+local P = { owners = {}, onCook = nil }
 local root = Instance.new("Folder"); root.Name = "Plots"; root.Parent = workspace
 
 local function part(props, parent)
@@ -246,7 +472,17 @@ end
 
 function P.origin(i)
 	local row, col = math.floor((i - 1) / 4), (i - 1) % 4
-	return Vector3.new(-90 + col * 60, 0, 30 + row * 70)
+	return Vector3.new(-90 + col * 60, 0, 30 + row * 80)
+end
+-- ตำแหน่งสำคัญของแปลง
+function P.points(i)
+	local o = P.origin(i)
+	return {
+		origin = o,
+		spawn = Vector3.new(o.X, 3, 2),             -- ริมถนน
+		counter = o + Vector3.new(0, 3, -12),      -- หน้าเคาน์เตอร์
+		queue = function(n) return o + Vector3.new(-6 + (n - 1) * 4, 3, -8) end,
+	}
 end
 
 function P.assign(player)
@@ -255,18 +491,15 @@ function P.assign(player)
 			P.owners[i] = player
 			local o = P.origin(i)
 			local m = Instance.new("Model"); m.Name = "Plot_" .. player.UserId; m.Parent = root
-			part({ Size = Vector3.new(50, 0.4, 50), Position = o + Vector3.new(0, 0.2, 0), Color = Color3.fromRGB(190, 170, 140), Material = Enum.Material.Cobblestone }, m)
-			-- รถเข็นหลัก
-			part({ Size = Vector3.new(8, 3, 4), Position = o + Vector3.new(0, 1.9, -18), Color = Color3.fromRGB(200, 110, 50), Material = Enum.Material.Wood }, m)
-			part({ Size = Vector3.new(9, 0.3, 5), Position = o + Vector3.new(0, 5.4, -18), Color = Color3.fromRGB(210, 50, 50), Material = Enum.Material.Fabric }, m)
-			for _, dx in ipairs({ -4, 4 }) do part({ Size = Vector3.new(0.3, 5, 0.3), Position = o + Vector3.new(dx, 2.9, -16), Color = Color3.fromRGB(60, 60, 60) }, m) end
-			sign(m, player.DisplayName .. "'s Stall", Vector3.new(9, 1.2, 0.2), o + Vector3.new(0, 6.3, -16))
-			-- จุดยืนเก็บเงิน
-			local pad = part({ Size = Vector3.new(6, 0.3, 6), Position = o + Vector3.new(0, 0.55, -10), Color = Color3.fromRGB(255, 215, 60), Material = Enum.Material.Neon }, m)
-			pad.Name = "CollectPad"
+			part({ Size = Vector3.new(50, 0.4, 56), Position = o + Vector3.new(0, 0.2, -3), Color = Color3.fromRGB(190, 170, 140), Material = Enum.Material.Cobblestone }, m)
+			-- เคาน์เตอร์ขาย (ลูกค้ายืนฝั่งถนน ผู้เล่นยืนฝั่งใน)
+			part({ Size = Vector3.new(16, 3, 2), Position = o + Vector3.new(0, 1.9, -14), Color = Color3.fromRGB(200, 110, 50), Material = Enum.Material.Wood }, m)
+			part({ Size = Vector3.new(18, 0.3, 6), Position = o + Vector3.new(0, 6, -15), Color = Color3.fromRGB(210, 50, 50), Material = Enum.Material.Fabric }, m)
+			for _, dx in ipairs({ -8, 8 }) do part({ Size = Vector3.new(0.3, 6, 0.3), Position = o + Vector3.new(dx, 3, -12.5), Color = Color3.fromRGB(60, 60, 60) }, m) end
+			sign(m, player.DisplayName .. "'s Street Food", Vector3.new(16, 1.4, 0.2), o + Vector3.new(0, 7, -12.4))
 			local stalls = Instance.new("Folder"); stalls.Name = "Stalls"; stalls.Parent = m
 			player:SetAttribute("PlotIndex", i)
-			return m, pad
+			return m
 		end
 	end
 end
@@ -277,7 +510,7 @@ function P.release(player)
 	if m then m:Destroy() end
 end
 
--- วางแผงอาหารตามเมนูที่มี
+-- โต๊ะครัวของเมนูที่ปลดล็อก
 function P.refresh(player, foods)
 	local m = root:FindFirstChild("Plot_" .. player.UserId)
 	if not m then return end
@@ -287,10 +520,19 @@ function P.refresh(player, foods)
 		if foods[f.id] and not stalls:FindFirstChild(f.id) then
 			local g = Instance.new("Model"); g.Name = f.id; g.Parent = stalls
 			local k = idx - 1
-			local pos = o + Vector3.new(-21 + (k % 5) * 10.5, 0, -2 + math.floor(k / 5) * 9)
-			part({ Size = Vector3.new(6, 2.4, 3), Position = pos + Vector3.new(0, 1.6, 0), Color = Color3.new(f.color[1], f.color[2], f.color[3]), Material = Enum.Material.Wood }, g)
-			part({ Size = Vector3.new(7, 0.25, 4), Position = pos + Vector3.new(0, 4.4, 0), Color = Color3.fromRGB(240, 240, 230), Material = Enum.Material.Fabric }, g)
-			sign(g, f.emoji .. " " .. Locale.food("en", f.id), Vector3.new(6, 0.9, 0.15), pos + Vector3.new(0, 3.2, 1.6))
+			local pos = o + Vector3.new(-20 + (k % 5) * 10, 0, -20 - math.floor(k / 5) * 9)
+			local body = part({ Size = Vector3.new(6, 2.6, 3), Position = pos + Vector3.new(0, 1.7, 0), Color = Color3.new(f.color[1], f.color[2], f.color[3]), Material = Enum.Material.Wood }, g)
+			part({ Size = Vector3.new(6.4, 0.2, 3.4), Position = pos + Vector3.new(0, 3.1, 0), Color = Color3.fromRGB(70, 70, 70), Material = Enum.Material.Metal }, g)
+			part({ Size = Vector3.new(7, 0.25, 4), Position = pos + Vector3.new(0, 5.4, 0), Color = Color3.fromRGB(240, 240, 230), Material = Enum.Material.Fabric }, g)
+			sign(g, f.emoji .. " " .. Locale.food("en", f.id), Vector3.new(6, 0.8, 0.15), pos + Vector3.new(0, 4.4, 1.6))
+			-- อาหารโชว์บนโต๊ะ
+			local d = Dish.build(f.id); d.Parent = g
+			d:PivotTo(CFrame.new(pos + Vector3.new(0, 3.3, 0)))
+			for _, x in ipairs(d:GetDescendants()) do if x:IsA("BasePart") then x.Anchored = true end end
+			-- ปุ่มทำอาหาร
+			local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Cook"; pp.ObjectText = Locale.food("en", f.id)
+			pp.KeyboardKeyCode = Enum.KeyCode.E; pp.HoldDuration = 0; pp.MaxActivationDistance = 8; pp.RequiresLineOfSight = false; pp.Parent = body
+			pp.Triggered:Connect(function(who) if who == player and P.onCook then P.onCook(player, f.id) end end)
 		end
 	end
 end
@@ -298,21 +540,24 @@ return P
 ]]></string>
       </Properties>
     </Item>
-    <Item class="Script" referent="8">
+    <Item class="Script" referent="10">
       <Properties>
         <string name="Name">TycoonServer</string>
         <token name="RunContext">0</token>
-        <string name="Source"><![CDATA[-- ตรรกะหลัก: รายได้, ซื้อเมนู, Game Pass, Dev Product, แปลงร้าน
+        <string name="Source"><![CDATA[-- ตรรกะหลัก: ลูกค้า ทำอาหาร เสิร์ฟ เงิน ชื่อเสียง ร้านค้า Game Pass Dev Product
 local Players = game:GetService("Players")
 local MPS = game:GetService("MarketplaceService")
 local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
+local _Locale = require(RS.Locale)
+local Dish = require(RS.Dish)
 local Remotes = require(RS.Remotes)
 local Data = require(script.Parent.DataService)
 local Plot = require(script.Parent.PlotService)
+local Customers = require(script.Parent.CustomerService)
 local LB = require(script.Parent.LeaderboardService)
 
-local passCache = {}
+local passCache, cooking = {}, {}
 local function ownsPass(player, key)
 	local id
 	for _, gp in ipairs(Config.GamePasses) do if gp.key == key then id = gp.id end end
@@ -324,90 +569,133 @@ local function ownsPass(player, key)
 	end
 	return passCache[player][key]
 end
-
-local function incomePerSec(player)
-	local d = Data.get(player); if not d then return 0 end
-	local total = 0
-	for _, f in ipairs(Config.Foods) do if d.foods[f.id] then total += f.income end end
-	for _, gp in ipairs(Config.GamePasses) do if gp.mult and ownsPass(player, gp.key) then total *= gp.mult end end
-	return math.floor(total)
+local function mult(player)
+	local m = 1
+	for _, gp in ipairs(Config.GamePasses) do if gp.mult and ownsPass(player, gp.key) then m *= gp.mult end end
+	return m
 end
-
 local function push(player)
 	local d = Data.get(player)
-	if d then local inc = incomePerSec(player); LB.update(player, d, inc); Remotes.DataUpdate:FireClient(player, d, inc) end
+	if d then LB.update(player, d, d.served); Remotes.DataUpdate:FireClient(player, d, player:GetAttribute("Holding")) end
+end
+local function notify(player, key, color, ...)
+	Remotes.Notify:FireClient(player, key, color, ...)
+end
+local function foodOf(id) for _, f in ipairs(Config.Foods) do if f.id == id then return f end end end
+
+-- ถือจาน
+local function setHolding(player, foodId)
+	local char = player.Character
+	if char then
+		local old = char:FindFirstChild("HeldDish"); if old then old:Destroy() end
+		if foodId then
+			local d = Dish.build(foodId); d.Name = "HeldDish"
+			local hand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
+			if hand then
+				d:PivotTo(hand.CFrame * CFrame.new(0, -0.6, -1.2))
+				local w = Instance.new("Weld"); w.Part0 = hand; w.Part1 = d.PrimaryPart; w.C0 = CFrame.new(0, -0.6, -1.2); w.Parent = d.PrimaryPart
+			end
+			d.Parent = char
+		end
+	end
+	player:SetAttribute("Holding", foodId)
+	push(player)
 end
 
-local function collect(player)
-	local d = Data.get(player); if not d or d.pending <= 0 then return end
-	d.cash += d.pending; d.total += d.pending; d.pending = 0
+-- ทำอาหาร: เริ่มมินิเกมที่ client แล้วรอผล
+Plot.onCook = function(player, foodId)
+	if cooking[player] then return end
+	local f = foodOf(foodId); if not f then return end
+	cooking[player] = { food = f, t0 = os.clock() }
+	Remotes.StartMinigame:FireClient(player, f.game, f.cookTime, foodId)
+end
+Remotes.MinigameResult.OnServerEvent:Connect(function(player, score)
+	local c = cooking[player]; if not c then return end
+	cooking[player] = nil
+	score = math.clamp(tonumber(score) or 0, 0, 1)
+	if os.clock() - c.t0 < c.food.cookTime * 0.5 then score = 0 end -- กันโกง ทำเร็วเกินไป
+	if score <= 0 then notify(player, "burnt", "red"); return end
+	player:SetAttribute("Quality", score)
+	setHolding(player, c.food.id)
+	notify(player, score > 0.85 and "perfect" or (score > 0.5 and "good" or "ok"), "green")
+end)
+
+-- เสิร์ฟ
+Customers.onServed = function(entry)
+	local player = entry.player
+	local holding = player:GetAttribute("Holding")
+	if not holding then notify(player, "noDish", "red"); return end
+	if holding ~= entry.food.id then notify(player, "wrongDish", "red"); return end
+	local d = Data.get(player); if not d then return end
+	local quality = player:GetAttribute("Quality") or 0.5
+	local patience = Customers.patienceLeft(entry)
+	local base = entry.food.price
+	local tip = math.floor(base * Config.TipMax * (quality * 0.6 + patience * 0.4))
+	local earned = math.floor((base + tip) * mult(player))
+	d.cash += earned; d.total += earned; d.served += 1
+	d.rep = math.min(d.rep + (quality > 0.85 and 2 or 1), 1000)
+	setHolding(player, nil)
+	Customers.leave(entry, quality > 0.85 and "😍" or "😊")
+	notify(player, "tip", "green", earned, tip)
 	push(player)
+end
+Customers.onLeft = function(entry)
+	local d = Data.get(entry.player)
+	if d then d.rep = math.max(d.rep - 2, 0); notify(entry.player, "left", "red"); push(entry.player) end
 end
 
 local function onPlayer(player)
 	local d = Data.load(player)
 	LB.setup(player, d)
-	local _, pad = Plot.assign(player)
+	Plot.assign(player)
 	Plot.refresh(player, d.foods)
 	push(player)
-	-- เหยียบแผ่นเหลืองเพื่อเก็บเงิน
-	local last = 0
-	pad.Touched:Connect(function(hit)
-		local p = Players:GetPlayerFromCharacter(hit.Parent)
-		if p == player and os.clock() - last > 0.5 then last = os.clock(); collect(player) end
+	player.CharacterAdded:Connect(function() task.wait(0.5); if player:GetAttribute("Holding") then setHolding(player, player:GetAttribute("Holding")) end end)
+	-- ลูกค้าเดินเข้ามาเรื่อย ๆ ชื่อเสียงสูงมาถี่ขึ้น
+	task.spawn(function()
+		task.wait(4)
+		while player.Parent do
+			local dd = Data.get(player); if not dd then break end
+			Customers.spawn(player, dd.foods)
+			local repBonus = math.min(dd.rep / 1000, 0.5)
+			task.wait(math.random(Config.CustomerInterval.min, Config.CustomerInterval.max) * (1 - repBonus))
+		end
 	end)
+	-- พ่อครัวอัตโนมัติ (Game Pass): เสิร์ฟให้เองช้า ๆ
 	task.spawn(function()
 		while player.Parent do
-			task.wait(Config.PayoutInterval)
-			local dd = Data.get(player); if not dd then break end
-			local earned = incomePerSec(player) * Config.PayoutInterval
-			if ownsPass(player, "AutoCollect") then dd.cash += earned; dd.total += earned else dd.pending += earned end
-			push(player)
+			task.wait(10)
+			if ownsPass(player, "AutoChef") then
+				local q = Customers.queue(player)
+				local e = q[1]
+				if e and e.alive and e.orderAt then
+					local dd = Data.get(player)
+					if dd then dd.cash += e.food.price; dd.total += e.food.price; dd.served += 1; Customers.leave(e, "🤖"); push(player) end
+				end
+			end
 		end
 	end)
 end
 Players.PlayerAdded:Connect(onPlayer)
 for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
-Players.PlayerRemoving:Connect(function(p) local d = Data.get(p); if d then LB.submit(p, d) end; Plot.release(p); passCache[p] = nil end)
+Players.PlayerRemoving:Connect(function(p)
+	local d = Data.get(p); if d then LB.submit(p, d) end
+	Customers.clear(p); Plot.release(p); passCache[p] = nil; cooking[p] = nil
+end)
 task.spawn(function() while true do task.wait(120); for _, p in ipairs(Players:GetPlayers()) do local d = Data.get(p); if d then LB.submit(p, d) end end end end)
 
--- ล็อกอินรายวัน: คืน (สถานะ, วันสตรีค, จำนวนเงิน)
-local DAY = 86400
-local function dailyInfo(d)
-	local now = os.time()
-	local since = now - (d.lastClaim or 0)
-	local canClaim = since >= DAY
-	local streak = (since < DAY * 2) and (d.streak or 0) or 0 -- ขาดเกิน 1 วัน สตรีคหลุด
-	local nextDay = math.min(streak + 1, #Config.DailyRewards)
-	return canClaim, nextDay, Config.DailyRewards[nextDay]
-end
-Remotes.ClaimDaily.OnServerInvoke = function(player, justAsk)
-	local d = Data.get(player); if not d then return false end
-	local can, day, reward = dailyInfo(d)
-	if justAsk or not can then return can, day, reward end
-	d.cash += reward; d.total += reward; d.streak = day; d.lastClaim = os.time()
-	Data.save(player); push(player)
-	return true, day, reward
-end
-
 Remotes.GetData.OnServerInvoke = function(player)
-	local d = Data.get(player) or Data.load(player)
-	return d, incomePerSec(player)
+	return Data.get(player) or Data.load(player), player:GetAttribute("Holding")
 end
-Remotes.Collect.OnServerInvoke = function(player) collect(player); return true end
 Remotes.BuyFood.OnServerInvoke = function(player, foodId)
 	local d = Data.get(player); if not d then return false end
-	for _, f in ipairs(Config.Foods) do
-		if f.id == foodId then
-			if d.foods[foodId] then return false, "owned" end
-			if d.cash < f.cost then return false, "notEnough" end
-			d.cash -= f.cost; d.foods[foodId] = true
-			Plot.refresh(player, d.foods)
-			push(player)
-			return true
-		end
-	end
-	return false
+	local f = foodOf(foodId); if not f then return false end
+	if d.foods[foodId] then return false, "owned" end
+	if d.cash < f.cost then return false, "notEnough" end
+	d.cash -= f.cost; d.foods[foodId] = true
+	Plot.refresh(player, d.foods)
+	push(player)
+	return true
 end
 Remotes.PromptPass.OnServerEvent:Connect(function(player, kind, key)
 	local list = kind == "pass" and Config.GamePasses or Config.DevProducts
@@ -429,27 +717,138 @@ MPS.ProcessReceipt = function(receipt)
 	end
 	return Enum.ProductPurchaseDecision.NotProcessedYet
 end
-MPS.PromptGamePassPurchaseFinished:Connect(function(player, _, bought)
-	if bought then passCache[player] = nil; push(player) end
-end)
+MPS.PromptGamePassPurchaseFinished:Connect(function(player, _, bought) if bought then passCache[player] = nil; push(player) end end)
+
+-- ล็อกอินรายวัน
+local DAY = 86400
+local function dailyInfo(d)
+	local since = os.time() - (d.lastClaim or 0)
+	local streak = (since < DAY * 2) and (d.streak or 0) or 0
+	local nextDay = math.min(streak + 1, #Config.DailyRewards)
+	return since >= DAY, nextDay, Config.DailyRewards[nextDay]
+end
+Remotes.ClaimDaily.OnServerInvoke = function(player, justAsk)
+	local d = Data.get(player); if not d then return false end
+	local can, day, reward = dailyInfo(d)
+	if justAsk or not can then return can, day, reward end
+	d.cash += reward; d.total += reward; d.streak = day; d.lastClaim = os.time()
+	Data.save(player); push(player)
+	return true, day, reward
+end
 ]]></string>
       </Properties>
     </Item>
   </Item>
-  <Item class="StarterGui" referent="9">
+  <Item class="StarterGui" referent="11">
     <Properties>
       <string name="Name">StarterGui</string>
     </Properties>
   </Item>
-  <Item class="StarterPlayer" referent="10">
+  <Item class="StarterPlayer" referent="12">
     <Properties>
       <string name="Name">StarterPlayer</string>
     </Properties>
-    <Item class="StarterPlayerScripts" referent="11">
+    <Item class="StarterPlayerScripts" referent="13">
       <Properties>
         <string name="Name">StarterPlayerScripts</string>
       </Properties>
-      <Item class="LocalScript" referent="12">
+      <Item class="LocalScript" referent="14">
+        <Properties>
+          <string name="Name">MinigameClient</string>
+          <string name="Source"><![CDATA[-- มินิเกมทำอาหาร 3 แบบ: timing / mash / flip ส่งคะแนน 0-1 กลับเซิร์ฟเวอร์
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local RS = game:GetService("ReplicatedStorage")
+local Locale = require(RS:WaitForChild("Locale"))
+local Remotes = require(RS:WaitForChild("Remotes"))
+local player = Players.LocalPlayer
+local lang = Locale.detect(player.LocaleId)
+
+local gui = Instance.new("ScreenGui"); gui.Name = "MinigameUI"; gui.ResetOnSpawn = false; gui.Parent = player.PlayerGui
+local box = Instance.new("Frame"); box.Size = UDim2.new(0, 420, 0, 150); box.Position = UDim2.new(0.5, -210, 0.7, 0)
+box.BackgroundColor3 = Color3.fromRGB(28, 24, 22); box.Visible = false; box.Parent = gui
+Instance.new("UICorner", box).CornerRadius = UDim.new(0, 14)
+local title = Instance.new("TextLabel"); title.Size = UDim2.new(1, -20, 0, 34); title.Position = UDim2.new(0, 10, 0, 8)
+title.BackgroundTransparency = 1; title.Font = Enum.Font.FredokaOne; title.TextSize = 20; title.TextColor3 = Color3.fromRGB(255, 170, 40); title.TextWrapped = true; title.Parent = box
+local hint = Instance.new("TextLabel"); hint.Size = UDim2.new(1, -20, 0, 24); hint.Position = UDim2.new(0, 10, 0, 42)
+hint.BackgroundTransparency = 1; hint.Font = Enum.Font.FredokaOne; hint.TextSize = 16; hint.TextColor3 = Color3.fromRGB(230, 225, 215); hint.TextWrapped = true; hint.Parent = box
+local track = Instance.new("Frame"); track.Size = UDim2.new(1, -40, 0, 26); track.Position = UDim2.new(0, 20, 0, 80); track.BackgroundColor3 = Color3.fromRGB(60, 52, 46); track.BorderSizePixel = 0; track.Parent = box
+Instance.new("UICorner", track).CornerRadius = UDim.new(0, 8)
+local zone = Instance.new("Frame"); zone.BackgroundColor3 = Color3.fromRGB(90, 200, 110); zone.BorderSizePixel = 0; zone.Parent = track
+local fill = Instance.new("Frame"); fill.BackgroundColor3 = Color3.fromRGB(255, 170, 40); fill.BorderSizePixel = 0; fill.Size = UDim2.fromScale(0, 1); fill.Parent = track
+local marker = Instance.new("Frame"); marker.Size = UDim2.new(0, 6, 1.4, 0); marker.Position = UDim2.new(0, 0, -0.2, 0); marker.BackgroundColor3 = Color3.new(1, 1, 1); marker.BorderSizePixel = 0; marker.Parent = track
+local btn = Instance.new("TextButton"); btn.Size = UDim2.new(1, -40, 0, 30); btn.Position = UDim2.new(0, 20, 0, 112); btn.Text = "SPACE / TAP"
+btn.Font = Enum.Font.FredokaOne; btn.TextSize = 18; btn.TextColor3 = Color3.new(1, 1, 1); btn.BackgroundColor3 = Color3.fromRGB(255, 170, 40); btn.Parent = box
+Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+local active = nil
+local function pressed()
+	if active then active() end
+end
+btn.MouseButton1Click:Connect(pressed)
+UIS.InputBegan:Connect(function(input, gp)
+	if gp or not box.Visible then return end
+	if input.KeyCode == Enum.KeyCode.Space then pressed() end
+end)
+
+local function finish(score)
+	active = nil; box.Visible = false
+	Remotes.MinigameResult:FireServer(score)
+end
+
+Remotes.StartMinigame.OnClientEvent:Connect(function(kind, duration, foodId)
+	title.Text = "🍳 " .. Locale.food(lang, foodId)
+	box.Visible = true; fill.Size = UDim2.fromScale(0, 1); marker.Visible = false; zone.Visible = false
+	local t0 = os.clock()
+	if kind == "timing" then
+		hint.Text = Locale.get(lang, "mgTiming")
+		marker.Visible = true; zone.Visible = true
+		local zc = 0.35 + math.random() * 0.4
+		zone.Size = UDim2.fromScale(0.14, 1); zone.Position = UDim2.fromScale(zc - 0.07, 0)
+		local pos, conn = 0, nil
+		conn = RunService.RenderStepped:Connect(function()
+			local t = (os.clock() - t0) / duration
+			pos = (math.sin(t * math.pi * 3) + 1) / 2 -- แกว่งไปมา
+			marker.Position = UDim2.new(pos, -3, -0.2, 0)
+			if t > 2.5 then conn:Disconnect(); if active then finish(0) end end -- ช้าเกิน = ไหม้
+		end)
+		active = function()
+			conn:Disconnect()
+			local dist = math.abs(pos - zc)
+			finish(dist < 0.07 and 1 or (dist < 0.15 and 0.6 or (dist < 0.25 and 0.3 or 0)))
+		end
+	elseif kind == "mash" then
+		hint.Text = Locale.get(lang, "mgMash")
+		local need, count = math.floor(duration * 6), 0
+		active = function()
+			count += 1; fill.Size = UDim2.fromScale(math.min(count / need, 1), 1)
+			if count >= need then
+				local el = os.clock() - t0
+				finish(el < duration and 1 or (el < duration * 1.6 and 0.6 or 0.3))
+			end
+		end
+		task.delay(duration * 2.5, function() if active then finish(count / need * 0.3) end end)
+	else -- flip
+		hint.Text = Locale.get(lang, "mgFlip")
+		zone.Visible = true; zone.Size = UDim2.fromScale(0.2, 1); zone.Position = UDim2.fromScale(0.7, 0)
+		local prog, conn = 0, nil
+		conn = RunService.RenderStepped:Connect(function()
+			prog = (os.clock() - t0) / duration
+			fill.Size = UDim2.fromScale(math.min(prog, 1), 1)
+			fill.BackgroundColor3 = prog > 0.9 and Color3.fromRGB(220, 80, 70) or Color3.fromRGB(255, 170, 40)
+			if prog >= 1 then conn:Disconnect(); if active then finish(0) end end
+		end)
+		active = function()
+			conn:Disconnect()
+			finish(prog >= 0.7 and 1 or (prog >= 0.55 and 0.6 or (prog >= 0.4 and 0.3 or 0)))
+		end
+	end
+end)
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="LocalScript" referent="15">
         <Properties>
           <string name="Name">ShopClient</string>
           <string name="Source"><![CDATA[-- UI หลัก: แถบเงินด้านบน, ร้านค้าแบบแท็บ, สลับภาษา, แจ้งเตือน
@@ -462,7 +861,7 @@ local Remotes = require(RS:WaitForChild("Remotes"))
 local player = Players.LocalPlayer
 local lang = Locale.detect(player.LocaleId)
 local T = function(k) return Locale.get(lang, k) end
-local state = { data = nil, income = 0, tab = "menu" }
+local state = { data = nil, holding = nil, tab = "menu" }
 
 local C = { bg = Color3.fromRGB(28, 24, 22), panel = Color3.fromRGB(42, 36, 32), card = Color3.fromRGB(58, 50, 44),
 	accent = Color3.fromRGB(255, 170, 40), green = Color3.fromRGB(90, 200, 110), red = Color3.fromRGB(220, 80, 70),
@@ -494,8 +893,9 @@ local gui = Instance.new("ScreenGui"); gui.Name = "TycoonUI"; gui.ResetOnSpawn =
 -- แถบด้านบน
 local top = frame(gui, UDim2.new(0, 520, 0, 64), UDim2.new(0.5, -260, 0, 12), C.bg); corner(top, 14); pad(top, 8)
 local cashLbl = label(top, "฿ 0", UDim2.new(0, 220, 0, 30), UDim2.new(0, 8, 0, 0), 28, C.accent)
-local incLbl = label(top, "+0 /sec", UDim2.new(0, 220, 0, 18), UDim2.new(0, 8, 0, 30), 15, C.green)
-local collectBtn = button(top, T("collect"), UDim2.new(0, 150, 0, 44), UDim2.new(1, -160, 0, 2), C.green, function() Remotes.Collect:InvokeServer() end)
+local incLbl = label(top, "", UDim2.new(0, 220, 0, 18), UDim2.new(0, 8, 0, 30), 15, C.green)
+local holdLbl = label(top, "", UDim2.new(0, 200, 0, 44), UDim2.new(1, -210, 0, 2), 16, C.text, Enum.TextXAlignment.Right)
+holdLbl.TextWrapped = true
 local titleLbl = label(top, T("title"), UDim2.new(0, 130, 0, 48), UDim2.new(0, 230, 0, 0), 14, C.muted, Enum.TextXAlignment.Center)
 titleLbl.TextWrapped = true
 
@@ -540,6 +940,12 @@ Remotes.Leaderboard.OnClientEvent:Connect(function(rows)
 	lbBody.Text = #lines > 0 and table.concat(lines, "\n") or "-"
 end)
 
+Remotes.Notify.OnClientEvent:Connect(function(key, color, a, b)
+	local msg = T(key)
+	if key == "tip" then msg = "+฿" .. Locale.fmt(a) .. (b and b > 0 and ("  (" .. T("tip") .. " ฿" .. Locale.fmt(b) .. ")") or "") end
+	notify(msg, color == "red" and C.red or C.green)
+end)
+
 -- หน้าต่างร้านค้า
 local shop = frame(gui, UDim2.new(0, 460, 0, 520), UDim2.new(0.5, -230, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
@@ -569,7 +975,7 @@ local function renderShop()
 		for _, f in ipairs(Config.Foods) do
 			local owned = d.foods[f.id]
 			local can = d.cash >= f.cost
-			local _, b = card(Locale.food(lang, f.id), "+" .. Locale.fmt(f.income) .. " " .. T("perSec"),
+			local _, b = card(Locale.food(lang, f.id), "฿ " .. Locale.fmt(f.price) .. " / " .. f.emoji,
 				owned and T("owned") or ("฿ " .. Locale.fmt(f.cost)), owned and C.card or (can and C.green or C.red),
 				function()
 					if owned then return end
@@ -592,8 +998,9 @@ end
 local function renderTop()
 	local d = state.data; if not d then return end
 	cashLbl.Text = "฿ " .. Locale.fmt(d.cash)
-	incLbl.Text = "+" .. Locale.fmt(state.income) .. " " .. T("perSec")
-	collectBtn.Text = T("collect") .. " (" .. Locale.fmt(d.pending) .. ")"
+	local stars = math.clamp(math.floor((d.rep or 0) / 200) + 1, 1, 5)
+	incLbl.Text = string.rep("⭐", stars) .. "  " .. T("served") .. ": " .. (d.served or 0)
+	holdLbl.Text = state.holding and ("🍽️ " .. T("holding") .. ": " .. Locale.food(lang, state.holding)) or ""
 end
 
 local function applyLang()
@@ -611,14 +1018,14 @@ langBtn.MouseButton1Click:Connect(function()
 end)
 
 local lastCash
-Remotes.DataUpdate.OnClientEvent:Connect(function(d, income)
-	state.data, state.income = d, income or 0
+Remotes.DataUpdate.OnClientEvent:Connect(function(d, holding)
+	state.data, state.holding = d, holding
 	renderTop()
 	if shopOpen and d.cash ~= lastCash then renderShop() end
 	lastCash = d.cash
 end)
-local ok, d, income = pcall(function() return Remotes.GetData:InvokeServer() end)
-if ok and d then state.data, state.income = d, income or 0; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
+local ok, d, holding = pcall(function() return Remotes.GetData:InvokeServer() end)
+if ok and d then state.data, state.holding = d, holding; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
 task.delay(1, function()
 	local okd, can, day, amt = pcall(function() return Remotes.ClaimDaily:InvokeServer(true) end)
 	if okd and can then showDaily(day, amt) end
@@ -628,16 +1035,16 @@ end)
       </Item>
     </Item>
   </Item>
-  <Item class="Workspace" referent="13">
+  <Item class="Workspace" referent="16">
     <Properties>
       <string name="Name">Workspace</string>
       <bool name="NeedsPivotMigration">false</bool>
     </Properties>
-    <Item class="Folder" referent="14">
+    <Item class="Folder" referent="17">
       <Properties>
         <string name="Name">Map</string>
       </Properties>
-      <Item class="Part" referent="15">
+      <Item class="Part" referent="18">
         <Properties>
           <string name="Name">Ground</string>
           <bool name="Anchored">true</bool>
@@ -656,7 +1063,7 @@ end)
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="16">
+      <Item class="Part" referent="19">
         <Properties>
           <string name="Name">Road</string>
           <bool name="Anchored">true</bool>
@@ -674,7 +1081,7 @@ end)
           </Vector3>
         </Properties>
       </Item>
-      <Item class="SpawnLocation" referent="17">
+      <Item class="SpawnLocation" referent="20">
         <Properties>
           <string name="Name">SpawnLocation</string>
           <bool name="Anchored">true</bool>
@@ -692,7 +1099,7 @@ end)
           </Vector3>
         </Properties>
       </Item>
-      <Item class="Part" referent="18">
+      <Item class="Part" referent="21">
         <Properties>
           <string name="Name">Welcome</string>
           <bool name="Anchored">true</bool>
@@ -709,12 +1116,12 @@ end)
             <Z>0.4</Z>
           </Vector3>
         </Properties>
-        <Item class="SurfaceGui" referent="19">
+        <Item class="SurfaceGui" referent="22">
           <Properties>
             <string name="Name">Gui</string>
             <token name="Face">5</token>
           </Properties>
-          <Item class="TextLabel" referent="20">
+          <Item class="TextLabel" referent="23">
             <Properties>
               <string name="Name">Text</string>
               <float name="BackgroundTransparency">1</float>

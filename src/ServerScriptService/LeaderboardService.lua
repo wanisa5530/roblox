@@ -9,11 +9,11 @@ local LB = { top = {} }
 function LB.setup(player, d)
 	local ls = Instance.new("Folder"); ls.Name = "leaderstats"; ls.Parent = player
 	local cash = Instance.new("NumberValue"); cash.Name = "Cash"; cash.Parent = ls
-	local inc = Instance.new("NumberValue"); inc.Name = "Income/s"; inc.Parent = ls
+	local inc = Instance.new("NumberValue"); inc.Name = "Served"; inc.Parent = ls
 end
 function LB.update(player, d, income)
 	local ls = player:FindFirstChild("leaderstats"); if not ls then return end
-	ls.Cash.Value = math.floor(d.cash); ls["Income/s"].Value = income
+	ls.Cash.Value = math.floor(d.cash); ls.Served.Value = income
 end
 function LB.submit(player, d)
 	if ods then pcall(ods.SetAsync, ods, tostring(player.UserId), math.floor(d.total)) end

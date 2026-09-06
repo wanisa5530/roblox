@@ -8,7 +8,7 @@ local Remotes = require(RS:WaitForChild("Remotes"))
 local player = Players.LocalPlayer
 local lang = Locale.detect(player.LocaleId)
 local T = function(k) return Locale.get(lang, k) end
-local state = { data = nil, income = 0, tab = "menu" }
+local state = { data = nil, holding = nil, tab = "menu" }
 
 local C = { bg = Color3.fromRGB(28, 24, 22), panel = Color3.fromRGB(42, 36, 32), card = Color3.fromRGB(58, 50, 44),
 	accent = Color3.fromRGB(255, 170, 40), green = Color3.fromRGB(90, 200, 110), red = Color3.fromRGB(220, 80, 70),
@@ -40,8 +40,9 @@ local gui = Instance.new("ScreenGui"); gui.Name = "TycoonUI"; gui.ResetOnSpawn =
 -- แถบด้านบน
 local top = frame(gui, UDim2.new(0, 520, 0, 64), UDim2.new(0.5, -260, 0, 12), C.bg); corner(top, 14); pad(top, 8)
 local cashLbl = label(top, "฿ 0", UDim2.new(0, 220, 0, 30), UDim2.new(0, 8, 0, 0), 28, C.accent)
-local incLbl = label(top, "+0 /sec", UDim2.new(0, 220, 0, 18), UDim2.new(0, 8, 0, 30), 15, C.green)
-local collectBtn = button(top, T("collect"), UDim2.new(0, 150, 0, 44), UDim2.new(1, -160, 0, 2), C.green, function() Remotes.Collect:InvokeServer() end)
+local incLbl = label(top, "", UDim2.new(0, 220, 0, 18), UDim2.new(0, 8, 0, 30), 15, C.green)
+local holdLbl = label(top, "", UDim2.new(0, 200, 0, 44), UDim2.new(1, -210, 0, 2), 16, C.text, Enum.TextXAlignment.Right)
+holdLbl.TextWrapped = true
 local titleLbl = label(top, T("title"), UDim2.new(0, 130, 0, 48), UDim2.new(0, 230, 0, 0), 14, C.muted, Enum.TextXAlignment.Center)
 titleLbl.TextWrapped = true
 
@@ -86,6 +87,12 @@ Remotes.Leaderboard.OnClientEvent:Connect(function(rows)
 	lbBody.Text = #lines > 0 and table.concat(lines, "\n") or "-"
 end)
 
+Remotes.Notify.OnClientEvent:Connect(function(key, color, a, b)
+	local msg = T(key)
+	if key == "tip" then msg = "+฿" .. Locale.fmt(a) .. (b and b > 0 and ("  (" .. T("tip") .. " ฿" .. Locale.fmt(b) .. ")") or "") end
+	notify(msg, color == "red" and C.red or C.green)
+end)
+
 -- หน้าต่างร้านค้า
 local shop = frame(gui, UDim2.new(0, 460, 0, 520), UDim2.new(0.5, -230, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
@@ -115,7 +122,7 @@ local function renderShop()
 		for _, f in ipairs(Config.Foods) do
 			local owned = d.foods[f.id]
 			local can = d.cash >= f.cost
-			local _, b = card(Locale.food(lang, f.id), "+" .. Locale.fmt(f.income) .. " " .. T("perSec"),
+			local _, b = card(Locale.food(lang, f.id), "฿ " .. Locale.fmt(f.price) .. " / " .. f.emoji,
 				owned and T("owned") or ("฿ " .. Locale.fmt(f.cost)), owned and C.card or (can and C.green or C.red),
 				function()
 					if owned then return end
@@ -138,8 +145,9 @@ end
 local function renderTop()
 	local d = state.data; if not d then return end
 	cashLbl.Text = "฿ " .. Locale.fmt(d.cash)
-	incLbl.Text = "+" .. Locale.fmt(state.income) .. " " .. T("perSec")
-	collectBtn.Text = T("collect") .. " (" .. Locale.fmt(d.pending) .. ")"
+	local stars = math.clamp(math.floor((d.rep or 0) / 200) + 1, 1, 5)
+	incLbl.Text = string.rep("⭐", stars) .. "  " .. T("served") .. ": " .. (d.served or 0)
+	holdLbl.Text = state.holding and ("🍽️ " .. T("holding") .. ": " .. Locale.food(lang, state.holding)) or ""
 end
 
 local function applyLang()
@@ -157,14 +165,14 @@ langBtn.MouseButton1Click:Connect(function()
 end)
 
 local lastCash
-Remotes.DataUpdate.OnClientEvent:Connect(function(d, income)
-	state.data, state.income = d, income or 0
+Remotes.DataUpdate.OnClientEvent:Connect(function(d, holding)
+	state.data, state.holding = d, holding
 	renderTop()
 	if shopOpen and d.cash ~= lastCash then renderShop() end
 	lastCash = d.cash
 end)
-local ok, d, income = pcall(function() return Remotes.GetData:InvokeServer() end)
-if ok and d then state.data, state.income = d, income or 0; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
+local ok, d, holding = pcall(function() return Remotes.GetData:InvokeServer() end)
+if ok and d then state.data, state.holding = d, holding; applyLang() else cashLbl.Text = "ERR: " .. tostring(d) end
 task.delay(1, function()
 	local okd, can, day, amt = pcall(function() return Remotes.ClaimDaily:InvokeServer(true) end)
 	if okd and can then showDaily(day, amt) end

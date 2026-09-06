@@ -38,3 +38,11 @@ rojo build -o StreetFoodTycoon.rbxlx  # สร้างไฟล์เกม
 ตั้ง Secrets ใน GitHub: `ROBLOX_API_KEY`, `ROBLOX_UNIVERSE_ID`, `ROBLOX_PLACE_ID`
 - ทุก push: lint + build ไฟล์เกม (ดาวน์โหลดได้จากแท็บ Actions > Artifacts)
 - push ไป main หรือกด Run workflow: รัน `tests/smoke.luau` บนเกมที่ publish ผ่าน Open Cloud
+
+## เวอร์ชัน 3: เกมทำอาหารเสิร์ฟลูกค้า
+- ลูกค้า NPC เดินจากถนนมาต่อคิว (`CustomerService.lua`) สั่งเมนูพร้อมแถบความอดทน 45 วิ
+- โต๊ะครัวแต่ละเมนูมีโมเดลอาหารจริง (`ReplicatedStorage/Dish.lua`) กด E เพื่อทำ
+- มินิเกม 3 แบบ (`MinigameClient.client.lua`): timing / mash / flip คุณภาพมีผลกับทิป
+- ถือจานในมือ เดินไปกด E ที่ลูกค้าเพื่อเสิร์ฟ ผิดเมนูเสิร์ฟไม่ได้
+- ชื่อเสียงร้าน (ดาว 1-5) ลูกค้าหนีชื่อเสียงลด ชื่อเสียงสูงลูกค้ามาถี่ขึ้น
+- Game Pass AutoChef เสิร์ฟให้เองทุก 10 วิ (แทนระบบเงินไหลเองแบบเก่า)
