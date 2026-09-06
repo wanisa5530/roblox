@@ -240,23 +240,35 @@ if G.started then return end; G.started = true
 	end
 	
 	-- ทำอาหาร: กด E ที่ครัว → เลือกเมนู → มินิเกม
-	Plot.onKitchen = function(player)
+	-- เจ้าของร้านที่ผู้เล่นกำลังทำงานให้ (ตัวเองหรือร้านที่ช่วย)
+	local function ownerOf(player)
+		local hid = player:GetAttribute("Helping")
+		if hid then local o = Players:GetPlayerByUserId(hid); if o then return o end; player:SetAttribute("Helping", nil) end
+		return player
+	end
+	Plot.onHelp = function(who, owner)
+		if who:GetAttribute("Helping") == owner.UserId then who:SetAttribute("Helping", nil); notify(who, "helpStop", "green")
+		else who:SetAttribute("Helping", owner.UserId); notify(who, "helpStart", "green", owner.DisplayName); notify(owner, "helperJoined", "green", who.DisplayName) end
+	end
+	Plot.onKitchen = function(player, owner)
 		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
 		if #tray(player) >= Config.TrayCapacity then notify(player, "trayFull", "red"); return end
-		if player:GetAttribute("Event") == "GasOut" and not player:GetAttribute("EventFixed") then notify(player, "noGas", "red"); return end
-		Remotes.OpenCook:FireClient(player)
+		if (owner or player):GetAttribute("Event") == "GasOut" and not (owner or player):GetAttribute("EventFixed") then notify(player, "noGas", "red"); return end
+		local d = Data.get(owner or player)
+		Remotes.OpenCook:FireClient(player, d and d.foods or {}, d and d.branch or 1)
 	end
 	Remotes.PickCook.OnServerEvent:Connect(function(player, foodId)
-		local d = Data.get(player)
-		if d and d.foods[foodId] and Plot.onCook then Plot.onCook(player, foodId) end
+		local d = Data.get(ownerOf(player))
+		if d and d.foods[foodId] and Plot.onCook then Plot.onCook(player, foodId, ownerOf(player)) end
 	end)
-	Plot.onCook = function(player, foodId)
+	Plot.onCook = function(player, foodId, owner)
+		owner = owner or player
 		if cooking[player] and os.clock() - cooking[player].t0 < (cooking[player].time or 10) * 3 then return end
 		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
 		if #tray(player) >= Config.TrayCapacity then notify(player, "trayFull", "red"); return end
-		if player:GetAttribute("Event") == "GasOut" and not player:GetAttribute("EventFixed") then notify(player, "noGas", "red"); return end
+		if owner:GetAttribute("Event") == "GasOut" and not owner:GetAttribute("EventFixed") then notify(player, "noGas", "red"); return end
 		local f = foodOf(foodId); if not f then return end
-		local speed = 1 - 0.15 * (upgOf(player, foodId, "speed") - 1)
+		local speed = 1 - 0.15 * (upgOf(owner, foodId, "speed") - 1)
 		local steps = f.steps or { f.game }
 		cooking[player] = { food = f, t0 = os.clock(), time = f.cookTime * speed * #steps }
 		Remotes.StartMinigame:FireClient(player, steps, f.cookTime * speed, foodId, f.spicy)
@@ -268,7 +280,7 @@ if G.started then return end; G.started = true
 		if os.clock() - c.t0 < c.time * 0.5 then score = 0 end
 		player:SetAttribute("Spice", c.food.spicy and math.clamp(tonumber(spice) or 1, 1, #Config.SpiceLevels) or nil) -- กันโกง ทำเร็วเกินไป
 		if score <= 0 then notify(player, "burnt", "red"); return end
-		addToTray(player, c.food.id, score, player:GetAttribute("Spice"), upgOf(player, c.food.id, "tray"))
+		addToTray(player, c.food.id, score, player:GetAttribute("Spice"), upgOf(ownerOf(player), c.food.id, "tray"))
 		notify(player, score > 0.85 and "perfect" or (score > 0.5 and "good" or "ok"), "green")
 	end)
 	
@@ -289,6 +301,8 @@ if G.started then return end; G.started = true
 		if player:GetAttribute("Event") == "Rush" then base = math.floor(base * 1.5) end
 		local earned = math.floor((base + tip) * mult(player))
 		d.cash += earned; d.total += earned; d.served += 1
+		local wk = ("W" .. math.floor(os.time() / 604800)); if d.weekKey ~= wk then d.weekKey = wk; d.weekEarned = 0 end
+		d.weekEarned = (d.weekEarned or 0) + earned
 		d.rep = math.min(d.rep + (quality > 0.85 and 2 or 1), 1000)
 		Customers.markServed(entry)
 		notify(player, "tip", "green", earned, tip)
@@ -315,8 +329,9 @@ if G.started then return end; G.started = true
 			for _, it in ipairs(tray(player)) do if it.f == e.food.id then return e end end
 		end
 	end
-	Customers.onServed = function(entry)
-		local player = entry.group.player
+	Customers.onServed = function(entry, actor)
+		local owner = entry.group.player
+		local player = actor or owner
 		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return false end
 		if #tray(player) == 0 then notify(player, "noDish", "red"); return false end
 		local needBag = entry.group.kind == "takeaway"
@@ -328,7 +343,12 @@ if G.started then return end; G.started = true
 		end
 		local quality = item.q or 0.5
 		if entry.spice and item.s ~= entry.spice then quality = 0; notify(player, "wrongSpice", "red") end
-		serveEntry(player, entry, quality)
+		local before = Data.get(owner) and Data.get(owner).cash or 0
+		serveEntry(owner, entry, quality)
+		if player ~= owner then
+			local hd = Data.get(player); local earned = (Data.get(owner).cash - before)
+			if hd and earned > 0 then local share = math.floor(earned * Config.HelperShare); hd.cash += share; hd.total += share; notify(player, "helperTip", "green", share); push(player) end
+		end
 		return true
 	end
 	-- หยิบจานจากเคาน์เตอร์ที่พ่อครัวทำไว้

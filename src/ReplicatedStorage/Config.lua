@@ -84,6 +84,7 @@ Config.QuestPool = {
 -- สาขา (Prestige): ถึงเลเวล 5 เปิดสาขาใหม่ เริ่มร้านใหม่ในย่านใหม่ ได้ทิปถาวร +10%/สาขา และเมนูลับของย่าน
 Config.Branches = { "Market", "Chinatown", "KhaoSan", "Floating" }
 Config.PrestigeTipBonus = 0.10
+Config.HelperShare = 0.30 -- ส่วนแบ่งของเพื่อนที่มาช่วยร้าน
 -- สมุดสะสม: การ์ดสูตรลับ (ได้จากลูกค้าพิเศษ) แต่ละใบ +1% ทิป, จานทอง (ทำสุดยอดติดกัน 3 ครั้ง มีโอกาส)
 Config.Recipes = { "GrandmaSauce", "SecretChili", "MonkTea", "RiverSalt", "TempleHerb", "TukTukSpice", "NightMarketOil", "KingRice", "MonsoonLime", "GoldenGarlic" }
 Config.RecipeTipBonus = 0.01

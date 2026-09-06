@@ -22,7 +22,7 @@ function fake:SetAttribute(k, v) attrs[k] = v end
 function fake:GetAttribute(k) return attrs[k] end
 function fake:FindFirstChild() return nil end
 local Data = require(SSS.DataService)
-Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }, prestige = 0, branch = 1, recipes = {}, gold = {}, goldStreak = 0 }
+Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }, prestige = 0, branch = 1, recipes = {}, gold = {}, goldStreak = 0, weekKey = "", weekEarned = 0 }
 local plot = Plot.assign(fake)
 check("plot assigned", plot ~= nil and attrs.PlotIndex == 1)
 Plot.refresh(fake, { MooPing = true, PadThai = true })
@@ -186,7 +186,26 @@ dd.recipes.GrandmaSauce = true; dd.gold.MooPing = true
 Plot.refresh(fake, dd.foods, dd.gold)
 check("gold dish on shelf", plot.Stalls.MooPing:GetAttribute("Gold") == true)
 
--- 11) คิวซื้อกลับไม่เกิน MaxQueue
+-- 11) เพื่อนช่วยร้าน: ผู้ช่วยเสิร์ฟด้วยถาดตัวเอง เจ้าของได้เงิน ผู้ช่วยได้ 30%
+local hattrs = {}
+local helper = { UserId = 2, DisplayName = "Helper", Parent = game, Character = nil }
+function helper:SetAttribute(k, v) hattrs[k] = v end
+function helper:GetAttribute(k) return hattrs[k] end
+function helper:FindFirstChild() return nil end
+Data.cache[2] = { cash = 0, foods = { MooPing = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }, prestige = 0, branch = 1, recipes = {}, gold = {}, goldStreak = 0, weekKey = "", weekEarned = 0 }
+Plot.onHelp(helper, fake)
+check("helper attached", hattrs.Helping == 1 and Plot.canAct(helper, fake))
+dd.foods = { MooPing = true }
+local gH = Customers.spawn(fake, dd.foods)
+t0 = os.clock(); while gH and not gH.orderAt and os.clock() - t0 < 20 do task.wait(0.2) end
+local eH = gH.members[1]
+GS.addToTray(helper, eH.food.id, 1, eH.spice, 1); if gH.kind == "takeaway" then Plot.onPack(helper) end
+local ownerBefore = dd.cash
+check("helper served", Customers.onServed(eH, helper) == true and eH.served)
+check("owner paid, helper share", dd.cash > ownerBefore and Data.cache[2].cash > 0 and dd.weekEarned > 0)
+Customers.leave(gH, "😊"); Data.cache[2] = nil
+
+-- 12) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil

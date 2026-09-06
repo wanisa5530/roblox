@@ -76,7 +76,7 @@ local function addPrompt(npc, g)
 	pp.HoldDuration = 0; pp.MaxActivationDistance = 7; pp.RequiresLineOfSight = false; pp:SetAttribute("Kind", "serve")
 	pp.Parent = npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart")
 	pp.Triggered:Connect(function(who)
-		if who ~= g.player or not g.alive or not C.onServed then return end
+		if not Plot.canAct(who, g.player) or not g.alive or not C.onServed then return end
 		-- เสิร์ฟทุกจานในถาดที่ตรงกับออเดอร์ของทั้งกลุ่มในครั้งเดียว (เริ่มจากคนที่กด)
 		local served = 0
 		local function tryNpc(target)
@@ -86,10 +86,10 @@ local function addPrompt(npc, g)
 				if #pending == 0 then return end
 				local pick = C.pickEntry and C.pickEntry(who, pending)
 				if not pick then
-					if served == 0 and target == npc then C.onServed(pending[1]) end -- ไม่มีของตรง แจ้งเหตุผล
+					if served == 0 and target == npc then C.onServed(pending[1], who) end -- ไม่มีของตรง แจ้งเหตุผล
 					return
 				end
-				if C.onServed(pick) == false then return end
+				if C.onServed(pick, who) == false then return end
 				served += 1
 			end
 		end

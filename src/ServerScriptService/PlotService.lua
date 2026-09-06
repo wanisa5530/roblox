@@ -32,6 +32,10 @@ local function light(parent, pos, color)
 	local l = Instance.new("PointLight"); l.Color = color; l.Range = 12; l.Brightness = 0.8; l.Parent = b
 end
 
+-- ผู้ช่วย: คนอื่นที่กดช่วยร้านนี้ (attribute Helping = UserId เจ้าของ)
+function P.canAct(who, owner) return who == owner or who:GetAttribute("Helping") == owner.UserId end
+P.onHelp = nil
+
 function P.origin(i)
 	local row, col = math.floor((i - 1) / 4), (i - 1) % 4
 	return Vector3.new(-90 + col * 60, 0, 30 + row * 80)
@@ -74,7 +78,7 @@ local function makeTable(m, pos, idx, player)
 		local d = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.12, 1.4, 1.4), Color = Color3.fromRGB(235, 225, 210), Transparency = 1 }, plates)
 		d.CFrame = CFrame.new(pos + Vector3.new(-1 + k * 0.7, 2.66 + k * 0.05, (k % 2) * 0.8 - 0.4)) * CFrame.Angles(0, 0, math.rad(90))
 	end
-	local cleanPrompt = prompt(g:FindFirstChildWhichIsA("Part"), "Clean", "Table " .. idx, "clean", function(who) if who == player and t.dirty and P.onClean then P.onClean(player, t) end end)
+	local cleanPrompt = prompt(g:FindFirstChildWhichIsA("Part"), "Clean", "Table " .. idx, "clean", function(who) if P.canAct(who, player) and t.dirty and P.onClean then P.onClean(who, t) end end)
 	cleanPrompt.Enabled = false
 	function t.setDirty(dirty)
 		t.dirty = dirty; cleanPrompt.Enabled = dirty
@@ -101,7 +105,9 @@ function P.assign(player)
 				w.Parent = m
 			end
 			for _, dx in ipairs({ -8, 8 }) do part({ Size = Vector3.new(0.3, 6, 0.3), Position = o + Vector3.new(dx, 3, -12.5), Color = Color3.fromRGB(60, 60, 60) }, m) end
-			sign(m, "🍜 " .. player.DisplayName, Vector3.new(16, 1.4, 0.2), o + Vector3.new(0, 7, -12.4), Color3.fromRGB(60, 20, 10), Color3.fromRGB(255, 200, 60)).Name = "NameSign"
+			local ns = sign(m, "🍜 " .. player.DisplayName, Vector3.new(16, 1.4, 0.2), o + Vector3.new(0, 7, -12.4), Color3.fromRGB(60, 20, 10), Color3.fromRGB(255, 200, 60)); ns.Name = "NameSign"
+			local hp = prompt(ns, "Help", player.DisplayName, "help", function(who) if who ~= player and P.onHelp then P.onHelp(who, player) end end)
+			hp.MaxActivationDistance = 14
 			for k = -6, 6, 4 do light(m, o + Vector3.new(k, 5.6, -11.8), Color3.fromRGB(255, 210, 120)) end
 			-- ตกแต่ง: กระถางต้นไม้และโคมไฟกระดาษ
 			for _, c in ipairs({ Vector3.new(-23, 0, 22), Vector3.new(23, 0, 22), Vector3.new(-23, 0, -29), Vector3.new(23, 0, -29) }) do
@@ -118,7 +124,7 @@ function P.assign(player)
 			-- จุดใส่ถุง (ซื้อกลับ)
 			local pack = part({ Size = Vector3.new(3, 2.8, 2), Position = o + Vector3.new(11, 1.8, -14), Color = Color3.fromRGB(240, 235, 220), Material = Enum.Material.Plastic }, m)
 			sign(m, "🥡", Vector3.new(2.5, 1, 0.1), o + Vector3.new(11, 4, -13), nil, Color3.fromRGB(255, 240, 200))
-			prompt(pack, "Pack", "🥡", "pack", function(who) if who == player and P.onPack then P.onPack(player) end end)
+			prompt(pack, "Pack", "🥡", "pack", function(who) if P.canAct(who, player) and P.onPack then P.onPack(who) end end)
 			-- ร่มใหญ่หน้าเคาน์เตอร์ (กางตอนฝนตก) และถังแก๊ส (เปลี่ยนตอนแก๊สหมด)
 			local umb = part({ Size = Vector3.new(1, 3, 1), Position = o + Vector3.new(9, 1.5, -11), Color = Color3.fromRGB(230, 230, 230), Material = Enum.Material.Fabric }, m)
 			prompt(umb, "Umbrella", "☂️", "umbrella", function(who) if who == player and P.onFix and who:GetAttribute("Event") == "Rain" then P.onFix(who) end end).HoldDuration = 1
@@ -129,7 +135,7 @@ function P.assign(player)
 			local sink = part({ Size = Vector3.new(4, 2.6, 2.5), Position = o + Vector3.new(-11, 1.6, -18), Color = Color3.fromRGB(190, 195, 200), Material = Enum.Material.Metal }, m)
 			part({ Size = Vector3.new(3, 0.3, 1.8), Position = o + Vector3.new(-11, 2.9, -18), Color = Color3.fromRGB(120, 180, 230), Material = Enum.Material.Glass }, m)
 			sign(m, "🧼 " .. Locale.get("th", "wash"), Vector3.new(4, 0.9, 0.1), o + Vector3.new(-11, 4, -16.7), nil, Color3.fromRGB(200, 230, 255))
-			local wp = prompt(sink, "Wash", "🧼", "wash", function(who) if who == player and P.onWash then P.onWash(player) end end)
+			local wp = prompt(sink, "Wash", "🧼", "wash", function(who) if P.canAct(who, player) and P.onWash then P.onWash(who) end end)
 			wp.HoldDuration = 1.5
 			-- โต๊ะนั่ง
 			P.tables[player] = {}
@@ -151,7 +157,7 @@ function P.assign(player)
 			part({ Size = Vector3.new(17, 0.25, 6), Position = o + Vector3.new(0, 6.2, -22), Color = Color3.fromRGB(240, 240, 230), Material = Enum.Material.Fabric }, k)
 			sign(k, "🍳 " .. Locale.get("th", "kitchen") .. " / " .. Locale.get("en", "kitchen"), Vector3.new(8, 1.2, 0.15), o + Vector3.new(0, 5.2, -19.8), Color3.fromRGB(255, 245, 220), Color3.fromRGB(140, 30, 30))
 			light(k, o + Vector3.new(-6, 5.8, -19.8), Color3.fromRGB(255, 120, 80)); light(k, o + Vector3.new(6, 5.8, -19.8), Color3.fromRGB(255, 120, 80))
-			prompt(kb, "Cook", "🍳", "kitchen", function(who) if who == player and P.onKitchen then P.onKitchen(player) end end)
+			prompt(kb, "Cook", "🍳", "kitchen", function(who) if P.canAct(who, player) and P.onKitchen then P.onKitchen(who, player) end end)
 			-- ชั้นโชว์เมนูหลังครัว
 			part({ Size = Vector3.new(20, 0.3, 2), Position = o + Vector3.new(0, 4.5, -27), Color = Color3.fromRGB(150, 100, 60), Material = Enum.Material.Wood }, m)
 			part({ Size = Vector3.new(20, 0.3, 2), Position = o + Vector3.new(0, 2.2, -27), Color = Color3.fromRGB(150, 100, 60), Material = Enum.Material.Wood }, m)
@@ -191,7 +197,7 @@ function P.putOnCounter(player, foodId)
 	local d = Dish.build(foodId); d:SetAttribute("Slot", slot); d.Parent = ready
 	d:PivotTo(CFrame.new(pts.counterSlot(slot)))
 	for _, x in ipairs(d:GetDescendants()) do if x:IsA("BasePart") then x.Anchored = true end end
-	prompt(d.PrimaryPart, "Pick up", Locale.food("en", foodId), "pickup", function(who) if who == player and P.onPickup then P.onPickup(player, d) end end)
+	prompt(d.PrimaryPart, "Pick up", Locale.food("en", foodId), "pickup", function(who) if P.canAct(who, player) and P.onPickup then P.onPickup(who, d) end end)
 	return true
 end
 function P.takeFromCounter(player, foodId)

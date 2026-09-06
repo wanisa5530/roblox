@@ -55,7 +55,8 @@ local function localizePrompt(pp)
 		elseif kind == "pickup" then pp.ActionText = Locale.get(L, "pickup")
 		elseif kind == "umbrella" then pp.ActionText = Locale.get(L, "umbrella")
 		elseif kind == "gas" then pp.ActionText = Locale.get(L, "gas")
-		elseif kind == "kitchen" then pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.get(L, "kitchen") end
+		elseif kind == "kitchen" then pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.get(L, "kitchen")
+		elseif kind == "help" then pp.ActionText = Locale.get(L, "help") end
 	end
 	local function gate()
 		local kind = pp:GetAttribute("Kind"); local ev = player:GetAttribute("Event")

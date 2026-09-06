@@ -77,14 +77,18 @@ dailyBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Leaderboard ด้านขวา
-local lbFrame = frame(gui, UDim2.new(0, 220, 0, 260), UDim2.new(1, -236, 0, 90), C.bg); corner(lbFrame, 12); pad(lbFrame, 10)
+local lbFrame = frame(gui, UDim2.new(0, 220, 0, 330), UDim2.new(1, -236, 0, 90), C.bg); corner(lbFrame, 12); pad(lbFrame, 10)
 lbFrame.BackgroundTransparency = 0.15
 local lbTitle = label(lbFrame, "🏆 " .. T("top"), UDim2.new(1, 0, 0, 26), UDim2.new(), 18, C.accent)
 local lbBody = label(lbFrame, "...", UDim2.new(1, 0, 1, -30), UDim2.new(0, 0, 0, 30), 14, C.text)
 lbBody.TextYAlignment = Enum.TextYAlignment.Top; lbBody.TextWrapped = true
-Remotes.Leaderboard.OnClientEvent:Connect(function(rows)
+Remotes.Leaderboard.OnClientEvent:Connect(function(rows, wrows)
 	local lines = {}
 	for i, r in ipairs(rows) do lines[#lines + 1] = string.format("%d. %s  ฿%s", i, r.name, Locale.fmt(r.value)) end
+	if wrows and #wrows > 0 then
+		lines[#lines + 1] = ""; lines[#lines + 1] = "📅 " .. T("weekly")
+		for i, r in ipairs(wrows) do lines[#lines + 1] = (i == 1 and "👑 " or (i .. ". ")) .. r.name .. "  ฿" .. Locale.fmt(r.value) end
+	end
 	lbBody.Text = #lines > 0 and table.concat(lines, "\n") or "-"
 end)
 
@@ -101,8 +105,8 @@ button(cookPick, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red,
 local cpList = Instance.new("ScrollingFrame"); cpList.Size = UDim2.new(1, -24, 1, -60); cpList.Position = UDim2.new(0, 12, 0, 52)
 cpList.BackgroundTransparency = 1; cpList.BorderSizePixel = 0; cpList.ScrollBarThickness = 6; cpList.AutomaticCanvasSize = Enum.AutomaticSize.Y; cpList.CanvasSize = UDim2.new(); cpList.Parent = cookPick
 local cpGrid = Instance.new("UIGridLayout"); cpGrid.CellSize = UDim2.new(0, 190, 0, 44); cpGrid.CellPadding = UDim2.new(0, 8, 0, 8); cpGrid.Parent = cpList
-Remotes.OpenCook.OnClientEvent:Connect(function()
-	local d = state.data; if not d then return end
+Remotes.OpenCook.OnClientEvent:Connect(function(foods, branch)
+	local d = { foods = foods or (state.data and state.data.foods) or {}, branch = branch or (state.data and state.data.branch) or 1 }
 	for _, ch in ipairs(cpList:GetChildren()) do if ch:IsA("TextButton") then ch:Destroy() end end
 	cpTitle.Text = "🍳 " .. T("chooseDish")
 	for _, f in ipairs(Config.Foods) do
