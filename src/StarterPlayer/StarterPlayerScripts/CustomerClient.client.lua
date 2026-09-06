@@ -57,7 +57,13 @@ local function localizePrompt(pp)
 		elseif kind == "gas" then pp.ActionText = Locale.get(L, "gas")
 		elseif kind == "kitchen" then pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.get(L, "kitchen") end
 	end
-	apply(); player:GetAttributeChangedSignal("Lang"):Connect(apply)
+	local function gate()
+		local kind = pp:GetAttribute("Kind"); local ev = player:GetAttribute("Event")
+		if kind == "umbrella" then pp.Enabled = ev == "Rain" and not player:GetAttribute("EventFixed")
+		elseif kind == "gas" then pp.Enabled = ev == "GasOut" and not player:GetAttribute("EventFixed") end
+	end
+	apply(); gate(); player:GetAttributeChangedSignal("Lang"):Connect(apply)
+	player:GetAttributeChangedSignal("Event"):Connect(gate); player:GetAttributeChangedSignal("EventFixed"):Connect(gate)
 end
 for _, pp in ipairs(workspace:GetDescendants()) do if pp:IsA("ProximityPrompt") then localizePrompt(pp) end end
 workspace.DescendantAdded:Connect(function(pp) if pp:IsA("ProximityPrompt") then task.defer(localizePrompt, pp) end end)
