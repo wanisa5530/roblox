@@ -107,7 +107,23 @@ local multi = 0
 for _, f in ipairs(Config.Foods) do if f.steps then multi += 1; check("steps valid " .. f.id, #f.steps >= 2) end end
 check("has multi-step foods", multi >= 5)
 
--- 7) คิวซื้อกลับไม่เกิน MaxQueue
+-- 7) เหตุการณ์และลูกค้าพิเศษ
+GS.startEvent(fake, "GasOut")
+check("event set", attrs.Event == "GasOut" and attrs.EventEnd ~= nil)
+check("fix event", GS.fixEvent(fake) == true and attrs.EventFixed == true)
+GS.endEvent(fake); check("event over", attrs.Event == nil)
+GS.startEvent(fake, "Rain"); check("rain patience halves", Customers.patienceMult[fake] == 0.5); GS.endEvent(fake)
+Customers.forceSpecial[fake] = "VIP"
+local g3 = Customers.spawn(fake, { MooPing = true })
+check("special assigned", g3 and g3.members[1].special == "VIP" and g3.members[1].npc:GetAttribute("Special") == "VIP")
+t0 = os.clock(); while g3 and not g3.orderAt and os.clock() - t0 < 20 do task.wait(0.2) end
+local cashBefore = dd.cash; dd.cash = 0
+GS.addToTray(fake, "MooPing", 1, nil, 1); if g3.kind == "takeaway" then Plot.onPack(fake) end
+Customers.onServed(g3.members[1])
+check("vip pays x5", dd.cash >= 12 * 5)
+dd.cash = cashBefore
+
+-- 8) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil

@@ -60,6 +60,16 @@ Config.UpgradeMax = 3
 Config.TrayCapacity = 4 -- จำนวนจานที่ถือได้พร้อมกัน
 function Config.upgradeCost(food, kind, level) return math.floor(food.cost * 0.4 * level + (kind == "tray" and 400 or 250)) end
 Config.SpiceLevels = { "🌶️", "🌶️🌶️", "🌶️🌶️🌶️" }
+-- ลูกค้าพิเศษ: โอกาส (ต่อคน), ตัวคูณ
+Config.Specials = {
+	Tourist = { chance = 0.10, emoji = "🧳", tipMult = 3,   patience = 0.6 },
+	Critic  = { chance = 0.05, emoji = "🕵️", repGood = 20, repBad = -10 },
+	VIP     = { chance = 0.02, emoji = "👑", payMult = 5 },
+}
+-- เหตุการณ์: ทุก 3-5 นาที สุ่ม 1 อย่าง นาน 60 วิ
+Config.EventEvery = { 180, 300 }
+Config.EventDuration = 60
+Config.Events = { "Rain", "GasOut", "Rush" }
 -- พนักงาน: cost = ค่าจ้างครั้งแรก, wage = ค่าแรงต่อคาบ, interval = วินาทีต่อการทำงาน 1 ครั้ง
 Config.WagePeriod = 300
 Config.Staff = {

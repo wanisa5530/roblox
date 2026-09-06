@@ -48,3 +48,16 @@ local function hook(name, snd)
 	sg.DescendantAdded:Connect(function(b) if b:IsA("TextButton") then b.MouseButton1Click:Connect(function() play(snd) end) end end)
 end
 hook("MinigameUI", "click"); hook("TycoonUI", "ui")
+
+-- ฝนตก: อนุภาคฝนติดตามผู้เล่น
+player:GetAttributeChangedSignal("Event"):Connect(function()
+	local char = player.Character; if not char then return end
+	local root = char:FindFirstChild("HumanoidRootPart"); if not root then return end
+	local old = root:FindFirstChild("RainFX"); if old then old:Destroy() end
+	if player:GetAttribute("Event") == "Rain" then
+		local a = Instance.new("Attachment"); a.Name = "RainFX"; a.Position = Vector3.new(0, 30, 0); a.Parent = root
+		local pe = Instance.new("ParticleEmitter"); pe.Rate = 400; pe.Lifetime = NumberRange.new(1.2); pe.Speed = NumberRange.new(40)
+		pe.Size = NumberSequence.new(0.15); pe.Transparency = NumberSequence.new(0.4); pe.Color = ColorSequence.new(Color3.fromRGB(180, 200, 255))
+		pe.EmissionDirection = Enum.NormalId.Bottom; pe.SpreadAngle = Vector2.new(60, 60); pe.Parent = a
+	end
+end)

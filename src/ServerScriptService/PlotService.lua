@@ -3,7 +3,7 @@ local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
 local Locale = require(RS.Locale)
 local Dish = require(RS.Dish)
-local P = { owners = {}, tables = {}, onCook = nil, onPack = nil, onClean = nil, onWash = nil, onPickup = nil }
+local P = { owners = {}, tables = {}, onCook = nil, onPack = nil, onClean = nil, onWash = nil, onPickup = nil, onFix = nil }
 local root = Instance.new("Folder"); root.Name = "Plots"; root.Parent = workspace
 
 local function part(props, parent)
@@ -112,6 +112,12 @@ function P.assign(player)
 			local pack = part({ Size = Vector3.new(3, 2.8, 2), Position = o + Vector3.new(11, 1.8, -14), Color = Color3.fromRGB(240, 235, 220), Material = Enum.Material.Plastic }, m)
 			sign(m, "🥡", Vector3.new(2.5, 1, 0.1), o + Vector3.new(11, 4, -13), nil, Color3.fromRGB(255, 240, 200))
 			prompt(pack, "Pack", "🥡", "pack", function(who) if who == player and P.onPack then P.onPack(player) end end)
+			-- ร่มใหญ่หน้าเคาน์เตอร์ (กางตอนฝนตก) และถังแก๊ส (เปลี่ยนตอนแก๊สหมด)
+			local umb = part({ Size = Vector3.new(1, 3, 1), Position = o + Vector3.new(9, 1.5, -11), Color = Color3.fromRGB(230, 230, 230), Material = Enum.Material.Fabric }, m)
+			prompt(umb, "Umbrella", "☂️", "umbrella", function(who) if who == player and P.onFix and who:GetAttribute("Event") == "Rain" then P.onFix(who) end end).HoldDuration = 1
+			local gas = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(3, 1.6, 1.6), Color = Color3.fromRGB(80, 160, 90), Material = Enum.Material.Metal }, m)
+			gas.CFrame = CFrame.new(o + Vector3.new(-18, 1.5, -24)) * CFrame.Angles(0, 0, math.rad(90))
+			prompt(gas, "Gas", "⛽", "gas", function(who) if who == player and P.onFix and who:GetAttribute("Event") == "GasOut" then P.onFix(who) end end).HoldDuration = 2
 			-- อ่างล้างจาน
 			local sink = part({ Size = Vector3.new(4, 2.6, 2.5), Position = o + Vector3.new(-11, 1.6, -18), Color = Color3.fromRGB(190, 195, 200), Material = Enum.Material.Metal }, m)
 			part({ Size = Vector3.new(3, 0.3, 1.8), Position = o + Vector3.new(-11, 2.9, -18), Color = Color3.fromRGB(120, 180, 230), Material = Enum.Material.Glass }, m)

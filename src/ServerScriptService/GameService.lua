@@ -155,6 +155,7 @@ if G.started then return end; G.started = true
 		if cooking[player] then return end
 		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
 		if #tray(player) >= Config.TrayCapacity then notify(player, "trayFull", "red"); return end
+		if player:GetAttribute("Event") == "GasOut" and not player:GetAttribute("EventFixed") then notify(player, "noGas", "red"); return end
 		local f = foodOf(foodId); if not f then return end
 		local speed = 1 - 0.15 * (upgOf(player, foodId, "speed") - 1)
 		local steps = f.steps or { f.game }
@@ -178,6 +179,15 @@ if G.started then return end; G.started = true
 		local patience = Customers.patienceLeft(entry)
 		local base = entry.food.price
 		local tip = math.floor(base * Config.TipMax * (quality * 0.6 + patience * 0.4))
+		local sp = entry.special and Config.Specials[entry.special]
+		if sp and sp.tipMult then tip *= sp.tipMult end
+		if sp and sp.payMult then base *= sp.payMult; notify(player, "vipPaid", "green") end
+		if sp and sp.repGood then
+			local good = quality > 0.85
+			d.rep = math.clamp(d.rep + (good and sp.repGood or sp.repBad), 0, 1000)
+			notify(player, good and "criticGood" or "criticBad", good and "green" or "red")
+		end
+		if player:GetAttribute("Event") == "Rush" then base = math.floor(base * 1.5) end
 		local earned = math.floor((base + tip) * mult(player))
 		d.cash += earned; d.total += earned; d.served += 1
 		d.rep = math.min(d.rep + (quality > 0.85 and 2 or 1), 1000)
@@ -205,6 +215,29 @@ if G.started then return end; G.started = true
 		local id = dish:GetAttribute("FoodId")
 		if addToTray(player, id, 0.6, nil, 1) then dish:Destroy() end
 	end
+
+	-- เหตุการณ์
+	local function startEvent(player, name)
+		player:SetAttribute("Event", name); player:SetAttribute("EventFixed", nil); player:SetAttribute("EventEnd", os.time() + Config.EventDuration)
+		notify(player, name, "red")
+		if name == "Rain" then Customers.patienceMult[player] = 0.5 end
+		if name == "Rush" then player:SetAttribute("SpawnMult", 0.3) end
+	end
+	local function fixEvent(player)
+		local ev = player:GetAttribute("Event")
+		if not ev or player:GetAttribute("EventFixed") then return false end
+		player:SetAttribute("EventFixed", true)
+		if ev == "Rain" then Customers.patienceMult[player] = nil end
+		return true
+	end
+	local function endEvent(player)
+		if not player:GetAttribute("Event") then return end
+		player:SetAttribute("Event", nil); player:SetAttribute("EventFixed", nil); player:SetAttribute("EventEnd", nil); player:SetAttribute("SpawnMult", nil)
+		Customers.patienceMult[player] = nil
+		notify(player, "eventOver", "green")
+	end
+	Plot.onFix = fixEvent
+	G.startEvent, G.fixEvent, G.endEvent = startEvent, fixEvent, endEvent
 
 	-- พนักงาน
 	local staffNpcs = {}
@@ -286,6 +319,14 @@ if G.started then return end; G.started = true
 		push(player)
 		player.CharacterAdded:Connect(function() task.wait(0.5); setHolding(player) end)
 		for _, st in ipairs(Config.Staff) do showStaff(player, st.key) end
+		task.spawn(function()
+			while player.Parent do
+				task.wait(math.random(Config.EventEvery[1], Config.EventEvery[2]))
+				if not player.Parent then break end
+				startEvent(player, Config.Events[math.random(#Config.Events)])
+				task.wait(Config.EventDuration); endEvent(player)
+			end
+		end)
 		task.spawn(function()
 			local lastWage = os.clock()
 			while player.Parent do

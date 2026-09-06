@@ -4,7 +4,7 @@ local TweenService = game:GetService("TweenService")
 local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
 local Plot = require(script.Parent.PlotService)
-local C = { queues = {}, groups = {}, onServed = nil, onLeft = nil, onGroupDone = nil }
+local C = { queues = {}, groups = {}, forceSpecial = {}, onServed = nil, onLeft = nil, onGroupDone = nil }
 local folder = Instance.new("Folder"); folder.Name = "Customers"; folder.Parent = workspace
 
 local NAMES = { "Somchai", "Nid", "Ploy", "Ken", "Yuki", "Mei", "Budi", "Anna", "Tom", "Fah", "Bee", "Pim" }
@@ -45,10 +45,16 @@ local function walkTo(model, target)
 end
 
 function C.queue(player) C.queues[player] = C.queues[player] or {}; return C.queues[player] end
+C.patienceMult = {} -- ต่อผู้เล่น (เหตุการณ์ฝนตก)
+local function patienceOf(g)
+	local m = C.patienceMult[g.player] or 1
+	for _, e in ipairs(g.members) do if e.special and Config.Specials[e.special].patience then m *= Config.Specials[e.special].patience end end
+	return Config.Patience * m
+end
 function C.patienceLeft(entry)
 	local g = entry.group
 	if not g.orderAt then return 1 end
-	return math.clamp(1 - (os.clock() - g.orderAt) / Config.Patience, 0, 1)
+	return math.clamp(1 - (os.clock() - g.orderAt) / patienceOf(g), 0, 1)
 end
 
 local function pickFood(foods)
@@ -84,6 +90,10 @@ function C.spawn(player, foods)
 		local npc = makeNpc(pts.spawn + Vector3.new((k - 1) * 2.5, 0, 0))
 		local e = { npc = npc, food = pickFood(foods), group = g, served = false }
 		if e.food.spicy then e.spice = math.random(#Config.SpiceLevels) end
+		local r = math.random()
+		for key, sp in pairs(Config.Specials) do if r < sp.chance then e.special = key; break end; r -= sp.chance end
+		if C.forceSpecial and C.forceSpecial[player] then e.special = C.forceSpecial[player]; C.forceSpecial[player] = nil end
+		npc:SetAttribute("Special", e.special)
 		g.members[k] = e
 		npc:SetAttribute("Takeaway", g.kind == "takeaway")
 	end
@@ -115,7 +125,7 @@ function C.spawn(player, foods)
 			addPrompt(e)
 		end
 		while g.alive do
-			local left = 1 - (os.clock() - g.orderAt) / Config.Patience
+			local left = 1 - (os.clock() - g.orderAt) / patienceOf(g)
 			if left <= 0 then break end
 			for _, e in ipairs(g.members) do if not e.served then e.npc:SetAttribute("Patience", left) end end
 			task.wait(0.25)

@@ -22,7 +22,8 @@ local function attach(npc)
 		bg.Enabled = id ~= nil or mood ~= nil
 		if mood then t.Text = mood; barBg.Visible = false; return end
 		local food = id and foodOf(id)
-		if food then t.Text = (npc:GetAttribute("Takeaway") and "🥡 " or "") .. food.emoji .. " " .. Locale.food(lang(), id) .. (npc:GetAttribute("Spice") and (" " .. Config.SpiceLevels[npc:GetAttribute("Spice")]) or "") end
+		local spKey = npc:GetAttribute("Special"); local spTag = spKey and (Config.Specials[spKey].emoji .. " ") or ""
+		if food then t.Text = spTag .. (npc:GetAttribute("Takeaway") and "🥡 " or "") .. food.emoji .. " " .. Locale.food(lang(), id) .. (npc:GetAttribute("Spice") and (" " .. Config.SpiceLevels[npc:GetAttribute("Spice")]) or "") end
 		local left = npc:GetAttribute("Patience") or 1
 		bar.Size = UDim2.fromScale(left, 1)
 		bar.BackgroundColor3 = left > 0.5 and Color3.fromRGB(90, 200, 110) or (left > 0.25 and Color3.fromRGB(240, 190, 60) or Color3.fromRGB(220, 80, 70))
@@ -43,7 +44,9 @@ local function localizePrompt(pp)
 		elseif kind == "pack" then pp.ActionText = Locale.get(L, "pack"); pp.ObjectText = Locale.get(L, "takeaway")
 		elseif kind == "clean" then pp.ActionText = Locale.get(L, "clean"); pp.ObjectText = ""
 		elseif kind == "wash" then pp.ActionText = Locale.get(L, "wash"); pp.ObjectText = ""
-		elseif kind == "pickup" then pp.ActionText = Locale.get(L, "pickup") end
+		elseif kind == "pickup" then pp.ActionText = Locale.get(L, "pickup")
+		elseif kind == "umbrella" then pp.ActionText = Locale.get(L, "umbrella")
+		elseif kind == "gas" then pp.ActionText = Locale.get(L, "gas") end
 	end
 	apply(); player:GetAttributeChangedSignal("Lang"):Connect(apply)
 end
@@ -85,3 +88,20 @@ local function scanPlot(plot)
 end
 for _, p in ipairs(plots:GetChildren()) do scanPlot(p) end
 plots.ChildAdded:Connect(scanPlot)
+
+-- แบนเนอร์เหตุการณ์
+local banner = Instance.new("TextLabel"); banner.Size = UDim2.new(0, 520, 0, 34); banner.Position = UDim2.new(0.5, -260, 0, 84)
+banner.BackgroundColor3 = Color3.fromRGB(200, 60, 50); banner.TextColor3 = Color3.new(1, 1, 1); banner.Font = Enum.Font.FredokaOne; banner.TextSize = 18
+banner.Visible = false; banner.Parent = player:WaitForChild("PlayerGui"):WaitForChild("TycoonUI")
+Instance.new("UICorner", banner).CornerRadius = UDim.new(0, 8)
+local RunService = game:GetService("RunService")
+RunService.Heartbeat:Connect(function()
+	local ev = player:GetAttribute("Event")
+	banner.Visible = ev ~= nil
+	if ev then
+		local left = math.max((player:GetAttribute("EventEnd") or 0) - os.time(), 0)
+		local icon = ev == "Rain" and "🌧️" or (ev == "GasOut" and "⛽" or "🔥")
+		banner.Text = icon .. " " .. Locale.get(lang(), ev) .. (player:GetAttribute("EventFixed") and " ✅" or "") .. "  " .. left .. "s"
+		banner.BackgroundColor3 = ev == "Rush" and Color3.fromRGB(230, 130, 30) or (player:GetAttribute("EventFixed") and Color3.fromRGB(60, 150, 90) or Color3.fromRGB(200, 60, 50))
+	end
+end)
