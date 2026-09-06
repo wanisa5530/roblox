@@ -22,7 +22,7 @@ function fake:SetAttribute(k, v) attrs[k] = v end
 function fake:GetAttribute(k) return attrs[k] end
 function fake:FindFirstChild() return nil end
 local Data = require(SSS.DataService)
-Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" } }
+Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }, prestige = 0, branch = 1, recipes = {}, gold = {}, goldStreak = 0 }
 local plot = Plot.assign(fake)
 check("plot assigned", plot ~= nil and attrs.PlotIndex == 1)
 Plot.refresh(fake, { MooPing = true, PadThai = true })
@@ -177,7 +177,16 @@ dd.decor.owned.Pack = true
 check("premium unlocked by pack", GS.decorAction(fake, "buy", "LuckyCat") == true)
 check("equip chairs needs purchase", select(1, GS.decorAction(fake, "equip", "ChairNeon")) == false)
 
--- 10) คิวซื้อกลับไม่เกิน MaxQueue
+-- 10) สาขาใหม่และสมุดสะสม
+local okPr, errPr = GS.prestige(fake)
+check("prestige needs level 5", okPr == false and errPr == "needLevel5")
+dd.total = 250000; GS.checkLevel(fake)
+check("prestige ok", GS.prestige(fake) == true and dd.prestige == 1 and dd.branch == 2 and dd.cash == Config.StartingCash and dd.level == 1)
+dd.recipes.GrandmaSauce = true; dd.gold.MooPing = true
+Plot.refresh(fake, dd.foods, dd.gold)
+check("gold dish on shelf", plot.Stalls.MooPing:GetAttribute("Gold") == true)
+
+-- 11) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil

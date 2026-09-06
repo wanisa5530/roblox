@@ -7,7 +7,7 @@ if G.started then return end; G.started = true
 	local MPS = game:GetService("MarketplaceService")
 	local RS = game.ReplicatedStorage
 	local Config = require(RS.Config)
-	local _Locale = require(RS.Locale)
+	local Locale = require(RS.Locale)
 	local Dish = require(RS.Dish)
 	local Remotes = require(RS.Remotes)
 	local Data = require(script.Parent.DataService)
@@ -30,6 +30,11 @@ if G.started then return end; G.started = true
 	end
 	local function mult(player)
 		local m = 1
+		local d = Data.get(player)
+		if d then
+			local n = 0; for _ in pairs(d.recipes or {}) do n += 1 end
+			m *= 1 + (d.prestige or 0) * Config.PrestigeTipBonus + n * Config.RecipeTipBonus
+		end
 		for _, gp in ipairs(Config.GamePasses) do if gp.mult and ownsPass(player, gp.key) then m *= gp.mult end end
 		return m
 	end
@@ -164,6 +169,25 @@ if G.started then return end; G.started = true
 		notify(player, "questDone", "green", q.reward)
 		return true
 	end
+	local function prestige(player)
+		local d = Data.get(player); if not d then return false end
+		if d.level < #Config.Levels then return false, "needLevel5" end
+		d.prestige += 1; d.branch = d.prestige % #Config.Branches + 1
+		d.cash = Config.StartingCash; d.foods = { MooPing = true }; d.upg = {}; d.staff = {}; d.total = 0; d.level = 1; d.rep = 0
+		Customers.clear(player)
+		local m = workspace.Plots:FindFirstChild("Plot_" .. player.UserId)
+		if m then
+			local st = m:FindFirstChild("Stalls"); if st then st:ClearAllChildren() end
+			local rd = m:FindFirstChild("Ready"); if rd then rd:ClearAllChildren() end
+			local ns = m:FindFirstChild("NameSign"); if ns then ns.SurfaceGui.TextLabel.Text = "🍜 " .. player.DisplayName .. " · " .. Locale.get("th", Config.Branches[d.branch]) end
+		end
+		Plot.refresh(player, d.foods, d.gold); Plot.menuBoard(player, d.foods); checkLevel(player)
+		Data.save(player); push(player)
+		notify(player, "prestigeDone", "green", Config.Branches[d.branch])
+		return true
+	end
+	Remotes.Prestige.OnServerInvoke = prestige
+	G.prestige = prestige
 	G.progress, G.checkLevel, G.ensureQuests = progress, checkLevel, ensureQuests
 
 	-- ตกแต่งร้าน
@@ -268,6 +292,18 @@ if G.started then return end; G.started = true
 		d.rep = math.min(d.rep + (quality > 0.85 and 2 or 1), 1000)
 		Customers.markServed(entry)
 		notify(player, "tip", "green", earned, tip)
+		-- สมุดสะสม: จานทองจากสตรีคสุดยอด, สูตรลับจากลูกค้าพิเศษ
+		if quality > 0.85 then
+			d.goldStreak = (d.goldStreak or 0) + 1
+			if d.goldStreak >= Config.GoldStreak and math.random() < Config.GoldDishChance and not d.gold[entry.food.id] then
+				d.gold[entry.food.id] = true; d.goldStreak = 0; notify(player, "goldDish", "green"); Plot.refresh(player, d.foods, d.gold)
+			end
+		else d.goldStreak = 0 end
+		if sp and math.random() < (entry.special == "Critic" and 0.6 or 0.25) then
+			local missing = {}
+			for _, r in ipairs(Config.Recipes) do if not d.recipes[r] then missing[#missing + 1] = r end end
+			if #missing > 0 then local r = missing[math.random(#missing)]; d.recipes[r] = true; notify(player, "recipeFound", "green", r) end
+		end
 		progress(player, "serve", 1); progress(player, "earn", earned)
 		if quality > 0.85 then progress(player, "perfect", 1) end
 		progress(player, entry.group.kind == "takeaway" and "takeaway" or "dine", 1)
@@ -401,7 +437,8 @@ if G.started then return end; G.started = true
 		local d = Data.load(player)
 		LB.setup(player, d)
 		Plot.assign(player)
-		Plot.refresh(player, d.foods)
+		Plot.refresh(player, d.foods, d.gold)
+		if d.prestige > 0 then local m = workspace.Plots:FindFirstChild("Plot_" .. player.UserId); local ns = m and m:FindFirstChild("NameSign"); if ns then ns.SurfaceGui.TextLabel.Text = "🍜 " .. player.DisplayName .. " · " .. Locale.get("th", Config.Branches[d.branch]) end end
 		ensureQuests(d); checkLevel(player)
 		Plot.applyDecor(player, d.decor)
 		for _, gp in ipairs(Config.GamePasses) do ownsPass(player, gp.key) end
@@ -468,10 +505,11 @@ if G.started then return end; G.started = true
 	Remotes.BuyFood.OnServerInvoke = function(player, foodId)
 		local d = Data.get(player); if not d then return false end
 		local f = foodOf(foodId); if not f then return false end
+		if f.branch and Config.Branches[d.branch] ~= f.branch then return false, "owned" end
 		if d.foods[foodId] then return false, "owned" end
 		if d.cash < f.cost then return false, "notEnough" end
 		d.cash -= f.cost; d.foods[foodId] = true
-		Plot.refresh(player, d.foods); Plot.menuBoard(player, d.foods)
+		Plot.refresh(player, d.foods, d.gold); Plot.menuBoard(player, d.foods)
 		push(player)
 		return true
 	end

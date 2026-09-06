@@ -120,9 +120,10 @@ end)
 local shop = frame(gui, UDim2.new(0, 520, 0, 520), UDim2.new(0.5, -260, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
 local tabs = {}
-local tabNames = { "menu", "decor", "staff", "quests", "passes", "robux" }
+local tabNames = { "menu", "decor", "staff", "quests", "collection", "passes", "robux" }
 for i, name in ipairs(tabNames) do
-	tabs[name] = button(shop, T(name), UDim2.new(0, 76, 0, 36), UDim2.new(0, 8 + (i - 1) * 80, 0, 8), C.card)
+	tabs[name] = button(shop, T(name), UDim2.new(0, 66, 0, 36), UDim2.new(0, 6 + (i - 1) * 69, 0, 8), C.card)
+	tabs[name].TextSize = 14
 end
 local list = Instance.new("ScrollingFrame"); list.Size = UDim2.new(1, -24, 1, -64); list.Position = UDim2.new(0, 12, 0, 54)
 list.BackgroundTransparency = 1; list.BorderSizePixel = 0; list.ScrollBarThickness = 6; list.CanvasSize = UDim2.new(); list.AutomaticCanvasSize = Enum.AutomaticSize.Y; list.Parent = shop
@@ -160,6 +161,7 @@ local function renderShop()
 			ub.TextSize = 14
 		end
 		for _, f in ipairs(Config.Foods) do
+			if f.branch and Config.Branches[d.branch or 1] ~= f.branch then continue end
 			local owned = d.foods[f.id]
 			local can = d.cash >= f.cost
 			local _, b = card(Locale.food(lang, f.id), "฿ " .. Locale.fmt(f.price) .. " / " .. f.emoji,
@@ -209,6 +211,29 @@ local function renderShop()
 			card(desc, (q.type == "earn" and Locale.fmt(q.progress) or q.progress) .. " / " .. (q.type == "earn" and Locale.fmt(q.target) or q.target) .. "   🎁 ฿" .. Locale.fmt(q.reward),
 				q.claimed and T("claimedQ") or T("claim"), q.claimed and C.card or (ready and C.green or C.card),
 				function() if ready and not q.claimed then local ok = Remotes.ClaimQuest:InvokeServer(i); if ok then renderShop() end end end, "📋")
+		end
+	elseif state.tab == "collection" then
+		local nR = 0; for _ in pairs(d.recipes or {}) do nR += 1 end
+		local nG = 0; for _ in pairs(d.gold or {}) do nG += 1 end
+		local bonus = math.floor(((d.prestige or 0) * Config.PrestigeTipBonus + nR * Config.RecipeTipBonus) * 100)
+		card(T("branch") .. ": " .. T(Config.Branches[d.branch or 1]) .. " #" .. ((d.prestige or 0) + 1), T("bonus") .. " +" .. bonus .. "%  ·  " .. T("goldDishes") .. " " .. nG .. "/" .. #Config.Foods .. "  ·  " .. T("recipes") .. " " .. nR .. "/" .. #Config.Recipes,
+			T("prestige"), (d.level or 1) >= #Config.Levels and C.accent or C.card, function()
+				local ok, err = Remotes.Prestige:InvokeServer()
+				if ok then renderShop() elseif err then notify(T(err), C.red) end
+			end, "🏙️")
+		local gl = frame(list, UDim2.new(1, -8, 0, 20), UDim2.new(), C.bg); label(gl, "🏆 " .. T("goldDishes"), UDim2.new(1, 0, 1, 0), UDim2.new(), 15, C.accent)
+		local grid = frame(list, UDim2.new(1, -8, 0, 0), UDim2.new(), C.bg); grid.AutomaticSize = Enum.AutomaticSize.Y
+		local gg = Instance.new("UIGridLayout"); gg.CellSize = UDim2.new(0, 52, 0, 52); gg.CellPadding = UDim2.new(0, 4, 0, 4); gg.Parent = grid
+		for _, f in ipairs(Config.Foods) do
+			local has = d.gold and d.gold[f.id]
+			local c = label(grid, has and f.emoji or "❓", UDim2.new(), UDim2.new(), 26, nil, Enum.TextXAlignment.Center)
+			c.BackgroundTransparency = 0; c.BackgroundColor3 = has and Color3.fromRGB(255, 200, 60) or C.card; corner(c, 8)
+		end
+		local rl = frame(list, UDim2.new(1, -8, 0, 20), UDim2.new(), C.bg); label(rl, "📜 " .. T("recipes"), UDim2.new(1, 0, 1, 0), UDim2.new(), 15, C.accent)
+		for _, r in ipairs(Config.Recipes) do
+			local has = d.recipes and d.recipes[r]
+			local c = frame(list, UDim2.new(1, -8, 0, 30), UDim2.new(), has and C.card or C.bg); corner(c, 8)
+			label(c, (has and "✅ " or "❓ ") .. (has and T(r) or "???"), UDim2.new(1, -16, 1, 0), UDim2.new(0, 8, 0, 0), 15, has and C.text or C.muted)
 		end
 	elseif state.tab == "passes" then
 		for _, gp in ipairs(Config.GamePasses) do

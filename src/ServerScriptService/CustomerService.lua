@@ -62,6 +62,7 @@ local function pickFood(foods)
 	for _, f in ipairs(Config.Foods) do if foods[f.id] then owned[#owned + 1] = f end end
 	return owned[math.random(#owned)]
 end
+C.onRecipeChance = nil
 
 -- ข้อความออเดอร์บน NPC: "id:spice|id:spice" เฉพาะที่ยังไม่เสิร์ฟ
 function C.refreshOrder(npc, g)

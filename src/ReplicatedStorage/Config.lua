@@ -54,6 +54,9 @@ Config.FoodNames = {
 	HoiTod     = { en="Hoi Tod (Mussel Pancake)", th="หอยทอด",            ja="ホイトード",           zh="蚵仔煎",       id="Hoi Tod" },
 	MangoRice  = { en="Mango Sticky Rice",        th="ข้าวเหนียวมะม่วง",     ja="マンゴースティッキーライス", zh="芒果糯米饭", id="Ketan Mangga" },
 	ThaiTea    = { en="Thai Iced Tea",            th="ชาไทย",             ja="タイティー",           zh="泰式奶茶",     id="Teh Thailand" },
+	Dimsum     = { en="Chinatown Dim Sum",       th="ติ่มซำเยาวราช",       ja="ヤワラート点心",         zh="唐人街点心",   id="Dimsum Chinatown" },
+	Scorpion   = { en="Fried Scorpion Skewer",   th="แมงป่องทอดข้าวสาร",   ja="サソリの串揚げ",         zh="炸蝎子串",     id="Sate Kalajengking" },
+	KanomJeen  = { en="Floating Market Kanom Jeen", th="ขนมจีนตลาดน้ำ",     ja="水上市場カノムチーン",   zh="水上市场米线", id="Kanom Jeen Pasar Apung" },
 	DurianCart = { en="Durian Cart",              th="รถเข็นทุเรียน",        ja="ドリアン屋台",         zh="榴莲车",       id="Gerobak Durian" },
 }
 
@@ -78,6 +81,14 @@ Config.QuestPool = {
 	{ type="clean", target=5, reward=200 },   { type="perfect", target=8, reward=500 },
 	{ type="takeaway", target=6, reward=300 }, { type="dine", target=6, reward=300 },
 }
+-- สาขา (Prestige): ถึงเลเวล 5 เปิดสาขาใหม่ เริ่มร้านใหม่ในย่านใหม่ ได้ทิปถาวร +10%/สาขา และเมนูลับของย่าน
+Config.Branches = { "Market", "Chinatown", "KhaoSan", "Floating" }
+Config.PrestigeTipBonus = 0.10
+-- สมุดสะสม: การ์ดสูตรลับ (ได้จากลูกค้าพิเศษ) แต่ละใบ +1% ทิป, จานทอง (ทำสุดยอดติดกัน 3 ครั้ง มีโอกาส)
+Config.Recipes = { "GrandmaSauce", "SecretChili", "MonkTea", "RiverSalt", "TempleHerb", "TukTukSpice", "NightMarketOil", "KingRice", "MonsoonLime", "GoldenGarlic" }
+Config.RecipeTipBonus = 0.01
+Config.GoldDishChance = 0.25
+Config.GoldStreak = 3
 -- ลูกค้าพิเศษ: โอกาส (ต่อคน), ตัวคูณ
 Config.Specials = {
 	Tourist = { chance = 0.10, emoji = "🧳", tipMult = 3,   patience = 0.6 },

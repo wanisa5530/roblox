@@ -304,7 +304,7 @@ function P.release(player)
 	if m then m:Destroy() end
 end
 
-function P.refresh(player, foods)
+function P.refresh(player, foods, gold)
 	local m = root:FindFirstChild("Plot_" .. player.UserId)
 	if not m then return end
 	local o = P.origin(player:GetAttribute("PlotIndex"))
@@ -317,6 +317,12 @@ function P.refresh(player, foods)
 			local d = Dish.build(f.id); d:ScaleTo(0.7); d.Parent = g
 			d:PivotTo(CFrame.new(pos))
 			for _, x in ipairs(d:GetDescendants()) do if x:IsA("BasePart") then x.Anchored = true end end
+		end
+		local g = stalls:FindFirstChild(f.id)
+		if g and gold and gold[f.id] and not g:GetAttribute("Gold") then
+			g:SetAttribute("Gold", true)
+			for _, x in ipairs(g:GetDescendants()) do if x:IsA("BasePart") then x.Color = Color3.fromRGB(255, 215, 80); x.Material = Enum.Material.Metal end end
+			local l = Instance.new("PointLight"); l.Color = Color3.fromRGB(255, 220, 120); l.Range = 6; l.Parent = g:FindFirstChildWhichIsA("BasePart", true)
 		end
 	end
 end
