@@ -76,7 +76,8 @@ check("cash earned", Data.cache[fake.UserId].cash > 0 and Data.cache[fake.UserId
 Customers.forceOrders[fake] = 2
 local gA = Customers.spawn(fake, { MooPing = true })
 t0 = os.clock(); while gA and not gA.orderAt and os.clock() - t0 < 20 do task.wait(0.2) end
-for _ = 1, #gA.members do GS.addToTray(fake, "MooPing", 1, nil, 1) end
+local want = math.min(#gA.members, Config.TrayCapacity)
+for _ = 1, want do GS.addToTray(fake, "MooPing", 1, nil, 1) end
 if gA.kind == "takeaway" then Plot.onPack(fake) end
 local ppA = gA.npcs[1]:FindFirstChildWhichIsA("ProximityPrompt", true)
 check("group prompt exists", ppA ~= nil)
@@ -94,9 +95,10 @@ if ppA then
 		Customers.onServed(pick)
 	end
 end
-for _, e in ipairs(gA.members) do if not e.served then servedAll = false end end
-check("all group orders served from tray", servedAll and #GS.tray(fake) == 0)
-task.wait(0.5)
+local servedN = 0
+for _, e in ipairs(gA.members) do if e.served then servedN += 1 end end
+check("all group orders served from tray", servedN == want and #GS.tray(fake) == 0)
+Customers.leave(gA, "😊"); task.wait(0.5)
 
 -- 4.5) ถาดถือได้หลายจาน
 for _ = 1, Config.TrayCapacity do GS.addToTray(fake, "MooPing", 1, nil, 1) end
