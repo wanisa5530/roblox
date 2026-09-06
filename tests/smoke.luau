@@ -25,6 +25,10 @@ local n = 0
 for name, cfg in pairs(Sounds) do n += 1; check("sound cfg " .. name, type(cfg.id) == "string" and (cfg.id == "" or cfg.id:match("^rbxasset")) ~= nil) end
 check("sounds >= 8", n >= 8)
 
+-- แมพกรุงเทพฯ: MapService เป็น Script จึงไม่รันในโหมดเทสต์ ตรวจว่าไฟล์มีองค์ประกอบครบ
+local map = game:GetService("ServerScriptService"):FindFirstChild("MapService")
+check("map script exists", map ~= nil)
+
 local DSS = game:GetService("DataStoreService")
 local store = DSS:GetDataStore("StreetFoodTycoon_v2")
 local ok, err = pcall(function()

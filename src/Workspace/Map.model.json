@@ -3,7 +3,7 @@
   "children": [
     { "name": "Ground", "className": "Part", "properties": {
       "Anchored": true, "Size": [500, 2, 500], "Position": [0, -1, 0],
-      "Color": [0.35, 0.33, 0.3], "Material": "Concrete", "TopSurface": "Smooth" } },
+      "Color": [0.2, 0.19, 0.18], "Material": "Concrete", "TopSurface": "Smooth" } },
     { "name": "Road", "className": "Part", "properties": {
       "Anchored": true, "Size": [500, 0.2, 18], "Position": [0, 0.1, -8], "Color": [0.2, 0.2, 0.22], "Material": "Asphalt" } },
     { "name": "Line", "className": "Part", "properties": {
@@ -14,7 +14,7 @@
       "Anchored": true, "Size": [30, 5, 0.4], "Position": [0, 10, -40], "Color": [1, 0.75, 0.2], "Material": "Neon" },
       "children": [ { "name": "Gui", "className": "SurfaceGui", "properties": { "Face": "Front" },
         "children": [ { "name": "Text", "className": "TextLabel", "properties": {
-          "Size": { "UDim2": [[1,0],[1,0]] }, "Text": "🍜 ตลาดโต้รุ่ง Street Food Tycoon 🍢", "TextScaled": true, "Font": "FredokaOne",
+          "Size": { "UDim2": [[1,0],[1,0]] }, "Text": "🍜 ตลาดโต้รุ่งกรุงเทพฯ · Bangkok Street Food 🍢", "TextScaled": true, "Font": "FredokaOne",
           "BackgroundTransparency": 1, "TextColor3": [0.3, 0.1, 0.05] } } ] } ] }
   ]
 }
