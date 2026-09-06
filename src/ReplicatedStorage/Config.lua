@@ -97,9 +97,9 @@ Config.Staff = {
 }
 -- Game Pass (ใส่ไอดีจริงแทน 0)
 Config.GamePasses = {
-	{ key="DoubleIncome", id=0, mult=2 },
-	{ key="AutoChef",  id=0 },
-	{ key="VIP",          id=0, mult=1.5 },
+	{ key="DoubleIncome", id=1966256968, mult=2 },
+	{ key="AutoChef",  id=1970685049 },
+	{ key="VIP",          id=1968813309, mult=1.5 },
 }
 -- Dev Product
 Config.DevProducts = {
