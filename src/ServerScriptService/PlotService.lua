@@ -14,8 +14,8 @@ local function part(props, parent)
 	return x
 end
 local function sign(parent, text, size, pos, color, bg)
-	local s = part({ Size = size, Position = pos, Color = bg or Color3.new(1, 0.95, 0.6), Material = Enum.Material.Neon }, parent)
-	local g = Instance.new("SurfaceGui"); g.Face = Enum.NormalId.Front; g.Parent = s
+	local s = part({ Size = size, Position = pos, Color = bg or Color3.new(1, 0.95, 0.6), Material = Enum.Material.SmoothPlastic }, parent)
+	local g = Instance.new("SurfaceGui"); g.Face = Enum.NormalId.Front; g.LightInfluence = 0; g.Brightness = 2; g.Parent = s
 	local t = Instance.new("TextLabel"); t.Size = UDim2.fromScale(1, 1); t.BackgroundTransparency = 1
 	t.Text = text; t.TextScaled = true; t.Font = Enum.Font.FredokaOne; t.TextColor3 = color or Color3.new(0.15, 0.1, 0.05); t.Parent = g
 	return s
@@ -28,8 +28,8 @@ local function prompt(parent, action, obj, key, cb)
 	return pp
 end
 local function light(parent, pos, color)
-	local b = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(0.6, 0.6, 0.6), Position = pos, Color = color, Material = Enum.Material.Neon }, parent)
-	local l = Instance.new("PointLight"); l.Color = color; l.Range = 14; l.Brightness = 1.2; l.Parent = b
+	local b = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(0.5, 0.5, 0.5), Position = pos, Color = color, Material = Enum.Material.Neon }, parent)
+	local l = Instance.new("PointLight"); l.Color = color; l.Range = 12; l.Brightness = 0.8; l.Parent = b
 end
 
 function P.origin(i)
@@ -102,7 +102,7 @@ function P.assign(player)
 			end
 			for _, dx in ipairs({ -8, 8 }) do part({ Size = Vector3.new(0.3, 6, 0.3), Position = o + Vector3.new(dx, 3, -12.5), Color = Color3.fromRGB(60, 60, 60) }, m) end
 			sign(m, "🍜 " .. player.DisplayName, Vector3.new(16, 1.4, 0.2), o + Vector3.new(0, 7, -12.4), Color3.fromRGB(60, 20, 10), Color3.fromRGB(255, 200, 60))
-			for k = -7, 7, 2 do light(m, o + Vector3.new(k, 5.6, -11.8), Color3.fromRGB(255, 210, 120)) end
+			for k = -6, 6, 4 do light(m, o + Vector3.new(k, 5.6, -11.8), Color3.fromRGB(255, 210, 120)) end
 			-- ตกแต่ง: กระถางต้นไม้และโคมไฟกระดาษ
 			for _, c in ipairs({ Vector3.new(-23, 0, 22), Vector3.new(23, 0, 22), Vector3.new(-23, 0, -29), Vector3.new(23, 0, -29) }) do
 				part({ Size = Vector3.new(2, 1.6, 2), Position = o + c + Vector3.new(0, 0.8, 0), Color = Color3.fromRGB(150, 80, 50), Material = Enum.Material.Slate }, m)

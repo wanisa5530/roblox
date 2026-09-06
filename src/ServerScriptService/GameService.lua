@@ -353,6 +353,7 @@ if G.started then return end; G.started = true
 		push(player)
 	end
 	Remotes.HireStaff.OnServerInvoke = function(player, key)
+		if key == "ToggleAutoChef" then player:SetAttribute("AutoChefOn", player:GetAttribute("AutoChefOn") == false); return true end
 		local d = Data.get(player); local st = staffCfg(key)
 		if not d or not st then return false end
 		if d.staff[key] then return false, "owned" end

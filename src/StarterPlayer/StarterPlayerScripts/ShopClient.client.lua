@@ -172,6 +172,10 @@ local function renderShop()
 			if owned then b.Visible = false end
 		end
 	elseif state.tab == "staff" then
+		if player:GetAttribute("Pass_AutoChef") then
+			local on = player:GetAttribute("AutoChefOn") ~= false
+			card("🤖 " .. T("AutoChef"), "Game Pass", on and "ON" or "OFF", on and C.green or C.card, function() Remotes.HireStaff:InvokeServer("ToggleAutoChef"); task.wait(0.1); renderShop() end, "⭐")
+		end
 		for _, st in ipairs(Config.Staff) do
 			local hired = d.staff and d.staff[st.key]
 			card(T(st.key), T(st.key:lower() .. "Desc") .. "  ·  ฿" .. Locale.fmt(st.wage) .. " " .. T("wage"),

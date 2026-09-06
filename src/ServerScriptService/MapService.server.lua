@@ -10,8 +10,8 @@ local function part(props, parent)
 	x.Parent = parent or deco; return x
 end
 local function neonSign(text, size, cf, color, bg, parent)
-	local s = part({ Size = size, CFrame = cf, Color = bg, Material = Enum.Material.Neon }, parent)
-	local g = Instance.new("SurfaceGui"); g.Face = Enum.NormalId.Front; g.Parent = s
+	local s = part({ Size = size, CFrame = cf, Color = bg, Material = Enum.Material.SmoothPlastic }, parent)
+	local g = Instance.new("SurfaceGui"); g.Face = Enum.NormalId.Front; g.LightInfluence = 0; g.Brightness = 2.5; g.Parent = s
 	local t = Instance.new("TextLabel"); t.Size = UDim2.fromScale(1, 1); t.BackgroundTransparency = 1; t.Text = text; t.TextScaled = true
 	t.Font = Enum.Font.FredokaOne; t.TextColor3 = color; t.Parent = g
 	local l = Instance.new("PointLight"); l.Color = bg; l.Range = 12; l.Brightness = 0.6; l.Parent = s
@@ -46,7 +46,8 @@ for x = -230, 230, 24 do
 	for f = 2, floors do
 		for w = -1, 1 do
 			local lit = math.random() < 0.6
-			part({ Size = Vector3.new(4, 4, 0.2), Position = Vector3.new(x + w * 7, f * 8 - 4, -30.9), Color = lit and Color3.fromRGB(255, 220, 150) or Color3.fromRGB(40, 50, 70), Material = lit and Enum.Material.Neon or Enum.Material.Glass })
+			part({ Size = Vector3.new(4, 4, 0.2), Position = Vector3.new(x + w * 7, f * 8 - 4, -30.9), Color = lit and Color3.fromRGB(255, 225, 170) or Color3.fromRGB(30, 35, 50), Material = Enum.Material.Glass, Transparency = lit and 0.2 or 0.4 })
+			if lit then local wl = Instance.new("SurfaceLight"); wl.Face = Enum.NormalId.Front; wl.Range = 6; wl.Brightness = 0.6; wl.Color = Color3.fromRGB(255, 220, 160); wl.Parent = part({ Size = Vector3.new(3.6, 3.6, 0.05), Position = Vector3.new(x + w * 7, f * 8 - 4, -30.78), Color = Color3.fromRGB(255, 225, 170), Material = Enum.Material.Neon, Transparency = 0.5 }) end
 		end
 		part({ Size = Vector3.new(23, 0.3, 3), Position = Vector3.new(x, f * 8 - 7, -29.5), Color = Color3.fromRGB(150, 150, 150), Material = Enum.Material.Concrete })
 		for w = -10, 10, 2.5 do part({ Size = Vector3.new(0.15, 1.2, 0.15), Position = Vector3.new(x + w, f * 8 - 6.3, -28.2), Color = Color3.fromRGB(90, 90, 90) }) end
@@ -55,7 +56,10 @@ for x = -230, 230, 24 do
 	part({ Size = Vector3.new(23, 0.3, 5), Position = Vector3.new(x, 7.5, -28.5), Color = Color3.fromRGB(60, 60, 65), Material = Enum.Material.Metal })
 	local sn = shopNames[i % #shopNames + 1]
 	neonSign(sn[1], Vector3.new(18, 3, 0.3), CFrame.new(x, 10, -30.8), sn[2], sn[3])
-	part({ Size = Vector3.new(10, 6.5, 0.3), Position = Vector3.new(x, 3.5, -30.9), Color = Color3.fromRGB(255, 240, 210), Material = Enum.Material.Neon })
+	part({ Size = Vector3.new(10, 6.5, 0.3), Position = Vector3.new(x, 3.5, -30.9), Color = Color3.fromRGB(255, 240, 210), Material = Enum.Material.Glass, Transparency = 0.3 })
+	local sl = Instance.new("SurfaceLight"); sl.Face = Enum.NormalId.Front; sl.Range = 12; sl.Brightness = 1; sl.Color = Color3.fromRGB(255, 235, 200); sl.Parent = part({ Size = Vector3.new(9, 0.2, 0.2), Position = Vector3.new(x, 6.9, -30.7), Color = Color3.fromRGB(255, 255, 240), Material = Enum.Material.Neon })
+	-- กันสาดผ้าใบสี
+	part({ Size = Vector3.new(23, 0.2, 4), CFrame = CFrame.new(x, 7.6, -28.5) * CFrame.Angles(math.rad(12), 0, 0), Color = ({ Color3.fromRGB(200, 40, 40), Color3.fromRGB(30, 90, 170), Color3.fromRGB(40, 140, 80) })[i % 3 + 1], Material = Enum.Material.Fabric })
 	-- แอร์ติดผนัง
 	part({ Size = Vector3.new(2.5, 1.5, 1), Position = Vector3.new(x + 9, 12, -30.3), Color = Color3.fromRGB(220, 220, 220), Material = Enum.Material.Metal })
 end
@@ -195,9 +199,12 @@ end
 -- ตึกสูงกรุงเทพฯ เป็นฉากหลังไกล ๆ (หลังโซนเต็นท์และหลังตึกแถว)
 local function tower(x, z, w, h, tint)
 	part({ Size = Vector3.new(w, h, w), Position = Vector3.new(x, h / 2, z), Color = tint, Material = Enum.Material.Glass })
-	for f = 1, math.floor(h / 6) do
-		if math.random() < 0.7 then
-			part({ Size = Vector3.new(w + 0.3, 1.5, w + 0.3), Position = Vector3.new(x, f * 6 - 2, z), Color = Color3.fromRGB(255, 235, 170), Material = Enum.Material.Neon, Transparency = 0.35 })
+	for f = 1, math.floor(h / 5) do
+		for c = -1, 1 do
+			if math.random() < 0.45 then
+				part({ Size = Vector3.new(2.2, 2.6, w + 0.3), Position = Vector3.new(x + c * (w / 3.2), f * 5 - 2, z), Color = Color3.fromRGB(255, 235, 180), Material = Enum.Material.Neon, Transparency = 0.5 })
+				part({ Size = Vector3.new(w + 0.3, 2.6, 2.2), Position = Vector3.new(x, f * 5 - 2, z + c * (w / 3.2)), Color = Color3.fromRGB(255, 235, 180), Material = Enum.Material.Neon, Transparency = 0.5 })
+			end
 		end
 	end
 	local top = part({ Size = Vector3.new(1, 6, 1), Position = Vector3.new(x, h + 3, z), Color = Color3.fromRGB(255, 60, 60), Material = Enum.Material.Neon })
@@ -206,3 +213,34 @@ end
 local tints = { Color3.fromRGB(40, 60, 90), Color3.fromRGB(60, 70, 80), Color3.fromRGB(50, 80, 110), Color3.fromRGB(70, 60, 70) }
 for k = 0, 9 do tower(-200 + k * 45 + math.random(-8, 8), 300 + math.random(0, 40), 18 + math.random(0, 10), 70 + math.random(0, 80), tints[k % #tints + 1]) end
 for k = 0, 7 do tower(-180 + k * 50 + math.random(-8, 8), -230 - math.random(0, 40), 16 + math.random(0, 10), 60 + math.random(0, 90), tints[k % #tints + 1]) end
+
+
+-- ===== รายละเอียดข้างถนน: ต้นไม้ ถังขยะ มอเตอร์ไซค์จอด ป้ายผ้า เสาหลัก บรรยากาศ =====
+local function tree(pos)
+	part({ Size = Vector3.new(0.8, 7, 0.8), Position = pos + Vector3.new(0, 3.5, 0), Color = Color3.fromRGB(90, 60, 40), Material = Enum.Material.Wood })
+	part({ Shape = Enum.PartType.Ball, Size = Vector3.new(7, 6, 7), Position = pos + Vector3.new(0, 8.5, 0), Color = Color3.fromRGB(40, 110, 50), Material = Enum.Material.Grass })
+	part({ Shape = Enum.PartType.Ball, Size = Vector3.new(5, 4, 5), Position = pos + Vector3.new(1.5, 11, 1), Color = Color3.fromRGB(50, 130, 60), Material = Enum.Material.Grass })
+end
+for x = -225, 225, 30 do tree(Vector3.new(x + 8, 0, -20)); tree(Vector3.new(x - 6, 0, 6)) end
+for x = -240, 240, 45 do
+	-- ถังขยะเขียว + มอเตอร์ไซค์จอด
+	part({ Size = Vector3.new(1.4, 2.2, 1.4), Position = Vector3.new(x + 3, 1.1, 4), Color = Color3.fromRGB(40, 130, 60), Material = Enum.Material.Plastic })
+	for k = 0, 2 do
+		local m = Instance.new("Model"); m.Parent = deco
+		local body = part({ Size = Vector3.new(0.8, 1, 3), Position = Vector3.new(x - 6 + k * 1.6, 1.3, -17.5), Color = ({ Color3.fromRGB(200, 40, 40), Color3.fromRGB(30, 30, 30), Color3.fromRGB(230, 230, 230) })[k + 1], Material = Enum.Material.Metal }, m)
+		body.Orientation = Vector3.new(0, 20, 0)
+		for _, z in ipairs({ -1.2, 1.2 }) do local w = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.3, 1.1, 1.1), Color = Color3.fromRGB(25, 25, 25) }, m); w.CFrame = body.CFrame * CFrame.new(0, -0.7, z) * CFrame.Angles(0, 0, math.rad(90)) end
+	end
+	-- เสาหลักกันรถ
+	for k = 0, 3 do part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(2.2, 0.5, 0.5), CFrame = CFrame.new(x + 12 + k * 3, 1.1, -17) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(230, 200, 60), Material = Enum.Material.Metal }) end
+end
+-- ป้ายผ้าโฆษณาขึงระหว่างเสาไฟข้ามถนน
+for x = -180, 180, 90 do
+	part({ Size = Vector3.new(0.1, 0.1, 22), Position = Vector3.new(x, 13.5, -8), Color = Color3.fromRGB(30, 30, 30) })
+	neonSign("🍜 STREET FOOD FESTIVAL 🍢", Vector3.new(0.15, 3, 16), CFrame.new(x, 11.5, -8) * CFrame.Angles(0, math.rad(90), 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 40, 60))
+end
+-- บรรยากาศ: หมอกบาง แสงฟุ้ง สีอุ่น
+local atm = Instance.new("Atmosphere"); atm.Density = 0.32; atm.Offset = 0.2; atm.Color = Color3.fromRGB(199, 170, 150); atm.Decay = Color3.fromRGB(80, 60, 90); atm.Glare = 0.4; atm.Haze = 1.2; atm.Parent = Lighting
+local bloom = Instance.new("BloomEffect"); bloom.Intensity = 0.4; bloom.Size = 24; bloom.Threshold = 1.2; bloom.Parent = Lighting
+local cc = Instance.new("ColorCorrectionEffect"); cc.Saturation = 0.15; cc.Contrast = 0.1; cc.TintColor = Color3.fromRGB(255, 245, 235); cc.Parent = Lighting
+Lighting.Brightness = 0.8; Lighting.ExposureCompensation = -0.2
