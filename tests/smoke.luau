@@ -57,7 +57,9 @@ check("datastore " .. tostring(err or ""), ok)
 pcall(function()
 	local ds = game:GetService("DataStoreService"):GetDataStore("Diag")
 	ds:SetAsync("selftest", os.date("%Y-%m-%d %H:%M:%S") .. " reader ok")
-	print("PlaceVersion", game.PlaceVersion, "Meta", game:GetService("DataStoreService"):GetDataStore("Meta"):GetAsync("version"))
+	-- ประกาศเวอร์ชันใหม่ให้เซิร์ฟเวอร์เก่าเตะผู้เล่นออกมาเข้าเวอร์ชันนี้
+	game:GetService("DataStoreService"):GetDataStore("Meta"):SetAsync("version", game.PlaceVersion)
+	print("PlaceVersion", game.PlaceVersion, "-> Meta version set")
 	local pages = ds:ListKeysAsync()
 	for _, k in ipairs(pages:GetCurrentPage()) do print("DIAG", k.KeyName, ds:GetAsync(k.KeyName)) end
 end)
