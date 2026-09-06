@@ -261,7 +261,9 @@ function P.applyDecor(player, decor)
 		fan.CFrame = CFrame.new(o + Vector3.new(-12, 5, -9.7)) * CFrame.Angles(0, math.rad(90), 0)
 	end
 	if decor.owned.TV then
-		local tv = part({ Size = Vector3.new(6, 3.4, 0.3), Position = o + Vector3.new(6, 5.2, -12.3), Color = Color3.fromRGB(20, 20, 20), Material = Enum.Material.SmoothPlastic }, df)
+		-- ทีวีบนเสาข้างโซนโต๊ะ หันหน้าเข้าหาลูกค้า
+		part({ Size = Vector3.new(0.4, 8, 0.4), Position = o + Vector3.new(-23, 4, 5), Color = Color3.fromRGB(60, 60, 60), Material = Enum.Material.Metal }, df)
+		local tv = part({ Size = Vector3.new(6, 3.4, 0.3), CFrame = CFrame.new(o + Vector3.new(-22.6, 7.5, 5)) * CFrame.Angles(0, math.rad(-90), 0), Color = Color3.fromRGB(20, 20, 20), Material = Enum.Material.SmoothPlastic }, df)
 		local g = Instance.new("SurfaceGui"); g.Face = Enum.NormalId.Front; g.LightInfluence = 0; g.Brightness = 2; g.Parent = tv
 		local t = Instance.new("TextLabel"); t.Size = UDim2.fromScale(1, 1); t.BackgroundColor3 = Color3.fromRGB(30, 60, 120); t.Text = "📺 มวยไทย LIVE"; t.TextScaled = true; t.Font = Enum.Font.FredokaOne; t.TextColor3 = Color3.new(1, 1, 1); t.Parent = g
 	end
