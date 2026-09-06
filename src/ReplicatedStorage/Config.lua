@@ -7,7 +7,8 @@ Config.Patience = 90           -- วินาทีที่ลูกค้า�
 Config.PatiencePerExtra = 20   -- เพิ่มต่อคนหรือต่อออเดอร์ที่มากกว่า 1
 Config.MaxQueue = 6
 Config.MaxGroups = 3 -- กลุ่มที่อยู่ในร้านพร้อมกันสูงสุด (รวมที่นั่งโต๊ะ)
-Config.TablesPerPlot = 4
+Config.TablesPerPlot = 8 -- สร้างไว้ 8 เปิดใช้ตามเลเวล + พื้นที่ที่ซื้อ
+Config.Expansions = { 20000, 80000 } -- ราคาขยายพื้นที่ ครั้งละ +2 โต๊ะ
 Config.DineInChance = 0.6   -- โอกาสลูกค้านั่งทานที่ร้าน
 Config.EatTime = 12         -- วินาทีที่นั่งกิน
 Config.GroupSize = { 1, 3 } -- จำนวนคนต่อกลุ่ม
@@ -95,7 +96,7 @@ Config.RecipeTipBonus = 0.01
 Config.GoldDishChance = 0.25
 Config.GoldStreak = 3
 -- เทศกาลตามปฏิทิน (UTC+7): ช่วงวัน, เมนูจำกัดเวลา, ทิปคูณ, สีโคม
-Config.ForceFestival = "LoyKrathong" -- โหมดทดสอบ: ใส่ key เทศกาลเพื่อบังคับเปิด, nil = ตามปฏิทิน
+Config.ForceFestival = nil -- โหมดทดสอบ: ใส่ key เทศกาลเพื่อบังคับเปิด, nil = ตามปฏิทิน
 Config.Festivals = {
 	{ key="ChineseNY",  from={1,20}, to={2,15},  food="KhanomKeng",  tipMult=1.2, color={0.9,0.15,0.15} },
 	{ key="Songkran",   from={4,10}, to={4,16},  food="KhaoChae",    tipMult=1.3, color={0.3,0.7,1.0} },

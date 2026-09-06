@@ -139,7 +139,9 @@ function P.assign(player)
 			wp.HoldDuration = 1.5
 			-- โต๊ะนั่ง
 			P.tables[player] = {}
-			local spots = { Vector3.new(-16, 0, -2), Vector3.new(16, 0, -2), Vector3.new(-16, 0, 12), Vector3.new(16, 0, 12) }
+			local spots = { Vector3.new(-16, 0, -2), Vector3.new(16, 0, -2), Vector3.new(-16, 0, 12), Vector3.new(16, 0, 12),
+				Vector3.new(-16, 0, 34), Vector3.new(16, 0, 34), Vector3.new(-16, 0, 48), Vector3.new(16, 0, 48) }
+			local ext = part({ Size = Vector3.new(50, 0.4, 32), Position = o + Vector3.new(0, 0.2, 41), Color = Color3.fromRGB(150, 140, 130), Material = Enum.Material.Concrete, Transparency = 1 }, m); ext.Name = "Extension"
 			for k = 1, Config.TablesPerPlot do P.tables[player][k] = makeTable(m, o + spots[k], k, player) end
 			-- ครัวเดียว: เคาน์เตอร์ครัว เตา กระทะ หม้อ + ชั้นโชว์เมนู
 			local k = Instance.new("Model"); k.Name = "Kitchen"; k.Parent = m
@@ -194,11 +196,20 @@ function P.putOnCounter(player, foodId)
 	local used = {}
 	for _, c in ipairs(ready:GetChildren()) do used[c:GetAttribute("Slot")] = true end
 	local slot = 1; while used[slot] do slot += 1 end
-	local d = Dish.build(foodId); d:SetAttribute("Slot", slot); d.Parent = ready
+	local d = Dish.build(foodId); d:SetAttribute("Slot", slot); d:SetAttribute("Born", os.clock()); d.Parent = ready
 	d:PivotTo(CFrame.new(pts.counterSlot(slot)))
 	for _, x in ipairs(d:GetDescendants()) do if x:IsA("BasePart") then x.Anchored = true end end
 	prompt(d.PrimaryPart, "Pick up", Locale.food("en", foodId), "pickup", function(who) if P.canAct(who, player) and P.onPickup then P.onPickup(who, d) end end)
 	return true
+end
+-- ทิ้งจานบนเคาน์เตอร์ที่ไม่มีออเดอร์รออยู่แล้ว หรือค้างเกิน 90 วิ
+function P.cleanCounter(player, pendingFoods)
+	local m = root:FindFirstChild("Plot_" .. player.UserId); local ready = m and m:FindFirstChild("Ready")
+	if not ready then return end
+	for _, c in ipairs(ready:GetChildren()) do
+		local age = os.clock() - (c:GetAttribute("Born") or os.clock())
+		if not pendingFoods[c:GetAttribute("FoodId")] or age > 90 then c:Destroy() end
+	end
 end
 function P.takeFromCounter(player, foodId)
 	local m = root:FindFirstChild("Plot_" .. player.UserId); local ready = m and m:FindFirstChild("Ready")
@@ -336,10 +347,13 @@ function P.freeTable(player)
 	for _, t in ipairs(P.tables[player] or {}) do if not t.group and not t.dirty and not t.closed then return t end end
 end
 -- เปิดโต๊ะตามเลเวลร้าน โต๊ะที่ยังไม่เปิดจะซ่อน
-function P.setLevel(player, level)
+function P.setLevel(player, level, expansions)
 	local lv = Config.Levels[level] or Config.Levels[1]
+	local count = lv.tables + (expansions or 0) * 2
+	local m0 = root:FindFirstChild("Plot_" .. player.UserId)
+	local ext = m0 and m0:FindFirstChild("Extension"); if ext then ext.Transparency = (expansions or 0) > 0 and 0 or 1 end
 	for i, t in ipairs(P.tables[player] or {}) do
-		local open = i <= lv.tables
+		local open = i <= count
 		t.closed = not open
 		for _, x in ipairs(t.model:GetDescendants()) do
 			if x:IsA("BasePart") and x.Parent.Name ~= "Dirty" then x.Transparency = open and 0 or 1 end

@@ -22,7 +22,7 @@ function fake:SetAttribute(k, v) attrs[k] = v end
 function fake:GetAttribute(k) return attrs[k] end
 function fake:FindFirstChild() return nil end
 local Data = require(SSS.DataService)
-Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }, prestige = 0, branch = 1, recipes = {}, gold = {}, goldStreak = 0, weekKey = "", weekEarned = 0 }
+Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }, prestige = 0, branch = 1, recipes = {}, gold = {}, goldStreak = 0, weekKey = "", weekEarned = 0, expansions = 0 }
 local plot = Plot.assign(fake)
 check("plot assigned", plot ~= nil and attrs.PlotIndex == 1)
 Plot.refresh(fake, { MooPing = true, PadThai = true })
@@ -31,7 +31,7 @@ local kp = plot.Kitchen:FindFirstChildWhichIsA("ProximityPrompt", true)
 check("kitchen prompt", kp ~= nil and kp:GetAttribute("Kind") == "kitchen")
 
 -- 3) ลูกค้าเดินมาสั่ง
-check("tables built", #Plot.tables[fake] == Config.TablesPerPlot and Plot.freeTable(fake) ~= nil)
+check("tables built", #Plot.tables[fake] == 8 and Plot.freeTable(fake) ~= nil)
 Customers.forceOrders[fake] = 2
 local g = Customers.spawn(fake, { MooPing = true, PadThai = true })
 check("group spawned", g ~= nil and #g.members >= 2 and g.members[1].npc:FindFirstChildOfClass("Humanoid") ~= nil)
@@ -192,7 +192,7 @@ local helper = { UserId = 2, DisplayName = "Helper", Parent = game, Character = 
 function helper:SetAttribute(k, v) hattrs[k] = v end
 function helper:GetAttribute(k) return hattrs[k] end
 function helper:FindFirstChild() return nil end
-Data.cache[2] = { cash = 0, foods = { MooPing = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }, prestige = 0, branch = 1, recipes = {}, gold = {}, goldStreak = 0, weekKey = "", weekEarned = 0 }
+Data.cache[2] = { cash = 0, foods = { MooPing = true }, total = 0, rep = 0, served = 0, staff = {}, upg = {}, decor = { owned = {}, tent = "TentRed", chairs = "ChairPlastic", sign = "SignClassic" }, prestige = 0, branch = 1, recipes = {}, gold = {}, goldStreak = 0, weekKey = "", weekEarned = 0, expansions = 0 }
 Plot.onHelp(helper, fake)
 check("helper attached", hattrs.Helping == 1 and Plot.canAct(helper, fake))
 dd.foods = { MooPing = true }
@@ -216,7 +216,16 @@ check("festival off", GS.currentFestival() == nil)
 GS.forceFestival = nil
 check("spawn point beside plot", (Plot.points(1).spawn - Plot.origin(1)).X > 25)
 
--- 13) คิวซื้อกลับไม่เกิน MaxQueue
+-- 13) ขยายพื้นที่ + เคาน์เตอร์ไม่ตัน
+dd.cash = 100000; dd.total = 0; GS.checkLevel(fake)
+check("expand 1", GS.expand(fake) == true and dd.expansions == 1 and Plot.tables[fake][4].closed == false and Plot.tables[fake][5].closed == true)
+local okE = GS.expand(fake)
+check("expand max", okE == true and select(2, GS.expand(fake)) == "maxed")
+for _ = 1, 3 do Plot.putOnCounter(fake, "PadThai") end
+Plot.cleanCounter(fake, { MooPing = true })
+check("counter cleaned of orphan dishes", #plot.Ready:GetChildren() == 0)
+
+-- 14) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil

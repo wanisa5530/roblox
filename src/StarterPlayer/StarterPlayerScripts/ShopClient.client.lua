@@ -180,6 +180,12 @@ local function renderShop()
 		end
 	elseif state.tab == "decor" then
 		local dc = d.decor or { owned = {} }
+		local nx = d.expansions or 0; local ecost = Config.Expansions[nx + 1]
+		card(T("expand"), string.format(T("expandDesc"), nx), ecost and ("฿ " .. Locale.fmt(ecost)) or T("maxed"), ecost and (d.cash >= ecost and C.green or C.red) or C.card, function()
+			if not ecost then return end
+			local ok, err = Remotes.Decor:InvokeServer("expand")
+			if ok then notify(T("expanded"), C.green); renderShop() elseif err then notify(T(err), C.red) end
+		end, "📐")
 		if not dc.owned.Pack then
 			card(T("premiumItem"), T("TentGold") .. " · " .. T("SignGold") .. " · " .. T("LuckyCat"), "Robux", C.accent, function() Remotes.Decor:InvokeServer("pack") end, "👑")
 		end

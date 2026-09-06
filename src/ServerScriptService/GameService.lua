@@ -173,7 +173,7 @@ if G.started then return end; G.started = true
 		local lv = 1
 		for i, L in ipairs(Config.Levels) do if d.total >= L.need then lv = i end end
 		if lv ~= d.level then d.level = lv; notify(player, "levelUp", "green", Config.Levels[lv].key) end
-		Plot.setLevel(player, lv)
+		Plot.setLevel(player, lv, d.expansions)
 	end
 	Remotes.ClaimQuest.OnServerInvoke = function(player, idx)
 		local d = Data.get(player); if not d or not d.quests then return false end
@@ -204,6 +204,16 @@ if G.started then return end; G.started = true
 	G.prestige = prestige
 	G.progress, G.checkLevel, G.ensureQuests = progress, checkLevel, ensureQuests
 
+	local function expand(player)
+		local d = Data.get(player); if not d then return false end
+		local n = d.expansions or 0
+		local cost = Config.Expansions[n + 1]; if not cost then return false, "maxed" end
+		if d.cash < cost then return false, "notEnough" end
+		d.cash -= cost; d.expansions = n + 1
+		Plot.setLevel(player, d.level, d.expansions); push(player); notify(player, "expanded", "green")
+		return true
+	end
+	G.expand = expand
 	-- ตกแต่งร้าน
 	local function decorItem(key) for _, d in ipairs(Config.Decor) do if d.key == key then return d end end end
 	local function decorAction(player, action, key)
@@ -226,6 +236,7 @@ if G.started then return end; G.started = true
 		return true
 	end
 	Remotes.Decor.OnServerInvoke = function(player, action, key)
+		if action == "expand" then return expand(player) end
 		if action == "pack" then
 			if Config.DecorPackProduct ~= 0 then MPS:PromptProductPurchase(player, Config.DecorPackProduct) end
 			return true
@@ -452,10 +463,18 @@ if G.started then return end; G.started = true
 			if d.staff[st.key] and (d._staffNext[st.key] or 0) <= t then
 				d._staffNext[st.key] = t + st.interval * (ownsPass(player, "AutoChef") and 0.5 or 1)
 				if st.key == "Cook" then
+					local pending = {}
+					for _, g in ipairs(Customers.groups[player] or {}) do if g.alive then for _, e in ipairs(g.members) do if not e.served then pending[e.food.id] = true end end end end
+					Plot.cleanCounter(player, pending)
+					local done = false
 					for _, g in ipairs(Customers.groups[player] or {}) do
+						if done then break end
 						if g.alive and g.orderAt then
 							for _, e in ipairs(g.members) do
-								if not e.served and not e.cooking then e.cooking = true; Plot.putOnCounter(player, e.food.id); break end
+								if not e.served and not e.cooking then
+									if Plot.putOnCounter(player, e.food.id) then e.cooking = true; done = true end
+									break
+								end
 							end
 						end
 					end
