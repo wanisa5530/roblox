@@ -24,7 +24,7 @@ if G.started then return end; G.started = true
 		if passCache[player][key] == nil then
 			local ok, res = pcall(MPS.UserOwnsGamePassAsync, MPS, player.UserId, id)
 			passCache[player][key] = ok and res or false
-			if isReal(player) then player:SetAttribute("Pass_" .. key, passCache[player][key] or nil) end
+			if typeof(player) == "Instance" then player:SetAttribute("Pass_" .. key, passCache[player][key] or nil) end
 		end
 		return passCache[player][key]
 	end
