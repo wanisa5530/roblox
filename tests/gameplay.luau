@@ -32,12 +32,14 @@ check("stall has prompt", plot.Stalls.MooPing:FindFirstChildWhichIsA("ProximityP
 
 -- 3) ลูกค้าเดินมาสั่ง
 check("tables built", #Plot.tables[fake] == Config.TablesPerPlot and Plot.freeTable(fake) ~= nil)
+Customers.forceOrders[fake] = 2
 local g = Customers.spawn(fake, { MooPing = true, PadThai = true })
-check("group spawned", g ~= nil and #g.members >= 1 and g.members[1].npc:FindFirstChildOfClass("Humanoid") ~= nil)
+check("group spawned", g ~= nil and #g.members >= 2 and g.members[1].npc:FindFirstChildOfClass("Humanoid") ~= nil)
 local t0 = os.clock()
 while g and not g.orderAt and os.clock() - t0 < 20 do task.wait(0.2) end
 check("group ordered", g ~= nil and g.orderAt ~= nil)
 check("order attribute set", g ~= nil and g.members[1].npc:GetAttribute("OrderFood") ~= nil)
+check("one npc has 2 orders", g ~= nil and g.members[1].npc == g.members[2].npc and select(2, g.members[1].npc:GetAttribute("OrderFood"):gsub("|", "")) == 1)
 check("patience full", g ~= nil and Customers.patienceLeft(g.members[1]) > 0.7)
 print("group kind:", g and g.kind, "size:", g and #g.members)
 

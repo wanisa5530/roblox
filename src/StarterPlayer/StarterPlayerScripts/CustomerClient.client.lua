@@ -21,9 +21,17 @@ local function attach(npc)
 		local id, mood = npc:GetAttribute("OrderFood"), npc:GetAttribute("Mood")
 		bg.Enabled = id ~= nil or mood ~= nil
 		if mood then t.Text = mood; barBg.Visible = false; return end
-		local food = id and foodOf(id)
 		local spKey = npc:GetAttribute("Special"); local spTag = spKey and (Config.Specials[spKey].emoji .. " ") or ""
-		if food then t.Text = spTag .. (npc:GetAttribute("Takeaway") and "🥡 " or "") .. food.emoji .. " " .. Locale.food(lang(), id) .. (npc:GetAttribute("Spice") and (" " .. Config.SpiceLevels[npc:GetAttribute("Spice")]) or "") end
+		if id then
+			local lines = {}
+			for item in string.gmatch(id, "[^|]+") do
+				local fid, sp = item:match("^(%w+):?(%d*)$")
+				local food = fid and foodOf(fid)
+				if food then lines[#lines + 1] = food.emoji .. " " .. Locale.food(lang(), fid) .. (sp ~= "" and (" " .. Config.SpiceLevels[tonumber(sp)]) or "") end
+			end
+			t.Text = spTag .. (npc:GetAttribute("Takeaway") and "🥡 " or "") .. table.concat(lines, "\n")
+			bg.Size = UDim2.new(0, 190, 0, 50 + #lines * 24); t.Size = UDim2.new(1, -10, 0, #lines * 24 + 4); t.TextScaled = false; t.TextSize = 20
+		end
 		local left = npc:GetAttribute("Patience") or 1
 		bar.Size = UDim2.fromScale(left, 1)
 		bar.BackgroundColor3 = left > 0.5 and Color3.fromRGB(90, 200, 110) or (left > 0.25 and Color3.fromRGB(240, 190, 60) or Color3.fromRGB(220, 80, 70))

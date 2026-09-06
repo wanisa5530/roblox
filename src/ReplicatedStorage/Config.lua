@@ -10,6 +10,7 @@ Config.TablesPerPlot = 4
 Config.DineInChance = 0.6   -- โอกาสลูกค้านั่งทานที่ร้าน
 Config.EatTime = 12         -- วินาทีที่นั่งกิน
 Config.GroupSize = { 1, 3 } -- จำนวนคนต่อกลุ่ม
+Config.SecondOrderChance = 0.35 -- โอกาสที่ลูกค้า 1 คนสั่ง 2 เมนู
 Config.TipMax = 0.5            -- ทิปสูงสุด 50% ของราคา
 -- มินิเกม: timing = กดเมื่อเข็มอยู่โซนเขียว, mash = คลิกรัว, flip = รอให้แถบเต็มแล้วกดก่อนไหม้
 Config.MaxPlots = 8

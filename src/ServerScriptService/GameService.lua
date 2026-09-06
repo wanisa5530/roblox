@@ -152,7 +152,7 @@ if G.started then return end; G.started = true
 	
 	-- ทำอาหาร: เริ่มมินิเกมที่ client แล้วรอผล
 	Plot.onCook = function(player, foodId)
-		if cooking[player] then return end
+		if cooking[player] and os.clock() - cooking[player].t0 < (cooking[player].time or 10) * 3 then return end
 		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
 		if #tray(player) >= Config.TrayCapacity then notify(player, "trayFull", "red"); return end
 		if player:GetAttribute("Event") == "GasOut" and not player:GetAttribute("EventFixed") then notify(player, "noGas", "red"); return end
@@ -194,6 +194,11 @@ if G.started then return end; G.started = true
 		Customers.markServed(entry)
 		notify(player, "tip", "green", earned, tip)
 		push(player)
+	end
+	Customers.pickEntry = function(player, pending)
+		for _, e in ipairs(pending) do
+			for _, it in ipairs(tray(player)) do if it.f == e.food.id then return e end end
+		end
 	end
 	Customers.onServed = function(entry)
 		local player = entry.group.player
