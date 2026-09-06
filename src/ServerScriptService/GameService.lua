@@ -532,6 +532,17 @@ if G.started then return end; G.started = true
 		if d then d.rep = math.max(d.rep - 2 * #g.members, 0); notify(g.player, "left", "red"); push(g.player) end
 	end
 	
+	-- ตรวจเวอร์ชันใหม่ทุก 30 วิ ถ้ามีให้เตะผู้เล่นออกเพื่อเข้าเซิร์ฟเวอร์ใหม่ (Roblox ไม่รีสตาร์ทเซิร์ฟเวอร์เก่าให้เอง)
+	task.spawn(function()
+		local DSS = game:GetService("DataStoreService")
+		while true do
+			task.wait(30)
+			local ok, v = pcall(function() return DSS:GetDataStore("Meta"):GetAsync("version") end)
+			if ok and type(v) == "number" and game.PlaceVersion > 0 and v > game.PlaceVersion then
+				for _, p in ipairs(Players:GetPlayers()) do p:Kick(Locale.get(p:GetAttribute("Lang") or "th", "updateKick")) end
+			end
+		end
+	end)
 	local function onPlayer(player)
 		local d = Data.load(player)
 		LB.setup(player, d)

@@ -56,6 +56,8 @@ check("datastore " .. tostring(err or ""), ok)
 -- อ่านบันทึกวินิจฉัยจากเซิร์ฟเวอร์จริง (เขียนโดย G.diag)
 pcall(function()
 	local ds = game:GetService("DataStoreService"):GetDataStore("Diag")
+	ds:SetAsync("selftest", os.date("%Y-%m-%d %H:%M:%S") .. " reader ok")
+	print("PlaceVersion", game.PlaceVersion, "Meta", game:GetService("DataStoreService"):GetDataStore("Meta"):GetAsync("version"))
 	local pages = ds:ListKeysAsync()
 	for _, k in ipairs(pages:GetCurrentPage()) do print("DIAG", k.KeyName, ds:GetAsync(k.KeyName)) end
 end)
