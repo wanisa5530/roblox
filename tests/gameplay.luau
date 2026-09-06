@@ -22,7 +22,7 @@ function fake:SetAttribute(k, v) attrs[k] = v end
 function fake:GetAttribute(k) return attrs[k] end
 function fake:FindFirstChild() return nil end
 local Data = require(SSS.DataService)
-Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0 }
+Data.cache[fake.UserId] = { cash = 0, foods = { MooPing = true, PadThai = true }, total = 0, rep = 0, served = 0, staff = {} }
 local plot = Plot.assign(fake)
 check("plot assigned", plot ~= nil and attrs.PlotIndex == 1)
 Plot.refresh(fake, { MooPing = true, PadThai = true })
