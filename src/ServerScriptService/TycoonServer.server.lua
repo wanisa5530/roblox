@@ -28,7 +28,7 @@ local function incomePerTick(player)
 	return math.floor(total)
 end
 
-Players.PlayerAdded:Connect(function(player)
+local function onPlayer(player)
 	Data.load(player)
 	push(player)
 	task.spawn(function()
@@ -45,9 +45,13 @@ Players.PlayerAdded:Connect(function(player)
 			push(player)
 		end
 	end)
-end)
+end
+
+Players.PlayerAdded:Connect(onPlayer)
+for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
 
 Remotes.GetData.OnServerInvoke = function(player)
+	while not Data.get(player) do task.wait(0.1) end
 	return Data.get(player)
 end
 
