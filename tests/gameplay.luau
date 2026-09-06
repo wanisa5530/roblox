@@ -88,14 +88,13 @@ dd.cash = 0; GS.payWages(fake)
 check("staff quit when broke", next(dd.staff) == nil)
 
 -- 6) อัปเกรดโต๊ะครัว + ข้อมูลหลายขั้นตอน
-local RS2 = game:GetService("ReplicatedStorage"); local Remotes = require(RS2.Remotes)
 dd.cash = 100000
-local okU = Remotes.UpgradeStation.OnServerInvoke(fake, "MooPing", "tray")
+local okU = GS.upgradeStation(fake, "MooPing", "tray")
 check("upgrade tray", okU == true and dd.upg.MooPing.tray == 2)
-local okS = Remotes.UpgradeStation.OnServerInvoke(fake, "PadThai", "speed")
+local okS = GS.upgradeStation(fake, "PadThai", "speed")
 check("upgrade speed", okS == true and dd.upg.PadThai.speed == 2)
 dd.cash = 0
-local okN, errN = Remotes.UpgradeStation.OnServerInvoke(fake, "MooPing", "speed")
+local okN, errN = GS.upgradeStation(fake, "MooPing", "speed")
 check("upgrade needs cash", okN == false and errN == "notEnough")
 local multi = 0
 for _, f in ipairs(Config.Foods) do if f.steps then multi += 1; check("steps valid " .. f.id, #f.steps >= 2) end end

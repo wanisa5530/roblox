@@ -46,7 +46,7 @@ if G.started then return end; G.started = true
 		local d = Data.get(player); local u = d and d.upg[foodId]
 		return (u and u[kind]) or 1
 	end
-	Remotes.UpgradeStation.OnServerInvoke = function(player, foodId, kind)
+	local function upgradeStation(player, foodId, kind)
 		local d = Data.get(player); local f = foodOf(foodId)
 		if not d or not f or not d.foods[foodId] or (kind ~= "speed" and kind ~= "tray") then return false end
 		local lv = upgOf(player, foodId, kind)
@@ -56,6 +56,8 @@ if G.started then return end; G.started = true
 		d.cash -= cost; d.upg[foodId] = d.upg[foodId] or {}; d.upg[foodId][kind] = lv + 1
 		push(player); return true
 	end
+	Remotes.UpgradeStation.OnServerInvoke = upgradeStation
+	G.upgradeStation = upgradeStation
 	
 	-- ถือจาน
 	local function setHolding(player, foodId, count, bagged)
