@@ -92,7 +92,14 @@ function P.assign(player)
 			part({ Size = Vector3.new(50, 0.4, 56), Position = o + Vector3.new(0, 0.2, -3), Color = Color3.fromRGB(150, 140, 130), Material = Enum.Material.Concrete }, m)
 			-- เคาน์เตอร์ + หลังคาผ้าใบ + ไฟราว
 			part({ Size = Vector3.new(16, 3, 2), Position = o + Vector3.new(0, 1.9, -14), Color = Color3.fromRGB(200, 110, 50), Material = Enum.Material.Wood }, m)
-			part({ Size = Vector3.new(18, 0.3, 6), Position = o + Vector3.new(0, 6, -15), Color = Color3.fromRGB(210, 50, 50), Material = Enum.Material.Fabric }, m)
+			local tentColors = { Color3.fromRGB(230, 50, 50), Color3.fromRGB(40, 90, 200), Color3.fromRGB(250, 200, 40), Color3.fromRGB(50, 170, 90), Color3.fromRGB(240, 120, 40), Color3.fromRGB(150, 60, 180) }
+			local tc = tentColors[(i - 1) % #tentColors + 1]
+			part({ Size = Vector3.new(18, 0.3, 6), Position = o + Vector3.new(0, 6, -15), Color = tc, Material = Enum.Material.Fabric }, m)
+			for k = 0, 3 do
+				local w = Instance.new("WedgePart"); w.Anchored = true; w.Size = Vector3.new(k % 2 == 0 and 18 or 6, 2.2, (k % 2 == 0 and 6 or 18) / 2); w.Color = tc; w.Material = Enum.Material.Fabric
+				w.CFrame = CFrame.new(o + Vector3.new(0, 7.2, -15)) * CFrame.Angles(0, math.rad(90 * k), 0) * CFrame.new(0, 0, (k % 2 == 0 and 6 or 18) / 4)
+				w.Parent = m
+			end
 			for _, dx in ipairs({ -8, 8 }) do part({ Size = Vector3.new(0.3, 6, 0.3), Position = o + Vector3.new(dx, 3, -12.5), Color = Color3.fromRGB(60, 60, 60) }, m) end
 			sign(m, "🍜 " .. player.DisplayName, Vector3.new(16, 1.4, 0.2), o + Vector3.new(0, 7, -12.4), Color3.fromRGB(60, 20, 10), Color3.fromRGB(255, 200, 60))
 			for k = -7, 7, 2 do light(m, o + Vector3.new(k, 5.6, -11.8), Color3.fromRGB(255, 210, 120)) end

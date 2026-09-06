@@ -146,3 +146,63 @@ vehicle("Moto1", moto, -13.5, 32, 4, 1)
 vehicle("Moto2", moto, -2.5, 30, 12, -1)
 vehicle("Moto3", moto, -11, 34, 20, 1)
 vehicle("Bus", bus, -4, 14, 15, -1)
+
+-- ===== ตลาดกลางคืนสไตล์ตลาดนัดรถไฟ: เต็นท์หลากสี ตึกสูงเป็นฉากหลัง เสาไฟสูง =====
+local TENT = { Color3.fromRGB(230, 50, 50), Color3.fromRGB(40, 90, 200), Color3.fromRGB(250, 200, 40), Color3.fromRGB(50, 170, 90),
+	Color3.fromRGB(240, 120, 40), Color3.fromRGB(150, 60, 180), Color3.fromRGB(240, 90, 160), Color3.fromRGB(60, 190, 200) }
+local function tent(pos, color, size)
+	size = size or 10
+	local h = 7
+	for _, dx in ipairs({ -size / 2 + 0.5, size / 2 - 0.5 }) do
+		for _, dz in ipairs({ -size / 2 + 0.5, size / 2 - 0.5 }) do
+			part({ Size = Vector3.new(0.25, h, 0.25), Position = pos + Vector3.new(dx, h / 2, dz), Color = Color3.fromRGB(200, 200, 200), Material = Enum.Material.Metal })
+		end
+	end
+	-- หลังคาทรงปิรามิดจาก WedgePart 4 ชิ้น
+	for k = 0, 3 do
+		local w = Instance.new("WedgePart"); w.Anchored = true; w.Size = Vector3.new(size, 2.5, size / 2); w.Color = color; w.Material = Enum.Material.Fabric
+		w.CFrame = CFrame.new(pos + Vector3.new(0, h + 1.25, 0)) * CFrame.Angles(0, math.rad(90 * k), 0) * CFrame.new(0, 0, size / 4)
+		w.Parent = deco
+	end
+	part({ Size = Vector3.new(size + 0.4, 0.2, size + 0.4), Position = pos + Vector3.new(0, h, 0), Color = color, Material = Enum.Material.Fabric })
+	light(pos + Vector3.new(0, h - 0.8, 0), Color3.fromRGB(255, 235, 180), 14)
+	-- โต๊ะขายของ + สินค้า
+	part({ Size = Vector3.new(size - 3, 2.4, 2.5), Position = pos + Vector3.new(0, 1.2, size / 2 - 2), Color = Color3.fromRGB(230, 230, 230), Material = Enum.Material.Plastic })
+	for k = -1, 1 do part({ Size = Vector3.new(1.4, 0.8, 1.4), Position = pos + Vector3.new(k * 2.2, 2.8, size / 2 - 2), Color = TENT[math.random(#TENT)], Material = Enum.Material.SmoothPlastic }) end
+end
+-- โซนเต็นท์หลังแปลงร้าน (แถว x 2 ชั้น) และสองข้างถนนด้านนอกแปลง
+for row = 0, 2 do
+	for k = 0, 22 do
+		tent(Vector3.new(-132 + k * 12, 0, 175 + row * 16), TENT[(k + row) % #TENT + 1], 10)
+	end
+end
+for _, x in ipairs({ -165, 165 }) do
+	for k = 0, 8 do tent(Vector3.new(x, 0, 20 + k * 14), TENT[k % #TENT + 1], 10) end
+end
+-- ทางเดินระหว่างเต็นท์ + ผู้คนแบบง่าย (กล่องสี)
+for k = 0, 40 do
+	local px, pz = -130 + math.random() * 260, 168 + math.random() * 46
+	part({ Size = Vector3.new(1.2, 3.6, 0.8), Position = Vector3.new(px, 1.8, pz), Color = TENT[math.random(#TENT)] })
+	part({ Shape = Enum.PartType.Ball, Size = Vector3.new(1, 1, 1), Position = Vector3.new(px, 4.1, pz), Color = Color3.fromRGB(240, 200, 170) })
+end
+-- เสาไฟสูงแบบตลาดนัด
+for _, p in ipairs({ Vector3.new(-100, 0, 150), Vector3.new(0, 0, 150), Vector3.new(100, 0, 150), Vector3.new(-100, 0, 215), Vector3.new(100, 0, 215) }) do
+	part({ Size = Vector3.new(1, 40, 1), Position = p + Vector3.new(0, 20, 0), Color = Color3.fromRGB(120, 120, 125), Material = Enum.Material.Metal })
+	part({ Size = Vector3.new(6, 0.5, 6), Position = p + Vector3.new(0, 40, 0), Color = Color3.fromRGB(80, 80, 80), Material = Enum.Material.Metal })
+	local b = part({ Size = Vector3.new(5, 1, 5), Position = p + Vector3.new(0, 39.2, 0), Color = Color3.fromRGB(255, 255, 230), Material = Enum.Material.Neon })
+	local l = Instance.new("PointLight"); l.Color = Color3.fromRGB(255, 250, 220); l.Range = 60; l.Brightness = 1.5; l.Parent = b
+end
+-- ตึกสูงกรุงเทพฯ เป็นฉากหลังไกล ๆ (หลังโซนเต็นท์และหลังตึกแถว)
+local function tower(x, z, w, h, tint)
+	part({ Size = Vector3.new(w, h, w), Position = Vector3.new(x, h / 2, z), Color = tint, Material = Enum.Material.Glass })
+	for f = 1, math.floor(h / 6) do
+		if math.random() < 0.7 then
+			part({ Size = Vector3.new(w + 0.3, 1.5, w + 0.3), Position = Vector3.new(x, f * 6 - 2, z), Color = Color3.fromRGB(255, 235, 170), Material = Enum.Material.Neon, Transparency = 0.35 })
+		end
+	end
+	local top = part({ Size = Vector3.new(1, 6, 1), Position = Vector3.new(x, h + 3, z), Color = Color3.fromRGB(255, 60, 60), Material = Enum.Material.Neon })
+	local l = Instance.new("PointLight"); l.Color = Color3.fromRGB(255, 60, 60); l.Range = 20; l.Parent = top
+end
+local tints = { Color3.fromRGB(40, 60, 90), Color3.fromRGB(60, 70, 80), Color3.fromRGB(50, 80, 110), Color3.fromRGB(70, 60, 70) }
+for k = 0, 9 do tower(-200 + k * 45 + math.random(-8, 8), 300 + math.random(0, 40), 18 + math.random(0, 10), 70 + math.random(0, 80), tints[k % #tints + 1]) end
+for k = 0, 7 do tower(-180 + k * 50 + math.random(-8, 8), -230 - math.random(0, 40), 16 + math.random(0, 10), 60 + math.random(0, 90), tints[k % #tints + 1]) end
