@@ -131,8 +131,10 @@ check("3 daily quests", dd.quests and #dd.quests.list == 3)
 local qs = dd.quests.list[1]; qs.type = "clean"; qs.target = 1; qs.progress = 0
 GS.progress(fake, "clean", 1)
 check("quest progress", qs.progress == 1)
+dd.total = 3000; GS.checkLevel(fake)
+check("level 2 at 2k opens 3 tables", dd.level == 2 and Plot.tables[fake][3].closed == false and Plot.tables[fake][4].closed == true)
 dd.total = 15000; GS.checkLevel(fake)
-check("level 3 at 10k", dd.level == 3 and Plot.tables[fake][4].closed == true and Plot.tables[fake][3].closed == false)
+check("level 3 at 10k opens 4 tables", dd.level == 3 and Plot.tables[fake][4].closed == false)
 dd.total = 0; GS.checkLevel(fake)
 check("level 1 opens 2 tables", dd.level == 1 and Plot.tables[fake][3].closed == true)
 
