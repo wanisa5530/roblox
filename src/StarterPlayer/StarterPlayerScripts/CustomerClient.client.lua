@@ -49,3 +49,39 @@ local function localizePrompt(pp)
 end
 for _, pp in ipairs(workspace:GetDescendants()) do if pp:IsA("ProximityPrompt") then localizePrompt(pp) end end
 workspace.DescendantAdded:Connect(function(pp) if pp:IsA("ProximityPrompt") then task.defer(localizePrompt, pp) end end)
+
+-- ป้ายเหนือโต๊ะ: กี่คน สั่งอะไรบ้าง
+local function attachTable(tbl)
+	local top = tbl:FindFirstChildWhichIsA("Part"); if not top then return end
+	local bg = Instance.new("BillboardGui"); bg.Size = UDim2.new(0, 200, 0, 90); bg.StudsOffset = Vector3.new(0, 9, 0); bg.AlwaysOnTop = true; bg.Enabled = false; bg.Parent = top
+	local f = Instance.new("Frame"); f.Size = UDim2.fromScale(1, 1); f.BackgroundColor3 = Color3.fromRGB(28, 24, 22); f.BackgroundTransparency = 0.15; f.Parent = bg
+	Instance.new("UICorner", f).CornerRadius = UDim.new(0, 10)
+	local t = Instance.new("TextLabel"); t.Size = UDim2.new(1, -12, 1, -8); t.Position = UDim2.new(0, 6, 0, 4); t.BackgroundTransparency = 1
+	t.Font = Enum.Font.FredokaOne; t.TextSize = 16; t.TextColor3 = Color3.fromRGB(255, 240, 210); t.TextWrapped = true; t.TextYAlignment = Enum.TextYAlignment.Top; t.Parent = f
+	local function render()
+		local orders = tbl:GetAttribute("Orders")
+		bg.Enabled = orders ~= nil
+		if not orders then return end
+		local L = lang(); local counts, order = {}, {}
+		for item in string.gmatch(orders, "[^,]+") do
+			if not counts[item] then counts[item] = 0; order[#order + 1] = item end
+			counts[item] += 1
+		end
+		local n = 0; for _, c in pairs(counts) do n += c end
+		local lines = { "👥 " .. string.format(Locale.get(L, "people"), n) }
+		for _, item in ipairs(order) do
+			local id, sp = item:match("^(%w+):?(%d*)$")
+			local food = foodOf(id)
+			lines[#lines + 1] = (food and food.emoji or "") .. " " .. Locale.food(L, id) .. (sp ~= "" and (" " .. Config.SpiceLevels[tonumber(sp)]) or "") .. (counts[item] > 1 and (" x" .. counts[item]) or "")
+		end
+		t.Text = table.concat(lines, "\n")
+	end
+	tbl:GetAttributeChangedSignal("Orders"):Connect(render); player:GetAttributeChangedSignal("Lang"):Connect(render); render()
+end
+local plots = workspace:WaitForChild("Plots")
+local function scanPlot(plot)
+	for _, c in ipairs(plot:GetChildren()) do if c.Name:match("^Table%d") then attachTable(c) end end
+	plot.ChildAdded:Connect(function(c) if c.Name:match("^Table%d") then task.defer(attachTable, c) end end)
+end
+for _, p in ipairs(plots:GetChildren()) do scanPlot(p) end
+plots.ChildAdded:Connect(scanPlot)

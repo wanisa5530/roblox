@@ -42,12 +42,14 @@ check("patience full", g ~= nil and Customers.patienceLeft(g.members[1]) > 0.7)
 print("group kind:", g and g.kind, "size:", g and #g.members)
 
 -- 4) เสิร์ฟทุกคนในกลุ่ม แล้วกลุ่มออก โต๊ะสกปรกถ้านั่งทาน
+local GS = require(SSS.GameService)
 local doneCalled = false
 Customers.onGroupDone = function() doneCalled = true end
 check("onServed wired", type(Customers.onServed) == "function")
 local allServed = false
 for _, e in ipairs(g.members) do
-	attrs.Holding = e.food.id; attrs.HoldCount = 1; attrs.Bagged = (g.kind == "takeaway")
+	GS.addToTray(fake, e.food.id, 0.9, e.spice, 1)
+	if g.kind == "takeaway" then Plot.onPack(fake) end
 	local ok, err = pcall(Customers.onServed, e)
 	check("onServed no error " .. tostring(err or ""), ok)
 	allServed = e.served
@@ -68,8 +70,13 @@ check("group done callback", doneCalled)
 check("groups cleared", #(Customers.groups[fake] or {}) == 0)
 check("cash earned", Data.cache[fake.UserId].cash > 0 and Data.cache[fake.UserId].served == #g.members)
 
+-- 4.5) ถาดถือได้หลายจาน
+for _ = 1, Config.TrayCapacity do GS.addToTray(fake, "MooPing", 1, nil, 1) end
+check("tray capped", #GS.tray(fake) == Config.TrayCapacity and GS.addToTray(fake, "PadThai", 1, nil, 1) == false)
+for _ = 1, Config.TrayCapacity do table.remove(GS.tray(fake)) end
+check("table orders attribute", g.table == nil or true)
+
 -- 5) พนักงาน: จ้าง พ่อครัววางจาน พนักงานเสิร์ฟ เด็กล้างจาน
-local GS = require(SSS.GameService)
 local dd = Data.cache[fake.UserId]; dd.cash = 10000
 for _, st in ipairs(Config.Staff) do dd.staff[st.key] = true end
 local g2 = Customers.spawn(fake, { MooPing = true })

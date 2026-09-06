@@ -39,12 +39,12 @@ end
 local gui = Instance.new("ScreenGui"); gui.Name = "TycoonUI"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.Parent = player.PlayerGui
 
 -- แถบด้านบน
-local top = frame(gui, UDim2.new(0, 520, 0, 64), UDim2.new(0.5, -260, 0, 12), C.bg); corner(top, 14); pad(top, 8)
+local top = frame(gui, UDim2.new(0, 600, 0, 64), UDim2.new(0.5, -300, 0, 12), C.bg); corner(top, 14); pad(top, 8)
 local cashLbl = label(top, "฿ 0", UDim2.new(0, 220, 0, 30), UDim2.new(0, 8, 0, 0), 28, C.accent)
 local incLbl = label(top, "", UDim2.new(0, 220, 0, 18), UDim2.new(0, 8, 0, 30), 15, C.green)
-local holdLbl = label(top, "", UDim2.new(0, 200, 0, 44), UDim2.new(1, -210, 0, 2), 16, C.text, Enum.TextXAlignment.Right)
+local holdLbl = label(top, "", UDim2.new(0, 260, 0, 44), UDim2.new(1, -270, 0, 2), 14, C.text, Enum.TextXAlignment.Right)
 holdLbl.TextWrapped = true
-local titleLbl = label(top, T("title"), UDim2.new(0, 130, 0, 48), UDim2.new(0, 230, 0, 0), 14, C.muted, Enum.TextXAlignment.Center)
+local titleLbl = label(top, T("title"), UDim2.new(0, 100, 0, 48), UDim2.new(0, 225, 0, 0), 13, C.muted, Enum.TextXAlignment.Center)
 titleLbl.TextWrapped = true
 
 -- ปุ่มเปิดร้าน + ภาษา (ซ้ายล่าง)
@@ -175,7 +175,17 @@ local function renderTop()
 	cashLbl.Text = "฿ " .. Locale.fmt(d.cash)
 	local stars = math.clamp(math.floor((d.rep or 0) / 200) + 1, 1, 5)
 	incLbl.Text = string.rep("⭐", stars) .. "  " .. T("served") .. ": " .. (d.served or 0)
-	holdLbl.Text = state.holding == "Dirty" and ("🧽 " .. T("dirtyPlates")) or (state.holding and ((state.bagged and "🥡 " or "🍽️ ") .. Locale.food(lang, state.holding) .. ((state.count or 1) > 1 and (" x" .. state.count) or "")) or "")
+	local trayJson = player:GetAttribute("Tray")
+	local items = {}
+	if trayJson then local ok, arr = pcall(function() return game:GetService("HttpService"):JSONDecode(trayJson) end); if ok then items = arr end end
+	if state.holding == "Dirty" then holdLbl.Text = "🧽 " .. T("dirtyPlates")
+	elseif #items > 0 then
+		local counts, order = {}, {}
+		for _, it in ipairs(items) do local k = it.f .. (it.b and "🥡" or ""); if not counts[k] then counts[k] = 0; order[#order + 1] = { k = k, f = it.f, b = it.b } end; counts[k] += 1 end
+		local parts = {}
+		for _, o in ipairs(order) do parts[#parts + 1] = (o.b and "🥡" or "🍽️") .. Locale.food(lang, o.f) .. (counts[o.k] > 1 and (" x" .. counts[o.k]) or "") end
+		holdLbl.Text = table.concat(parts, "  ") .. "  (" .. #items .. "/" .. Config.TrayCapacity .. ")"
+	else holdLbl.Text = "" end
 end
 
 local function applyLang()
@@ -193,6 +203,7 @@ langBtn.MouseButton1Click:Connect(function()
 end)
 
 local lastCash
+player:GetAttributeChangedSignal("Tray"):Connect(function() renderTop() end)
 Remotes.DataUpdate.OnClientEvent:Connect(function(d, holding, count, bagged)
 	state.data, state.holding, state.count, state.bagged = d, holding, count, bagged
 	renderTop()

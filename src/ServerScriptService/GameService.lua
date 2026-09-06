@@ -59,51 +59,94 @@ if G.started then return end; G.started = true
 	Remotes.UpgradeStation.OnServerInvoke = upgradeStation
 	G.upgradeStation = upgradeStation
 	
-	-- ถือจาน
-	local function setHolding(player, foodId, count, bagged)
-		local char = player.Character
-		if char then
-			local old = char:FindFirstChild("HeldDish"); if old then old:Destroy() end
-			if foodId then
-				local d
-				if foodId == "Dirty" then
-					d = Instance.new("Model"); d.Name = "HeldDish"
-					for k = 1, 3 do
-						local pl = Instance.new("Part"); pl.Shape = Enum.PartType.Cylinder; pl.Size = Vector3.new(0.12, 1.3, 1.3); pl.Color = Color3.fromRGB(225, 215, 195)
-						pl.CanCollide = false; pl.Massless = true; pl.CFrame = CFrame.new(0, k * 0.15, 0) * CFrame.Angles(0, 0, math.rad(90)); pl.Parent = d
-						if k == 1 then d.PrimaryPart = pl else local w = Instance.new("Weld"); w.Part0 = d.PrimaryPart; w.Part1 = pl; w.C0 = CFrame.new(0, (k - 1) * 0.15, 0); w.Parent = pl end
-					end
-				elseif bagged then
-					d = Instance.new("Model"); d.Name = "HeldDish"
-					local bag = Instance.new("Part"); bag.Size = Vector3.new(1.4, 1.6, 1); bag.Color = Color3.fromRGB(240, 240, 235); bag.Material = Enum.Material.Plastic
-					bag.CanCollide = false; bag.Massless = true; bag.Parent = d; d.PrimaryPart = bag
+	-- ถาด: ถือได้หลายจาน (Tray = รายการ {f=เมนู, q=คุณภาพ, s=ความเผ็ด, b=ใส่ถุง}) หรือจานสกปรก
+	local HttpService = game:GetService("HttpService")
+	local trays = {}
+	local function tray(player) trays[player] = trays[player] or {}; return trays[player] end
+	local function renderHeld(player)
+		local char = player.Character; if not char then return end
+		local old = char:FindFirstChild("HeldDish"); if old then old:Destroy() end
+		local t = tray(player)
+		local dirty = player:GetAttribute("Holding") == "Dirty"
+		if #t == 0 and not dirty then return end
+		local d = Instance.new("Model"); d.Name = "HeldDish"
+		local base = Instance.new("Part"); base.Size = Vector3.new(2.6, 0.12, 1.6); base.Color = Color3.fromRGB(120, 80, 50); base.Material = Enum.Material.Wood
+		base.CanCollide = false; base.Massless = true; base.Parent = d; d.PrimaryPart = base
+		local function weld(m, off)
+			local w = Instance.new("Weld"); w.Part0 = base; w.Part1 = m.PrimaryPart; w.C0 = off; w.Parent = m.PrimaryPart
+			for _, x in ipairs(m:GetDescendants()) do if x:IsA("BasePart") then x.CanCollide = false; x.Massless = true end end
+			m.Parent = d
+		end
+		if dirty then
+			for k = 1, 3 do
+				local pl = Instance.new("Part"); pl.Shape = Enum.PartType.Cylinder; pl.Size = Vector3.new(0.12, 1.3, 1.3); pl.Color = Color3.fromRGB(225, 215, 195)
+				pl.CanCollide = false; pl.Massless = true; pl.Parent = d
+				local w = Instance.new("Weld"); w.Part0 = base; w.Part1 = pl; w.C0 = CFrame.new(0, 0.1 + k * 0.15, 0) * CFrame.Angles(0, 0, math.rad(90)); w.Parent = pl
+			end
+		else
+			for i, item in ipairs(t) do
+				if i > 4 then break end
+				local m
+				if item.b then
+					m = Instance.new("Model"); local bag = Instance.new("Part"); bag.Size = Vector3.new(0.9, 1.1, 0.7); bag.Color = Color3.fromRGB(240, 240, 235); bag.Parent = m; m.PrimaryPart = bag
 				else
-					d = Dish.build(foodId); d.Name = "HeldDish"
+					m = Dish.build(item.f); m:ScaleTo(0.55)
 				end
-				local hand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
-				if hand then
-					d:PivotTo(hand.CFrame * CFrame.new(0, -0.6, -1.2))
-					local w = Instance.new("Weld"); w.Part0 = hand; w.Part1 = d.PrimaryPart; w.C0 = CFrame.new(0, -0.6, -1.2); w.Parent = d.PrimaryPart
-				end
-				d.Parent = char
+				weld(m, CFrame.new(-0.9 + ((i - 1) % 2) * 1.2, 0.35, -0.4 + math.floor((i - 1) / 2) * 0.8))
 			end
 		end
-		player:SetAttribute("Holding", foodId); player:SetAttribute("HoldCount", foodId and (count or 1) or nil); player:SetAttribute("Bagged", bagged or nil)
+		local hand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
+		if hand then
+			local w = Instance.new("Weld"); w.Part0 = hand; w.Part1 = base; w.C0 = CFrame.new(0.2, -0.8, -1.3); w.Parent = base
+		end
+		d.Parent = char
+	end
+	local function syncTray(player)
+		local t = tray(player)
+		player:SetAttribute("Tray", HttpService:JSONEncode(t))
+		if player:GetAttribute("Holding") ~= "Dirty" then
+			player:SetAttribute("Holding", t[1] and t[1].f or nil); player:SetAttribute("HoldCount", #t > 0 and #t or nil)
+			local allBag = #t > 0; for _, it in ipairs(t) do if not it.b then allBag = false end end
+			player:SetAttribute("Bagged", allBag or nil)
+		end
+		if isReal(player) then renderHeld(player) end
 		push(player)
 	end
+	local function addToTray(player, foodId, quality, spice, count)
+		local t = tray(player)
+		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return false end
+		local space = Config.TrayCapacity - #t
+		if space <= 0 then notify(player, "trayFull", "red"); return false end
+		for _ = 1, math.min(count or 1, space) do table.insert(t, { f = foodId, q = quality or 0.5, s = spice, b = false }) end
+		syncTray(player); return true
+	end
+	local function takeFromTray(player, foodId, needBag)
+		local t = tray(player)
+		for i, it in ipairs(t) do
+			if it.f == foodId and (not needBag or it.b) then table.remove(t, i); syncTray(player); return it end
+		end
+	end
+	local function setDirty(player, on)
+		player:SetAttribute("Holding", on and "Dirty" or nil); player:SetAttribute("HoldCount", nil)
+		syncTray(player)
+	end
+	G.tray, G.addToTray = tray, addToTray
+	-- ใช้ชื่อเดิมให้โค้ดส่วนอื่น (ผู้เล่นเกิดใหม่)
+	local function setHolding(player) syncTray(player) end
 	Plot.onPack = function(player)
-		local id = player:GetAttribute("Holding")
-		if not id or id == "Dirty" then notify(player, id and "handsFull" or "noDish", "red"); return end
-		setHolding(player, id, player:GetAttribute("HoldCount") or 1, true)
+		local t = tray(player)
+		if player:GetAttribute("Holding") == "Dirty" or #t == 0 then notify(player, #t == 0 and "noDish" or "handsFull", "red"); return end
+		for _, it in ipairs(t) do it.b = true end
+		syncTray(player)
 	end
 	Plot.onClean = function(player, t)
 		if player:GetAttribute("Holding") then notify(player, player:GetAttribute("Holding") == "Dirty" and "handsFull" or "holding", "red"); return end
 		t.setDirty(false)
-		setHolding(player, "Dirty", 1, false)
+		setDirty(player, true)
 	end
 	Plot.onWash = function(player)
 		if player:GetAttribute("Holding") ~= "Dirty" then return end
-		setHolding(player, nil)
+		setDirty(player, false)
 		local d = Data.get(player); if d then d.rep = math.min(d.rep + 1, 1000); push(player) end
 	end
 	
@@ -111,6 +154,7 @@ if G.started then return end; G.started = true
 	Plot.onCook = function(player, foodId)
 		if cooking[player] then return end
 		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
+		if #tray(player) >= Config.TrayCapacity then notify(player, "trayFull", "red"); return end
 		local f = foodOf(foodId); if not f then return end
 		local speed = 1 - 0.15 * (upgOf(player, foodId, "speed") - 1)
 		local steps = f.steps or { f.game }
@@ -124,8 +168,7 @@ if G.started then return end; G.started = true
 		if os.clock() - c.t0 < c.time * 0.5 then score = 0 end
 		player:SetAttribute("Spice", c.food.spicy and math.clamp(tonumber(spice) or 1, 1, #Config.SpiceLevels) or nil) -- กันโกง ทำเร็วเกินไป
 		if score <= 0 then notify(player, "burnt", "red"); return end
-		player:SetAttribute("Quality", score)
-		setHolding(player, c.food.id, upgOf(player, c.food.id, "tray"), false)
+		addToTray(player, c.food.id, score, player:GetAttribute("Spice"), upgOf(player, c.food.id, "tray"))
 		notify(player, score > 0.85 and "perfect" or (score > 0.5 and "good" or "ok"), "green")
 	end)
 	
@@ -144,22 +187,23 @@ if G.started then return end; G.started = true
 	end
 	Customers.onServed = function(entry)
 		local player = entry.group.player
-		local holding = player:GetAttribute("Holding")
-		if not holding or holding == "Dirty" then notify(player, holding and "handsFull" or "noDish", "red"); return end
-		if holding ~= entry.food.id then notify(player, "wrongDish", "red"); return end
-		if entry.group.kind == "takeaway" and not player:GetAttribute("Bagged") then notify(player, "needBag", "red"); return end
-		local left = (player:GetAttribute("HoldCount") or 1) - 1
-		if left > 0 then setHolding(player, holding, left, player:GetAttribute("Bagged")) else setHolding(player, nil) end
-		local quality = player:GetAttribute("Quality") or 0.5
-		if entry.spice and player:GetAttribute("Spice") ~= entry.spice then quality = 0; notify(player, "wrongSpice", "red") end
+		if player:GetAttribute("Holding") == "Dirty" then notify(player, "handsFull", "red"); return end
+		if #tray(player) == 0 then notify(player, "noDish", "red"); return end
+		local needBag = entry.group.kind == "takeaway"
+		local item = takeFromTray(player, entry.food.id, needBag)
+		if not item then
+			local anyMatch = false
+			for _, it in ipairs(tray(player)) do if it.f == entry.food.id then anyMatch = true end end
+			notify(player, anyMatch and "needBag" or "wrongDish", "red"); return
+		end
+		local quality = item.q or 0.5
+		if entry.spice and item.s ~= entry.spice then quality = 0; notify(player, "wrongSpice", "red") end
 		serveEntry(player, entry, quality)
 	end
 	-- หยิบจานจากเคาน์เตอร์ที่พ่อครัวทำไว้
 	Plot.onPickup = function(player, dish)
-		if player:GetAttribute("Holding") then notify(player, "handsFull", "red"); return end
-		local id = dish:GetAttribute("FoodId"); dish:Destroy()
-		player:SetAttribute("Quality", 0.6)
-		setHolding(player, id, 1, false)
+		local id = dish:GetAttribute("FoodId")
+		if addToTray(player, id, 0.6, nil, 1) then dish:Destroy() end
 	end
 
 	-- พนักงาน
@@ -240,7 +284,7 @@ if G.started then return end; G.started = true
 		Plot.assign(player)
 		Plot.refresh(player, d.foods)
 		push(player)
-		player.CharacterAdded:Connect(function() task.wait(0.5); if player:GetAttribute("Holding") then setHolding(player, player:GetAttribute("Holding"), player:GetAttribute("HoldCount"), player:GetAttribute("Bagged")) end end)
+		player.CharacterAdded:Connect(function() task.wait(0.5); setHolding(player) end)
 		for _, st in ipairs(Config.Staff) do showStaff(player, st.key) end
 		task.spawn(function()
 			local lastWage = os.clock()
@@ -284,7 +328,7 @@ if G.started then return end; G.started = true
 	for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
 	Players.PlayerRemoving:Connect(function(p)
 		local d = Data.get(p); if d then LB.submit(p, d) end
-		Customers.clear(p); Plot.release(p); passCache[p] = nil; cooking[p] = nil; staffNpcs[p] = nil
+		Customers.clear(p); Plot.release(p); passCache[p] = nil; cooking[p] = nil; staffNpcs[p] = nil; trays[p] = nil
 	end)
 	task.spawn(function() while true do task.wait(120); for _, p in ipairs(Players:GetPlayers()) do local d = Data.get(p); if d then LB.submit(p, d) end end end end)
 	

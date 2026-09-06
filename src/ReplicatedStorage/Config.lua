@@ -57,6 +57,7 @@ Config.FoodNames = {
 
 -- อัปเกรดโต๊ะครัว: speed ลดเวลาทำ 15%/ระดับ, tray ทำได้หลายจานต่อครั้ง (สูงสุดระดับ 3)
 Config.UpgradeMax = 3
+Config.TrayCapacity = 4 -- จำนวนจานที่ถือได้พร้อมกัน
 function Config.upgradeCost(food, kind, level) return math.floor(food.cost * 0.4 * level + (kind == "tray" and 400 or 250)) end
 Config.SpiceLevels = { "🌶️", "🌶️🌶️", "🌶️🌶️🌶️" }
 -- พนักงาน: cost = ค่าจ้างครั้งแรก, wage = ค่าแรงต่อคาบ, interval = วินาทีต่อการทำงาน 1 ครั้ง

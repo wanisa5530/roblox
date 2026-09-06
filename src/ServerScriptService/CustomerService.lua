@@ -105,6 +105,11 @@ function C.spawn(player, foods)
 		task.wait(tbl and 4 or 3)
 		if not g.alive then return end
 		g.orderAt = os.clock()
+		if tbl then
+			local list = {}
+			for _, e in ipairs(g.members) do list[#list + 1] = e.food.id .. (e.spice and (":" .. e.spice) or "") end
+			tbl.model:SetAttribute("Orders", table.concat(list, ","))
+		end
 		for _, e in ipairs(g.members) do
 			e.npc:SetAttribute("OrderFood", e.food.id); e.npc:SetAttribute("Spice", e.spice); e.npc:SetAttribute("Patience", 1)
 			addPrompt(e)
@@ -145,7 +150,7 @@ function C.leave(g, mood, done)
 	if gs then local i = table.find(gs, g); if i then table.remove(gs, i) end end
 	local pts = Plot.points(player:GetAttribute("PlotIndex"))
 	if q then for n, og in ipairs(q) do if og.orderAt then task.spawn(walkTo, og.members[1].npc, pts.queue(n)) end end end
-	if g.table then g.table.group = nil; if done then g.table.setDirty(true) end end
+	if g.table then g.table.group = nil; g.table.model:SetAttribute("Orders", nil); if done then g.table.setDirty(true) end end
 	for _, e in ipairs(g.members) do
 		task.spawn(function()
 			e.npc:SetAttribute("OrderFood", nil); e.npc:SetAttribute("Mood", mood)
