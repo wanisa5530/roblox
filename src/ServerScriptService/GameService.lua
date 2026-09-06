@@ -31,6 +31,7 @@ if G.started then return end; G.started = true
 	-- เทศกาลปัจจุบัน (เวลาไทย) หรือบังคับด้วย G.forceFestival สำหรับทดสอบ
 	local function currentFestival()
 		if G.forceFestival ~= nil then return G.forceFestival or nil end
+		if Config.ForceFestival then for _, f in ipairs(Config.Festivals) do if f.key == Config.ForceFestival then return f end end end
 		local t = os.time() + 7 * 3600
 		local m, d = tonumber(os.date("!%m", t)), tonumber(os.date("!%d", t))
 		local md = m * 100 + d
@@ -412,6 +413,24 @@ if G.started then return end; G.started = true
 			end
 		elseif not d.staff[key] and existing then existing:Destroy(); staffNpcs[player][key] = nil end
 	end
+	local function staffWalk(player, key, target, cb)
+		local npc = staffNpcs[player] and staffNpcs[player][key]
+		if not npc or not npc.Parent then cb(); return end
+		if npc:GetAttribute("Busy") then return end
+		npc:SetAttribute("Busy", true)
+		task.spawn(function()
+			local h = npc:FindFirstChildOfClass("Humanoid")
+			local home = npc:GetPivot().Position
+			local function go(pos)
+				if not h then return end
+				h:MoveTo(pos); local t0 = os.clock(); local done = false
+				local c; c = h.MoveToFinished:Connect(function() done = true; c:Disconnect() end)
+				while not done and os.clock() - t0 < 8 and npc.Parent do task.wait(0.1) end
+			end
+			go(target); task.wait(0.6); cb(); go(home)
+			npc:SetAttribute("Busy", nil)
+		end)
+	end
 	local function staffTick(player)
 		local d = Data.get(player); if not d then return end
 		local t = os.clock()
@@ -431,12 +450,22 @@ if G.started then return end; G.started = true
 					for _, g in ipairs(Customers.groups[player] or {}) do
 						if g.alive and g.orderAt then
 							for _, e in ipairs(g.members) do
-								if not e.served and Plot.takeFromCounter(player, e.food.id) then serveEntry(player, e, 0.6); return end
+								if not e.served and not e.claimed and Plot.takeFromCounter(player, e.food.id) then
+									e.claimed = true
+									staffWalk(player, "Waiter", e.npc:GetPivot().Position, function() if g.alive and not e.served then serveEntry(player, e, 0.6) end end)
+									return
+								end
 							end
 						end
 					end
 				elseif st.key == "Washer" then
-					for _, tb in ipairs(Plot.tables[player] or {}) do if tb.dirty then tb.setDirty(false); break end end
+					for _, tb in ipairs(Plot.tables[player] or {}) do
+						if tb.dirty and not tb.cleaning then
+							tb.cleaning = true
+							staffWalk(player, "Washer", tb.pos + Vector3.new(0, 3, 4), function() tb.setDirty(false); tb.cleaning = false end)
+							break
+						end
+					end
 				end
 			end
 		end

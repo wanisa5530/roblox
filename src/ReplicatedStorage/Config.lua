@@ -95,6 +95,7 @@ Config.RecipeTipBonus = 0.01
 Config.GoldDishChance = 0.25
 Config.GoldStreak = 3
 -- เทศกาลตามปฏิทิน (UTC+7): ช่วงวัน, เมนูจำกัดเวลา, ทิปคูณ, สีโคม
+Config.ForceFestival = "LoyKrathong" -- โหมดทดสอบ: ใส่ key เทศกาลเพื่อบังคับเปิด, nil = ตามปฏิทิน
 Config.Festivals = {
 	{ key="ChineseNY",  from={1,20}, to={2,15},  food="KhanomKeng",  tipMult=1.2, color={0.9,0.15,0.15} },
 	{ key="Songkran",   from={4,10}, to={4,16},  food="KhaoChae",    tipMult=1.3, color={0.3,0.7,1.0} },
