@@ -32,7 +32,7 @@ check("customer spawned", entry ~= nil and entry.npc ~= nil and entry.npc:FindFi
 local t0 = os.clock()
 while entry and not entry.orderAt and os.clock() - t0 < 15 do task.wait(0.2) end
 check("customer reached queue and ordered", entry ~= nil and entry.orderAt ~= nil)
-check("order bubble shown", entry ~= nil and entry.bubble ~= nil)
+check("order attribute set", entry ~= nil and entry.npc:GetAttribute("OrderFood") ~= nil)
 check("patience full", entry ~= nil and Customers.patienceLeft(entry) > 0.8)
 
 -- 4) เสิร์ฟผ่าน callback แล้วลูกค้าออกจากคิว

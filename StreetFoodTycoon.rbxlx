@@ -278,17 +278,6 @@ local function walkTo(model, target)
 	end
 end
 
-local function bubble(model, text)
-	local head = model:FindFirstChild("Head") or model.PrimaryPart
-	local bg = Instance.new("BillboardGui"); bg.Name = "Order"; bg.Size = UDim2.new(0, 160, 0, 70); bg.StudsOffset = Vector3.new(0, 3, 0); bg.AlwaysOnTop = true; bg.Parent = head
-	local f = Instance.new("Frame"); f.Size = UDim2.fromScale(1, 1); f.BackgroundColor3 = Color3.fromRGB(255, 250, 235); f.Parent = bg
-	local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, 12); c.Parent = f
-	local t = Instance.new("TextLabel"); t.Size = UDim2.new(1, -10, 0, 44); t.Position = UDim2.new(0, 5, 0, 2); t.BackgroundTransparency = 1
-	t.Text = text; t.TextScaled = true; t.Font = Enum.Font.FredokaOne; t.TextColor3 = Color3.fromRGB(40, 30, 20); t.Parent = f
-	local barBg = Instance.new("Frame"); barBg.Size = UDim2.new(1, -16, 0, 10); barBg.Position = UDim2.new(0, 8, 1, -16); barBg.BackgroundColor3 = Color3.fromRGB(220, 215, 200); barBg.BorderSizePixel = 0; barBg.Parent = f
-	local bar = Instance.new("Frame"); bar.Name = "Bar"; bar.Size = UDim2.fromScale(1, 1); bar.BackgroundColor3 = Color3.fromRGB(90, 200, 110); bar.BorderSizePixel = 0; bar.Parent = barBg
-	return bg, bar, t
-end
 
 function C.queue(player) C.queues[player] = C.queues[player] or {}; return C.queues[player] end
 
@@ -308,8 +297,8 @@ function C.spawn(player, foods)
 	task.spawn(function()
 		walkTo(npc, pts.queue(slot))
 		if not entry.alive then return end
-		local bg, bar, label = bubble(npc, food.emoji .. " " .. Locale.food("en", food.id))
-		entry.bubble = bg; entry.label = label
+		npc:SetAttribute("OrderFood", food.id); npc:SetAttribute("Patience", 1)
+		entry.bubble = true
 		entry.orderAt = os.clock()
 		-- ปุ่มเสิร์ฟ
 		local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Serve"; pp.ObjectText = npc.Name; pp.KeyboardKeyCode = Enum.KeyCode.E
@@ -319,8 +308,7 @@ function C.spawn(player, foods)
 		while entry.alive and npc.Parent do
 			local left = 1 - (os.clock() - entry.orderAt) / Config.Patience
 			if left <= 0 then break end
-			bar.Size = UDim2.fromScale(left, 1)
-			bar.BackgroundColor3 = left > 0.5 and Color3.fromRGB(90, 200, 110) or (left > 0.25 and Color3.fromRGB(240, 190, 60) or Color3.fromRGB(220, 80, 70))
+			npc:SetAttribute("Patience", left)
 			task.wait(0.25)
 		end
 		if entry.alive then entry.alive = false; if C.onLeft then C.onLeft(entry) end; C.leave(entry, "😠") end
@@ -343,7 +331,7 @@ function C.leave(entry, mood)
 		for n, e in ipairs(q) do if e.orderAt then task.spawn(walkTo, e.npc, pts.queue(n)) end end
 	end
 	task.spawn(function()
-		if entry.label then entry.label.Text = mood end
+		entry.npc:SetAttribute("Mood", mood)
 		local pts = Plot.points(entry.player:GetAttribute("PlotIndex"))
 		walkTo(entry.npc, pts.spawn)
 		entry.npc:Destroy()
@@ -530,7 +518,7 @@ function P.refresh(player, foods)
 			d:PivotTo(CFrame.new(pos + Vector3.new(0, 3.3, 0)))
 			for _, x in ipairs(d:GetDescendants()) do if x:IsA("BasePart") then x.Anchored = true end end
 			-- ปุ่มทำอาหาร
-			local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Cook"; pp.ObjectText = Locale.food("en", f.id)
+			local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Cook"; pp.ObjectText = Locale.food("en", f.id); pp:SetAttribute("FoodId", f.id)
 			pp.KeyboardKeyCode = Enum.KeyCode.E; pp.HoldDuration = 0; pp.MaxActivationDistance = 8; pp.RequiresLineOfSight = false; pp.Parent = body
 			pp.Triggered:Connect(function(who) if who == player and P.onCook then P.onCook(player, f.id) end end)
 		end
@@ -754,6 +742,61 @@ end
       </Properties>
       <Item class="LocalScript" referent="14">
         <Properties>
+          <string name="Name">CustomerClient</string>
+          <string name="Source"><![CDATA[-- วาดลูกโป่งคำสั่งของลูกค้าตามภาษาของผู้เล่นแต่ละคน + แปลข้อความปุ่ม E
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local Config = require(RS:WaitForChild("Config"))
+local Locale = require(RS:WaitForChild("Locale"))
+local player = Players.LocalPlayer
+local function lang() return player:GetAttribute("Lang") or Locale.detect(player.LocaleId) end
+local function foodOf(id) for _, f in ipairs(Config.Foods) do if f.id == id then return f end end end
+
+local function attach(npc)
+	local head = npc:WaitForChild("Head", 5) or npc.PrimaryPart
+	if not head then return end
+	local bg = Instance.new("BillboardGui"); bg.Size = UDim2.new(0, 170, 0, 72); bg.StudsOffset = Vector3.new(0, 3, 0); bg.AlwaysOnTop = true; bg.Enabled = false; bg.Parent = head
+	local f = Instance.new("Frame"); f.Size = UDim2.fromScale(1, 1); f.BackgroundColor3 = Color3.fromRGB(255, 250, 235); f.Parent = bg
+	Instance.new("UICorner", f).CornerRadius = UDim.new(0, 12)
+	local t = Instance.new("TextLabel"); t.Size = UDim2.new(1, -10, 0, 44); t.Position = UDim2.new(0, 5, 0, 2); t.BackgroundTransparency = 1
+	t.TextScaled = true; t.Font = Enum.Font.FredokaOne; t.TextColor3 = Color3.fromRGB(40, 30, 20); t.Parent = f
+	local barBg = Instance.new("Frame"); barBg.Size = UDim2.new(1, -16, 0, 10); barBg.Position = UDim2.new(0, 8, 1, -16); barBg.BackgroundColor3 = Color3.fromRGB(220, 215, 200); barBg.BorderSizePixel = 0; barBg.Parent = f
+	local bar = Instance.new("Frame"); bar.Size = UDim2.fromScale(1, 1); bar.BackgroundColor3 = Color3.fromRGB(90, 200, 110); bar.BorderSizePixel = 0; bar.Parent = barBg
+	local function render()
+		local id, mood = npc:GetAttribute("OrderFood"), npc:GetAttribute("Mood")
+		bg.Enabled = id ~= nil or mood ~= nil
+		if mood then t.Text = mood; barBg.Visible = false; return end
+		local food = id and foodOf(id)
+		if food then t.Text = food.emoji .. " " .. Locale.food(lang(), id) end
+		local left = npc:GetAttribute("Patience") or 1
+		bar.Size = UDim2.fromScale(left, 1)
+		bar.BackgroundColor3 = left > 0.5 and Color3.fromRGB(90, 200, 110) or (left > 0.25 and Color3.fromRGB(240, 190, 60) or Color3.fromRGB(220, 80, 70))
+	end
+	npc.AttributeChanged:Connect(render); player:GetAttributeChangedSignal("Lang"):Connect(render); render()
+end
+local folder = workspace:WaitForChild("Customers")
+for _, n in ipairs(folder:GetChildren()) do task.spawn(attach, n) end
+folder.ChildAdded:Connect(function(n) task.spawn(attach, n) end)
+
+-- แปล ProximityPrompt (Cook / Serve)
+local function localizePrompt(pp)
+	local function apply()
+		local L = lang()
+		if pp.ActionText == "Cook" or pp:GetAttribute("FoodId") then
+			pp.ActionText = Locale.get(L, "cook"); pp.ObjectText = Locale.food(L, pp:GetAttribute("FoodId"))
+		elseif pp.ActionText == "Serve" or pp:GetAttribute("IsCustomer") then
+			pp:SetAttribute("IsCustomer", true); pp.ActionText = Locale.get(L, "serve")
+		end
+	end
+	apply(); player:GetAttributeChangedSignal("Lang"):Connect(apply)
+end
+for _, pp in ipairs(workspace:GetDescendants()) do if pp:IsA("ProximityPrompt") then localizePrompt(pp) end end
+workspace.DescendantAdded:Connect(function(pp) if pp:IsA("ProximityPrompt") then task.defer(localizePrompt, pp) end end)
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="LocalScript" referent="15">
+        <Properties>
           <string name="Name">MinigameClient</string>
           <string name="Source"><![CDATA[-- มินิเกมทำอาหาร 3 แบบ: timing / mash / flip ส่งคะแนน 0-1 กลับเซิร์ฟเวอร์
 local Players = game:GetService("Players")
@@ -848,7 +891,7 @@ end)
 ]]></string>
         </Properties>
       </Item>
-      <Item class="LocalScript" referent="15">
+      <Item class="LocalScript" referent="16">
         <Properties>
           <string name="Name">ShopClient</string>
           <string name="Source"><![CDATA[-- UI หลัก: แถบเงินด้านบน, ร้านค้าแบบแท็บ, สลับภาษา, แจ้งเตือน
@@ -860,6 +903,7 @@ local Locale = require(RS:WaitForChild("Locale"))
 local Remotes = require(RS:WaitForChild("Remotes"))
 local player = Players.LocalPlayer
 local lang = Locale.detect(player.LocaleId)
+player:SetAttribute("Lang", lang)
 local T = function(k) return Locale.get(lang, k) end
 local state = { data = nil, holding = nil, tab = "menu" }
 
@@ -1014,7 +1058,7 @@ shopBtn.MouseButton1Click:Connect(function() shopOpen = not shopOpen; shop.Visib
 closeBtn.MouseButton1Click:Connect(function() shopOpen = false; shop.Visible = false end)
 langBtn.MouseButton1Click:Connect(function()
 	local i = table.find(Locale.Supported, lang) or 1
-	lang = Locale.Supported[i % #Locale.Supported + 1]; applyLang()
+	lang = Locale.Supported[i % #Locale.Supported + 1]; player:SetAttribute("Lang", lang); applyLang()
 end)
 
 local lastCash
@@ -1035,16 +1079,16 @@ end)
       </Item>
     </Item>
   </Item>
-  <Item class="Workspace" referent="16">
+  <Item class="Workspace" referent="17">
     <Properties>
       <string name="Name">Workspace</string>
       <bool name="NeedsPivotMigration">false</bool>
     </Properties>
-    <Item class="Folder" referent="17">
+    <Item class="Folder" referent="18">
       <Properties>
         <string name="Name">Map</string>
       </Properties>
-      <Item class="Part" referent="18">
+      <Item class="Part" referent="19">
         <Properties>
           <string name="Name">Ground</string>
           <bool name="Anchored">true</bool>
@@ -1063,7 +1107,7 @@ end)
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="19">
+      <Item class="Part" referent="20">
         <Properties>
           <string name="Name">Road</string>
           <bool name="Anchored">true</bool>
@@ -1081,7 +1125,7 @@ end)
           </Vector3>
         </Properties>
       </Item>
-      <Item class="SpawnLocation" referent="20">
+      <Item class="SpawnLocation" referent="21">
         <Properties>
           <string name="Name">SpawnLocation</string>
           <bool name="Anchored">true</bool>
@@ -1099,7 +1143,7 @@ end)
           </Vector3>
         </Properties>
       </Item>
-      <Item class="Part" referent="21">
+      <Item class="Part" referent="22">
         <Properties>
           <string name="Name">Welcome</string>
           <bool name="Anchored">true</bool>
@@ -1116,12 +1160,12 @@ end)
             <Z>0.4</Z>
           </Vector3>
         </Properties>
-        <Item class="SurfaceGui" referent="22">
+        <Item class="SurfaceGui" referent="23">
           <Properties>
             <string name="Name">Gui</string>
             <token name="Face">5</token>
           </Properties>
-          <Item class="TextLabel" referent="23">
+          <Item class="TextLabel" referent="24">
             <Properties>
               <string name="Name">Text</string>
               <float name="BackgroundTransparency">1</float>

@@ -44,17 +44,6 @@ local function walkTo(model, target)
 	end
 end
 
-local function bubble(model, text)
-	local head = model:FindFirstChild("Head") or model.PrimaryPart
-	local bg = Instance.new("BillboardGui"); bg.Name = "Order"; bg.Size = UDim2.new(0, 160, 0, 70); bg.StudsOffset = Vector3.new(0, 3, 0); bg.AlwaysOnTop = true; bg.Parent = head
-	local f = Instance.new("Frame"); f.Size = UDim2.fromScale(1, 1); f.BackgroundColor3 = Color3.fromRGB(255, 250, 235); f.Parent = bg
-	local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, 12); c.Parent = f
-	local t = Instance.new("TextLabel"); t.Size = UDim2.new(1, -10, 0, 44); t.Position = UDim2.new(0, 5, 0, 2); t.BackgroundTransparency = 1
-	t.Text = text; t.TextScaled = true; t.Font = Enum.Font.FredokaOne; t.TextColor3 = Color3.fromRGB(40, 30, 20); t.Parent = f
-	local barBg = Instance.new("Frame"); barBg.Size = UDim2.new(1, -16, 0, 10); barBg.Position = UDim2.new(0, 8, 1, -16); barBg.BackgroundColor3 = Color3.fromRGB(220, 215, 200); barBg.BorderSizePixel = 0; barBg.Parent = f
-	local bar = Instance.new("Frame"); bar.Name = "Bar"; bar.Size = UDim2.fromScale(1, 1); bar.BackgroundColor3 = Color3.fromRGB(90, 200, 110); bar.BorderSizePixel = 0; bar.Parent = barBg
-	return bg, bar, t
-end
 
 function C.queue(player) C.queues[player] = C.queues[player] or {}; return C.queues[player] end
 
@@ -74,8 +63,8 @@ function C.spawn(player, foods)
 	task.spawn(function()
 		walkTo(npc, pts.queue(slot))
 		if not entry.alive then return end
-		local bg, bar, label = bubble(npc, food.emoji .. " " .. Locale.food("en", food.id))
-		entry.bubble = bg; entry.label = label
+		npc:SetAttribute("OrderFood", food.id); npc:SetAttribute("Patience", 1)
+		entry.bubble = true
 		entry.orderAt = os.clock()
 		-- ปุ่มเสิร์ฟ
 		local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Serve"; pp.ObjectText = npc.Name; pp.KeyboardKeyCode = Enum.KeyCode.E
@@ -85,8 +74,7 @@ function C.spawn(player, foods)
 		while entry.alive and npc.Parent do
 			local left = 1 - (os.clock() - entry.orderAt) / Config.Patience
 			if left <= 0 then break end
-			bar.Size = UDim2.fromScale(left, 1)
-			bar.BackgroundColor3 = left > 0.5 and Color3.fromRGB(90, 200, 110) or (left > 0.25 and Color3.fromRGB(240, 190, 60) or Color3.fromRGB(220, 80, 70))
+			npc:SetAttribute("Patience", left)
 			task.wait(0.25)
 		end
 		if entry.alive then entry.alive = false; if C.onLeft then C.onLeft(entry) end; C.leave(entry, "😠") end
@@ -109,7 +97,7 @@ function C.leave(entry, mood)
 		for n, e in ipairs(q) do if e.orderAt then task.spawn(walkTo, e.npc, pts.queue(n)) end end
 	end
 	task.spawn(function()
-		if entry.label then entry.label.Text = mood end
+		entry.npc:SetAttribute("Mood", mood)
 		local pts = Plot.points(entry.player:GetAttribute("PlotIndex"))
 		walkTo(entry.npc, pts.spawn)
 		entry.npc:Destroy()

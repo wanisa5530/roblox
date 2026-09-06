@@ -81,7 +81,7 @@ function P.refresh(player, foods)
 			d:PivotTo(CFrame.new(pos + Vector3.new(0, 3.3, 0)))
 			for _, x in ipairs(d:GetDescendants()) do if x:IsA("BasePart") then x.Anchored = true end end
 			-- ปุ่มทำอาหาร
-			local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Cook"; pp.ObjectText = Locale.food("en", f.id)
+			local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Cook"; pp.ObjectText = Locale.food("en", f.id); pp:SetAttribute("FoodId", f.id)
 			pp.KeyboardKeyCode = Enum.KeyCode.E; pp.HoldDuration = 0; pp.MaxActivationDistance = 8; pp.RequiresLineOfSight = false; pp.Parent = body
 			pp.Triggered:Connect(function(who) if who == player and P.onCook then P.onCook(player, f.id) end end)
 		end

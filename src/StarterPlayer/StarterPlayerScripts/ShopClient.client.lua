@@ -7,6 +7,7 @@ local Locale = require(RS:WaitForChild("Locale"))
 local Remotes = require(RS:WaitForChild("Remotes"))
 local player = Players.LocalPlayer
 local lang = Locale.detect(player.LocaleId)
+player:SetAttribute("Lang", lang)
 local T = function(k) return Locale.get(lang, k) end
 local state = { data = nil, holding = nil, tab = "menu" }
 
@@ -161,7 +162,7 @@ shopBtn.MouseButton1Click:Connect(function() shopOpen = not shopOpen; shop.Visib
 closeBtn.MouseButton1Click:Connect(function() shopOpen = false; shop.Visible = false end)
 langBtn.MouseButton1Click:Connect(function()
 	local i = table.find(Locale.Supported, lang) or 1
-	lang = Locale.Supported[i % #Locale.Supported + 1]; applyLang()
+	lang = Locale.Supported[i % #Locale.Supported + 1]; player:SetAttribute("Lang", lang); applyLang()
 end)
 
 local lastCash
