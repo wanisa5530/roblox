@@ -78,7 +78,7 @@ local function attachTable(tbl)
 			if not counts[item] then counts[item] = 0; order[#order + 1] = item end
 			counts[item] += 1
 		end
-		local n = 0; for _, c in pairs(counts) do n += c end
+		local n = tbl:GetAttribute("Guests") or 0
 		local lines = { "👥 " .. string.format(Locale.get(L, "people"), n) }
 		for _, item in ipairs(order) do
 			local id, sp = item:match("^(%w+):?(%d*)$")

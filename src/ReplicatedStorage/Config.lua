@@ -3,8 +3,9 @@ local Config = {}
 Config.StartingCash = 50
 -- ลูกค้า
 Config.CustomerInterval = { min = 14, max = 22 } -- วินาทีระหว่างลูกค้าแต่ละคน
-Config.Patience = 45           -- วินาทีที่ลูกค้ารอได้
-Config.MaxQueue = 3
+Config.Patience = 90           -- วินาทีที่ลูกค้ารอได้
+Config.PatiencePerExtra = 20   -- เพิ่มต่อคนหรือต่อออเดอร์ที่มากกว่า 1
+Config.MaxQueue = 6
 Config.MaxGroups = 3 -- กลุ่มที่อยู่ในร้านพร้อมกันสูงสุด (รวมที่นั่งโต๊ะ)
 Config.TablesPerPlot = 4
 Config.DineInChance = 0.6   -- โอกาสลูกค้านั่งทานที่ร้าน
@@ -61,6 +62,21 @@ Config.UpgradeMax = 3
 Config.TrayCapacity = 4 -- จำนวนจานที่ถือได้พร้อมกัน
 function Config.upgradeCost(food, kind, level) return math.floor(food.cost * 0.4 * level + (kind == "tray" and 400 or 250)) end
 Config.SpiceLevels = { "🌶️", "🌶️🌶️", "🌶️🌶️🌶️" }
+-- เลเวลร้าน: need = รายได้สะสม, tables = โต๊ะที่เปิดใช้
+Config.Levels = {
+	{ key="Cart",   need=0,      tables=2 },
+	{ key="Stall",  need=2000,   tables=3 },
+	{ key="Shop",   need=10000,  tables=4 },
+	{ key="Famous", need=50000,  tables=4 },
+	{ key="Legend", need=200000, tables=4 },
+}
+-- ภารกิจรายวัน: สุ่ม 3 ข้อจากรายการนี้ (type, target, reward)
+Config.QuestPool = {
+	{ type="serve", target=15, reward=300 }, { type="serve", target=40, reward=900 },
+	{ type="earn",  target=800, reward=250 }, { type="earn", target=3000, reward=800 },
+	{ type="clean", target=5, reward=200 },   { type="perfect", target=8, reward=500 },
+	{ type="takeaway", target=6, reward=300 }, { type="dine", target=6, reward=300 },
+}
 -- ลูกค้าพิเศษ: โอกาส (ต่อคน), ตัวคูณ
 Config.Specials = {
 	Tourist = { chance = 0.10, emoji = "🧳", tipMult = 3,   patience = 0.6 },

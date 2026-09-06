@@ -125,7 +125,18 @@ Customers.onServed(g3.members[1])
 check("vip pays x5", dd.cash >= 12 * 5)
 dd.cash = cashBefore
 
--- 8) คิวซื้อกลับไม่เกิน MaxQueue
+-- 8) ภารกิจและเลเวล
+GS.ensureQuests(dd)
+check("3 daily quests", dd.quests and #dd.quests.list == 3)
+local qs = dd.quests.list[1]; qs.type = "clean"; qs.target = 1; qs.progress = 0
+GS.progress(fake, "clean", 1)
+check("quest progress", qs.progress == 1)
+dd.total = 15000; GS.checkLevel(fake)
+check("level 3 at 10k", dd.level == 3 and Plot.tables[fake][4].closed == true and Plot.tables[fake][3].closed == false)
+dd.total = 0; GS.checkLevel(fake)
+check("level 1 opens 2 tables", dd.level == 1 and Plot.tables[fake][3].closed == true)
+
+-- 9) คิวซื้อกลับไม่เกิน MaxQueue
 for _ = 1, Config.MaxQueue + 6 do Customers.spawn(fake, { MooPing = true }) end
 check("queue capped", #Customers.queue(fake) <= Config.MaxQueue)
 Customers.clear(fake); Plot.release(fake); Data.cache[fake.UserId] = nil

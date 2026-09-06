@@ -41,7 +41,7 @@ function P.points(i)
 	return {
 		origin = o,
 		spawn = Vector3.new(o.X, 3, 2),
-		queue = function(n) return o + Vector3.new(4, 3, -10 + (n - 1) * 3.5) end,
+		queue = function(n) return o + Vector3.new(4, 3, -10 + (n - 1) * 3) end,
 		counterSlot = function(n) return o + Vector3.new(-5 + (n - 1) * 3.5, 3.6, -14) end,
 		staff = { Cook = o + Vector3.new(0, 3, -24), Waiter = o + Vector3.new(-3, 3, -16.5), Washer = o + Vector3.new(-11, 3, -20.5) },
 	}
@@ -176,7 +176,27 @@ function P.takeFromCounter(player, foodId)
 end
 
 function P.freeTable(player)
-	for _, t in ipairs(P.tables[player] or {}) do if not t.group and not t.dirty then return t end end
+	for _, t in ipairs(P.tables[player] or {}) do if not t.group and not t.dirty and not t.closed then return t end end
+end
+-- เปิดโต๊ะตามเลเวลร้าน โต๊ะที่ยังไม่เปิดจะซ่อน
+function P.setLevel(player, level)
+	local lv = Config.Levels[level] or Config.Levels[1]
+	for i, t in ipairs(P.tables[player] or {}) do
+		local open = i <= lv.tables
+		t.closed = not open
+		for _, x in ipairs(t.model:GetDescendants()) do
+			if x:IsA("BasePart") and x.Parent.Name ~= "Dirty" then x.Transparency = open and 0 or 1 end
+			if x:IsA("Seat") then x.Disabled = not open end
+			if x:IsA("PointLight") then x.Enabled = open end
+		end
+	end
+	local m = root:FindFirstChild("Plot_" .. player.UserId)
+	local sg = m and m:FindFirstChild("LevelSign")
+	if m and not sg then
+		local o = P.origin(player:GetAttribute("PlotIndex"))
+		sg = sign(m, "", Vector3.new(6, 1, 0.2), o + Vector3.new(0, 8.4, -12.4), Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 40, 60)); sg.Name = "LevelSign"
+	end
+	if sg then sg.SurfaceGui.TextLabel.Text = string.rep("⭐", level) .. " " .. Locale.get("en", lv.key) end
 end
 
 function P.release(player)

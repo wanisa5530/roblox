@@ -142,7 +142,7 @@ if G.started then return end; G.started = true
 	Plot.onClean = function(player, t)
 		if player:GetAttribute("Holding") then notify(player, player:GetAttribute("Holding") == "Dirty" and "handsFull" or "holding", "red"); return end
 		t.setDirty(false)
-		setDirty(player, true)
+		setDirty(player, true); progress(player, "clean", 1)
 	end
 	Plot.onWash = function(player)
 		if player:GetAttribute("Holding") ~= "Dirty" then return end
@@ -174,6 +174,41 @@ if G.started then return end; G.started = true
 	end)
 	
 	-- เสิร์ฟ
+	-- ภารกิจรายวันและเลเวลร้าน
+	local function today() return os.date("!%Y-%m-%d") end
+	local function ensureQuests(d)
+		if d.quests and d.quests.date == today() then return end
+		local pool = table.clone(Config.QuestPool); local list = {}
+		for _ = 1, 3 do local i = math.random(#pool); local q = pool[i]; table.remove(pool, i); list[#list + 1] = { type = q.type, target = q.target, reward = q.reward, progress = 0, claimed = false } end
+		d.quests = { date = today(), list = list }
+	end
+	local function progress(player, qtype, amount)
+		local d = Data.get(player); if not d then return end
+		ensureQuests(d)
+		for _, q in ipairs(d.quests.list) do
+			if q.type == qtype and not q.claimed and q.progress < q.target then
+				q.progress = math.min(q.progress + (amount or 1), q.target)
+				if q.progress >= q.target then notify(player, "questReady", "green") end
+			end
+		end
+	end
+	local function checkLevel(player)
+		local d = Data.get(player); if not d then return end
+		local lv = 1
+		for i, L in ipairs(Config.Levels) do if d.total >= L.need then lv = i end end
+		if lv ~= d.level then d.level = lv; notify(player, "levelUp", "green", Config.Levels[lv].key) end
+		Plot.setLevel(player, lv)
+	end
+	Remotes.ClaimQuest.OnServerInvoke = function(player, idx)
+		local d = Data.get(player); if not d or not d.quests then return false end
+		local q = d.quests.list[idx]
+		if not q or q.claimed or q.progress < q.target then return false end
+		q.claimed = true; d.cash += q.reward; push(player)
+		notify(player, "questDone", "green", q.reward)
+		return true
+	end
+	G.progress, G.checkLevel, G.ensureQuests = progress, checkLevel, ensureQuests
+
 	local function serveEntry(player, entry, quality)
 		local d = Data.get(player); if not d then return end
 		local patience = Customers.patienceLeft(entry)
@@ -193,6 +228,10 @@ if G.started then return end; G.started = true
 		d.rep = math.min(d.rep + (quality > 0.85 and 2 or 1), 1000)
 		Customers.markServed(entry)
 		notify(player, "tip", "green", earned, tip)
+		progress(player, "serve", 1); progress(player, "earn", earned)
+		if quality > 0.85 then progress(player, "perfect", 1) end
+		progress(player, entry.group.kind == "takeaway" and "takeaway" or "dine", 1)
+		checkLevel(player)
 		push(player)
 	end
 	Customers.pickEntry = function(player, pending)
@@ -321,6 +360,7 @@ if G.started then return end; G.started = true
 		LB.setup(player, d)
 		Plot.assign(player)
 		Plot.refresh(player, d.foods)
+		ensureQuests(d); checkLevel(player)
 		push(player)
 		player.CharacterAdded:Connect(function() task.wait(0.5); setHolding(player) end)
 		for _, st in ipairs(Config.Staff) do showStaff(player, st.key) end

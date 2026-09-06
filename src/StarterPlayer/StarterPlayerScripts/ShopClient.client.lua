@@ -41,7 +41,7 @@ local gui = Instance.new("ScreenGui"); gui.Name = "TycoonUI"; gui.ResetOnSpawn =
 -- แถบด้านบน
 local top = frame(gui, UDim2.new(0, 600, 0, 64), UDim2.new(0.5, -300, 0, 12), C.bg); corner(top, 14); pad(top, 8)
 local cashLbl = label(top, "฿ 0", UDim2.new(0, 220, 0, 30), UDim2.new(0, 8, 0, 0), 28, C.accent)
-local incLbl = label(top, "", UDim2.new(0, 220, 0, 18), UDim2.new(0, 8, 0, 30), 15, C.green)
+local incLbl = label(top, "", UDim2.new(0, 330, 0, 18), UDim2.new(0, 8, 0, 30), 13, C.green)
 local holdLbl = label(top, "", UDim2.new(0, 260, 0, 44), UDim2.new(1, -270, 0, 2), 14, C.text, Enum.TextXAlignment.Right)
 holdLbl.TextWrapped = true
 local titleLbl = label(top, T("title"), UDim2.new(0, 100, 0, 48), UDim2.new(0, 225, 0, 0), 13, C.muted, Enum.TextXAlignment.Center)
@@ -98,9 +98,9 @@ end)
 local shop = frame(gui, UDim2.new(0, 520, 0, 520), UDim2.new(0.5, -260, 0.5, -230), C.bg); corner(shop, 16); shop.Visible = false
 local closeBtn = button(shop, "✕", UDim2.new(0, 36, 0, 36), UDim2.new(1, -44, 0, 8), C.red)
 local tabs = {}
-local tabNames = { "menu", "staff", "passes", "robux" }
+local tabNames = { "menu", "staff", "quests", "passes", "robux" }
 for i, name in ipairs(tabNames) do
-	tabs[name] = button(shop, T(name), UDim2.new(0, 92, 0, 36), UDim2.new(0, 12 + (i - 1) * 98, 0, 8), C.card)
+	tabs[name] = button(shop, T(name), UDim2.new(0, 88, 0, 36), UDim2.new(0, 10 + (i - 1) * 92, 0, 8), C.card)
 end
 local list = Instance.new("ScrollingFrame"); list.Size = UDim2.new(1, -24, 1, -64); list.Position = UDim2.new(0, 12, 0, 54)
 list.BackgroundTransparency = 1; list.BorderSizePixel = 0; list.ScrollBarThickness = 6; list.CanvasSize = UDim2.new(); list.AutomaticCanvasSize = Enum.AutomaticSize.Y; list.Parent = shop
@@ -159,6 +159,14 @@ local function renderShop()
 					if ok then notify(T("hired") .. ": " .. T(st.key), C.green) elseif err then notify(T(err), C.red) end
 				end, st.emoji)
 		end
+	elseif state.tab == "quests" then
+		for i, q in ipairs((d.quests and d.quests.list) or {}) do
+			local ready = q.progress >= q.target
+			local desc = string.format(T("q" .. q.type), q.type == "earn" and Locale.fmt(q.target) or q.target)
+			card(desc, (q.type == "earn" and Locale.fmt(q.progress) or q.progress) .. " / " .. (q.type == "earn" and Locale.fmt(q.target) or q.target) .. "   🎁 ฿" .. Locale.fmt(q.reward),
+				q.claimed and T("claimedQ") or T("claim"), q.claimed and C.card or (ready and C.green or C.card),
+				function() if ready and not q.claimed then local ok = Remotes.ClaimQuest:InvokeServer(i); if ok then renderShop() end end end, "📋")
+		end
 	elseif state.tab == "passes" then
 		for _, gp in ipairs(Config.GamePasses) do
 			card(T(gp.key), "Game Pass", "Robux", C.accent, function() Remotes.PromptPass:FireServer("pass", gp.key) end, "⭐")
@@ -174,7 +182,8 @@ local function renderTop()
 	local d = state.data; if not d then return end
 	cashLbl.Text = "฿ " .. Locale.fmt(d.cash)
 	local stars = math.clamp(math.floor((d.rep or 0) / 200) + 1, 1, 5)
-	incLbl.Text = string.rep("⭐", stars) .. "  " .. T("served") .. ": " .. (d.served or 0)
+	local lvl = Config.Levels[d.level or 1]; local nextL = Config.Levels[(d.level or 1) + 1]
+	incLbl.Text = string.rep("⭐", stars) .. "  " .. T(lvl.key) .. (nextL and ("  (" .. string.format(T("nextLevel"), Locale.fmt(nextL.need)) .. ")") or "") .. "  ·  " .. T("served") .. ": " .. (d.served or 0)
 	local trayJson = player:GetAttribute("Tray")
 	local items = {}
 	if trayJson then local ok, arr = pcall(function() return game:GetService("HttpService"):JSONDecode(trayJson) end); if ok then items = arr end end

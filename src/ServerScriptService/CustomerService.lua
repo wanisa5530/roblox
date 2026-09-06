@@ -49,7 +49,7 @@ C.patienceMult = {} -- ต่อผู้เล่น (เหตุการณ�
 local function patienceOf(g)
 	local m = C.patienceMult[g.player] or 1
 	for _, e in ipairs(g.members) do if e.special and Config.Specials[e.special].patience then m *= Config.Specials[e.special].patience end end
-	return Config.Patience * m
+	return (Config.Patience + Config.PatiencePerExtra * math.max(#g.members - 1, 0)) * m
 end
 function C.patienceLeft(entry)
 	local g = entry.group
@@ -138,7 +138,7 @@ function C.spawn(player, foods)
 		if tbl then
 			local list = {}
 			for _, e in ipairs(g.members) do list[#list + 1] = e.food.id .. (e.spice and (":" .. e.spice) or "") end
-			tbl.model:SetAttribute("Orders", table.concat(list, ","))
+			tbl.model:SetAttribute("Orders", table.concat(list, ",")); tbl.model:SetAttribute("Guests", #g.npcs)
 		end
 		for _, npc in ipairs(g.npcs) do C.refreshOrder(npc, g); npc:SetAttribute("Patience", 1); addPrompt(npc, g) end
 		while g.alive do
