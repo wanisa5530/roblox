@@ -365,7 +365,7 @@ function M.build()
 	for z = -380, 460, 60 do lampAt(city, Vector3.new(-208, 0, z)); if z % 120 == 40 then tree(city, Vector3.new(-192, 0, z)) end end
 	for z = -380, 240, 80 do lampAt(city, Vector3.new(198, 0, z)); lampAt(city, Vector3.new(308, 0, z)) end
 	local TAXI = { { 240, 80, 160 }, { 40, 180, 90 }, { 250, 210, 40 }, { 240, 80, 160 }, { 60, 90, 200 }, { 235, 235, 235 } }
-	for i, spot in ipairs({ { 40, 5, 0 }, { 120, -5, 180 }, { 260, 5, 0 }, { 380, -5, 180 }, { 195, -130, 90 }, { 185, 100, 270 } }) do
+	for i, spot in ipairs({ { 40, 6.5, 90 }, { 120, -6.5, 270 }, { 260, 6.5, 90 }, { 380, -6.5, 270 }, { 195, -130, 0 }, { 185, 100, 180 } }) do
 		M.car(Vector3.new(spot[1], 0.4, spot[2]), Color3.fromRGB(unpack(TAXI[i])), city, math.rad(spot[3]))
 	end
 	for _, spot in ipairs({ Vector3.new(70, 0, -280), Vector3.new(30, 0, -120), Vector3.new(220, 0, -30) }) do M.tuktuk(spot, city) end
