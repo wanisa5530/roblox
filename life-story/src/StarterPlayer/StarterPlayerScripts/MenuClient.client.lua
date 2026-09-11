@@ -9,12 +9,14 @@ local T = U.T
 local gui = Instance.new("ScreenGui"); gui.Name = "LifeMenu"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui")
 local data = Remotes.GetData:InvokeServer()
 Remotes.DataUpdate.OnClientEvent:Connect(function(d) data = d end)
-local win = U.frame(gui, UDim2.new(0, 640, 0, 460), UDim2.new(0.5, -320, 0.5, -230), U.C.bg, 14); win.Visible = false
-U.button(win, "✕", UDim2.new(0, 34, 0, 34), UDim2.new(1, -40, 0, 6), U.C.red, function() win.Visible = false end)
-local tabsF = Instance.new("Frame"); tabsF.Size = UDim2.new(0, 140, 1, -50); tabsF.Position = UDim2.new(0, 8, 0, 44); tabsF.BackgroundTransparency = 1; tabsF.Parent = win
-U.list(tabsF, 4)
-local content = U.scroll(win, UDim2.new(1, -170, 1, -54), UDim2.new(0, 156, 0, 46))
-local title = U.label(win, "", UDim2.new(0.6, 0, 0, 30), UDim2.new(0, 156, 0, 8), { textSize = 18, color = U.C.accent })
+local win = U.frame(gui, UDim2.new(0, 680, 0, 470), UDim2.new(0.5, -340, 0.5, -290), U.C.bg, 16, U.C.teal); win.Visible = false; win.BackgroundTransparency = 0.05
+local header = U.frame(win, UDim2.new(1, 0, 0, 66), UDim2.new(), U.C.navy, 16)
+local hg = Instance.new("UIGradient"); hg.Color = ColorSequence.new(Color3.fromRGB(30, 80, 100), Color3.fromRGB(16, 26, 36)); hg.Parent = header
+U.button(win, "✕", UDim2.new(0, 30, 0, 30), UDim2.new(1, -38, 0, 8), U.C.red, function() win.Visible = false end)
+local tabsF = Instance.new("Frame"); tabsF.Size = UDim2.new(1, -60, 0, 56); tabsF.Position = UDim2.new(0, 10, 0, 5); tabsF.BackgroundTransparency = 1; tabsF.Parent = header
+local tl = Instance.new("UIListLayout"); tl.FillDirection = Enum.FillDirection.Horizontal; tl.Padding = UDim.new(0, 4); tl.VerticalAlignment = Enum.VerticalAlignment.Center; tl.Parent = tabsF
+local content = U.scroll(win, UDim2.new(1, -20, 1, -110), UDim2.new(0, 10, 0, 100))
+local title = U.label(win, "", UDim2.new(0.8, 0, 0, 26), UDim2.new(0, 14, 0, 70), { textSize = 17, color = U.C.accent })
 local TABS = { "character", "skills", "career", "school", "relationships", "family", "home", "business", "shop", "quests", "passes" }
 local current = "character"
 local render = {}
@@ -135,9 +137,14 @@ local function show(tab)
 	for k, b in pairs(tabBtns) do b.BackgroundColor3 = k == tab and U.C.accent or U.C.card end
 	if render[tab] then render[tab]() end
 end
-for i, t in ipairs(TABS) do local b = U.button(tabsF, T(t), UDim2.new(1, 0, 0, 30), nil, U.C.card, function() show(t) end); b.LayoutOrder = i; tabBtns[t] = b end
-player:GetAttributeChangedSignal("MenuToggle"):Connect(function() win.Visible = not win.Visible; if win.Visible then show(current) end end)
-player:GetAttributeChangedSignal("LangTick"):Connect(function() for t, b in pairs(tabBtns) do b.Text = T(t) end; if win.Visible then show(current) end end)
+local ICONS = { character = "🙂", skills = "📚", career = "💼", school = "🎓", relationships = "💬", family = "👨‍👩‍👧", home = "🏠", business = "☕", shop = "🛒", quests = "🎯", passes = "⭐" }
+for i, t in ipairs(TABS) do local b = U.iconButton(tabsF, ICONS[t], T(t), 40, nil, U.C.card, function() show(t) end); b.Parent.LayoutOrder = i; tabBtns[t] = b end
+player:GetAttributeChangedSignal("MenuToggle"):Connect(function()
+	local want = player:GetAttribute("MenuTab")
+	if want then player:SetAttribute("MenuTab", nil); win.Visible = true; show(want); return end
+	win.Visible = not win.Visible; if win.Visible then show(current) end
+end)
+player:GetAttributeChangedSignal("LangTick"):Connect(function() if win.Visible then show(current) end end)
 Remotes.DataUpdate.OnClientEvent:Connect(function() if win.Visible and current ~= "character" then show(current) end end)
 -- หน้าต่างจากอาคาร: สมัครงาน / มหาวิทยาลัย / โรงพยาบาล
 Remotes.Career.OnClientEvent:Connect(function(kind, key)

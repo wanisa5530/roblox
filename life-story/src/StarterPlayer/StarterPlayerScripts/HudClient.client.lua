@@ -14,28 +14,51 @@ player:SetAttribute("Lang", lang); Remotes.Action:FireServer("lang", lang)
 local T = U.T
 local gui = Instance.new("ScreenGui"); gui.Name = "LifeHud"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.Parent = player:WaitForChild("PlayerGui")
 local data
--- ===== แถบบน =====
-local top = U.frame(gui, UDim2.new(0, 420, 0, 74), UDim2.new(0.5, -210, 0, 8), U.C.bg, 12)
-local cashL = U.label(top, "฿0", UDim2.new(0.5, 0, 0, 34), UDim2.new(0, 14, 0, 6), { textSize = 26, color = U.C.accent })
-local nameL = U.label(top, "", UDim2.new(0.5, -14, 0, 20), UDim2.new(0.5, 0, 0, 8), { textSize = 13, color = U.C.dim, align = Enum.TextXAlignment.Right })
-local clockL = U.label(top, "", UDim2.new(0.5, -14, 0, 20), UDim2.new(0.5, 0, 0, 30), { textSize = 13, color = U.C.dim, align = Enum.TextXAlignment.Right })
-local moodL = U.label(top, "", UDim2.new(1, -28, 0, 20), UDim2.new(0, 14, 0, 46), { textSize = 13, color = U.C.green })
--- ===== ความต้องการ (ล่างซ้าย) =====
-local needsF = U.frame(gui, UDim2.new(0, 230, 0, 8 + #Config.Needs * 22), UDim2.new(0, 10, 1, -(20 + #Config.Needs * 22) - 70), U.C.bg, 10)
-local needBars = {}
-for i, n in ipairs(Config.Needs) do
-	U.label(needsF, n.emoji .. " " .. T(n.key), UDim2.new(0, 110, 0, 20), UDim2.new(0, 8, 0, 4 + (i - 1) * 22), { textSize = 12 })
-	local _, fill = U.bar(needsF, UDim2.new(0, 100, 0, 12), UDim2.new(0, 120, 0, 8 + (i - 1) * 22))
-	needBars[n.key] = fill
-end
--- ===== ปุ่มล่าง =====
-local menuBtn = U.button(gui, "☰ " .. T("menu"), UDim2.new(0, 130, 0, 44), UDim2.new(0, 10, 1, -56), U.C.accent)
-local _homeBtn = U.button(gui, "🏠", UDim2.new(0, 50, 0, 44), UDim2.new(0, 148, 1, -56), U.C.blue, function() Remotes.Action:FireServer("goHome") end)
-local stopBtn = U.button(gui, "■ " .. T("stop"), UDim2.new(0, 110, 0, 44), UDim2.new(0, 206, 1, -56), U.C.red, function() Remotes.Action:FireServer("stop") end); stopBtn.Visible = false
-local _langBtn = U.button(gui, "🌐 " .. lang, UDim2.new(0, 70, 0, 44), UDim2.new(0, 324, 1, -56), U.C.card, function()
+-- ===== แถบล่างสไตล์ The Sims: ซ้าย=ตัวละคร/อารมณ์/ปุ่ม กลาง=ความต้องการ ขวา=เงิน/เวลา/โหมด =====
+local BAR_H = 118
+local bar = U.frame(gui, UDim2.new(1, 0, 0, BAR_H), UDim2.new(0, 0, 1, -BAR_H), U.C.navy, 0); bar.BackgroundTransparency = 0.12
+local edge = U.frame(bar, UDim2.new(1, 0, 0, 3), UDim2.new(0, 0, 0, 0), U.C.teal, 0); edge.BackgroundTransparency = 0.2
+local grad = Instance.new("UIGradient"); grad.Color = ColorSequence.new(Color3.fromRGB(28, 44, 60), Color3.fromRGB(14, 22, 30)); grad.Rotation = 90; grad.Parent = bar
+-- ซ้าย: รูปตัวละคร (thumbnail จริง) + ชื่อ + ช่วงชีวิต + อารมณ์
+local portraitBg = U.frame(bar, UDim2.new(0, 84, 0, 84), UDim2.new(0, 14, 0, 16), U.C.card, 42, U.C.teal)
+local portrait = Instance.new("ImageLabel"); portrait.Size = UDim2.new(1, -6, 1, -6); portrait.Position = UDim2.new(0, 3, 0, 3); portrait.BackgroundTransparency = 1; portrait.Parent = portraitBg
+local pr = Instance.new("UICorner"); pr.CornerRadius = UDim.new(1, 0); pr.Parent = portrait
+pcall(function() portrait.Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150) end)
+local plumbob = U.label(bar, "◆", UDim2.new(0, 20, 0, 20), UDim2.new(0, 46, 0, 0), { textSize = 18, color = U.C.green, align = Enum.TextXAlignment.Center })
+local nameL = U.label(bar, "", UDim2.new(0, 220, 0, 22), UDim2.new(0, 108, 0, 14), { textSize = 16 })
+local stageL = U.label(bar, "", UDim2.new(0, 220, 0, 16), UDim2.new(0, 108, 0, 36), { textSize = 11, color = U.C.dim, font = Enum.Font.Gotham })
+local moodL = U.label(bar, "", UDim2.new(0, 220, 0, 18), UDim2.new(0, 108, 0, 54), { textSize = 13, color = U.C.green })
+-- ปุ่มวงกลม: เมนู บ้าน หยุด ภาษา
+local btnRow = Instance.new("Frame"); btnRow.Size = UDim2.new(0, 240, 0, 50); btnRow.Position = UDim2.new(0, 106, 0, 72); btnRow.BackgroundTransparency = 1; btnRow.Parent = bar
+local bl = Instance.new("UIListLayout"); bl.FillDirection = Enum.FillDirection.Horizontal; bl.Padding = UDim.new(0, 10); bl.Parent = btnRow
+local menuBtn = U.iconButton(btnRow, "☰", T("menu"), 34, nil, U.C.accent)
+U.iconButton(btnRow, "🏠", T("home"), 34, nil, U.C.card, function() Remotes.Action:FireServer("goHome") end)
+local _stopBtn, stopHolder = U.iconButton(btnRow, "■", T("stop"), 34, nil, U.C.red, function() Remotes.Action:FireServer("stop") end); stopHolder.Visible = false
+local langBtn = U.iconButton(btnRow, "🌐", lang, 34, nil, U.C.card, function()
 	local i = table.find(Config.Languages, lang) or 1; lang = Config.Languages[i % #Config.Languages + 1]
 	player:SetAttribute("Lang", lang); Remotes.Action:FireServer("lang", lang); player:SetAttribute("LangTick", os.clock())
 end)
+-- กลาง: ความต้องการ 8 อย่าง 2 คอลัมน์
+local needsF = Instance.new("Frame"); needsF.Size = UDim2.new(0, 520, 0, 100); needsF.Position = UDim2.new(0.5, -260, 0, 10); needsF.BackgroundTransparency = 1; needsF.Parent = bar
+local needBars, needLabels = {}, {}
+for i, n in ipairs(Config.Needs) do
+	local col = (i - 1) % 2; local row = (i - 1) // 2
+	local x, y = col * 262, row * 24
+	needLabels[n.key] = U.label(needsF, n.emoji .. " " .. T(n.key), UDim2.new(0, 96, 0, 20), UDim2.new(0, x, 0, y), { textSize = 12 })
+	local bg, fill = U.bar(needsF, UDim2.new(0, 150, 0, 12), UDim2.new(0, x + 100, 0, y + 4))
+	bg.BackgroundColor3 = Color3.fromRGB(10, 16, 22)
+	needBars[n.key] = fill
+end
+-- ขวา: เงิน เวลา วัน ฤดู + โหมด Live/Build/Buy
+local right = Instance.new("Frame"); right.Size = UDim2.new(0, 300, 1, 0); right.Position = UDim2.new(1, -310, 0, 0); right.BackgroundTransparency = 1; right.Parent = bar
+local cashL = U.label(right, "฿0", UDim2.new(1, 0, 0, 34), UDim2.new(0, 0, 0, 10), { textSize = 28, color = U.C.green, align = Enum.TextXAlignment.Right })
+local clockL = U.label(right, "", UDim2.new(1, 0, 0, 18), UDim2.new(0, 0, 0, 44), { textSize = 13, color = U.C.text, align = Enum.TextXAlignment.Right })
+local modeRow = Instance.new("Frame"); modeRow.Size = UDim2.new(0, 190, 0, 50); modeRow.Position = UDim2.new(1, -190, 0, 66); modeRow.BackgroundTransparency = 1; modeRow.Parent = right
+local ml = Instance.new("UIListLayout"); ml.FillDirection = Enum.FillDirection.Horizontal; ml.Padding = UDim.new(0, 10); ml.HorizontalAlignment = Enum.HorizontalAlignment.Right; ml.Parent = modeRow
+U.iconButton(modeRow, "▶", "Live", 34, nil, U.C.green, function() player:SetAttribute("BuildClose", os.clock()) end)
+U.iconButton(modeRow, "🔨", T("build"), 34, nil, U.C.accent, function() player:SetAttribute("BuildMode", os.clock()) end)
+U.iconButton(modeRow, "🛒", T("shop"), 34, nil, U.C.blue, function() player:SetAttribute("BuildMode", os.clock()) end)
+U.iconButton(modeRow, "🎯", T("quests"), 34, nil, U.C.card, function() player:SetAttribute("MenuTab", "quests"); player:SetAttribute("MenuToggle", os.clock()) end)
 -- ===== แจ้งเตือน =====
 local notifF = Instance.new("Frame"); notifF.Size = UDim2.new(0, 380, 0, 200); notifF.Position = UDim2.new(0.5, -190, 0, 90); notifF.BackgroundTransparency = 1; notifF.Parent = gui
 U.list(notifF, 4)
@@ -54,19 +77,22 @@ local function refresh()
 	cashL.Text = "฿" .. U.fmt(data.cash)
 	local c = data.char
 	if c then
-		nameL.Text = c.name .. " · " .. T(Config.Stages[c.stage].key) .. " · " .. T("generation", c.generation)
-		moodL.Text = T("mood") .. ": " .. T(c.mood or "Happy") .. (c.illness and ("  🤒 " .. T(c.illness.key)) or "") .. (c.career and ("  💼 " .. T(c.career) .. " L" .. c.careerLevel) or "")
-		for k, f in pairs(needBars) do local v = (c.needs[k] or 0) / 100; f.Size = UDim2.new(v, 0, 1, 0); f.BackgroundColor3 = v < 0.25 and U.C.red or (v < 0.5 and U.C.accent or U.C.green) end
+		nameL.Text = c.name
+		stageL.Text = T(Config.Stages[c.stage].key) .. " · " .. T("generation", c.generation) .. (c.career and ("  💼 " .. T(c.career) .. " " .. T("level", c.careerLevel)) or "")
+		local moodColor = ({ Happy = U.C.green, Confident = U.C.green, Inspired = U.C.accent, Focused = U.C.accent, Playful = U.C.yellow, Flirty = Color3.fromRGB(240, 120, 170), Sad = U.C.blue, Bored = U.C.dim, Angry = U.C.red, Stressed = U.C.red, Embarrassed = U.C.yellow, Scared = U.C.red, Sick = Color3.fromRGB(160, 220, 120) })[c.mood or "Happy"] or U.C.text
+		moodL.Text = "● " .. T(c.mood or "Happy") .. (c.illness and ("  🤒 " .. T(c.illness.key)) or ""); moodL.TextColor3 = moodColor; plumbob.TextColor3 = moodColor
+		for k, f in pairs(needBars) do local v = (c.needs[k] or 0) / 100; f.Size = UDim2.new(v, 0, 1, 0); f.BackgroundColor3 = U.needColor(v) end
 	end
 end
 local createShown = false
 local function showCreate() end  -- กำหนดจริงด้านล่าง
 Remotes.DataUpdate.OnClientEvent:Connect(function(d) data = d; refresh(); player:SetAttribute("HasChar", d.char ~= nil); if not d.char and not createShown then createShown = true; showCreate() end end)
-player:GetAttributeChangedSignal("Action"):Connect(function() stopBtn.Visible = player:GetAttribute("Action") ~= nil end)
+player:GetAttributeChangedSignal("Action"):Connect(function() stopHolder.Visible = player:GetAttribute("Action") ~= nil end)
 task.spawn(function()
 	while true do
 		local h = Lighting:GetAttribute("Hour") or 12; local season = Lighting:GetAttribute("Season") or "Summer"
-		clockL.Text = string.format("%02d:%02d · %s · %s", math.floor(h), math.floor((h % 1) * 60), T(season), T("day", data and data.dayCount or 0))
+		local icon = (h >= 6 and h < 18) and "☀️" or "🌙"
+		clockL.Text = string.format("%s %02d:%02d  ·  %s  ·  %s", icon, math.floor(h), math.floor((h % 1) * 60), T(season), T("day", data and data.dayCount or 0))
 		task.wait(2)
 	end
 end)
@@ -121,6 +147,7 @@ if data and not data.char and not createShown then createShown = true; showCreat
 player:SetAttribute("HasChar", data and data.char ~= nil)
 -- ปุ่มเมนูส่งสัญญาณให้ MenuClient
 menuBtn.MouseButton1Click:Connect(function() player:SetAttribute("MenuToggle", os.clock()) end)
+player:GetAttributeChangedSignal("LangTick"):Connect(function() langBtn.Text = "🌐"; for _, n in ipairs(Config.Needs) do needLabels[n.key].Text = n.emoji .. " " .. T(n.key) end end)
 -- ปรับข้อความ prompt ตามภาษา
 local function localizePrompt(pp)
 	local act = pp:GetAttribute("Action"); if not act then return end

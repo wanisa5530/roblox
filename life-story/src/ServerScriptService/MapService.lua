@@ -181,7 +181,8 @@ function M.build()
 		ground:SetAttribute("LotIndex", i)
 		local ns = sign(f, "For sale", CFrame.new(origin + Vector3.new(0, 5, -23)) * CFrame.Angles(0, math.pi, 0), Vector3.new(12, 2.5, 0.5)); ns.Name = "NameSign"
 		for _, side in ipairs({ -1, 1 }) do part({ Size = Vector3.new(0.4, 2.5, 44), Position = origin + Vector3.new(side * 22, 1.5, 0), Color = Color3.fromRGB(240, 240, 240), Material = Enum.Material.Wood }, f) end
-		part({ Size = Vector3.new(44, 2.5, 0.4), Position = origin + Vector3.new(0, 1.5, 22), Color = Color3.fromRGB(240, 240, 240), Material = Enum.Material.Wood }, f)
+		part({ Size = Vector3.new(16, 2.5, 0.4), Position = origin + Vector3.new(-14, 1.5, 22), Color = Color3.fromRGB(240, 240, 240), Material = Enum.Material.Wood }, f)
+		part({ Size = Vector3.new(10, 2.5, 0.4), Position = origin + Vector3.new(17, 1.5, 22), Color = Color3.fromRGB(240, 240, 240), Material = Enum.Material.Wood }, f)
 		part({ Size = Vector3.new(10, 0.3, 14), Position = origin + Vector3.new(14, 0.55, -18), Color = Color3.fromRGB(160, 160, 165), Material = Enum.Material.Concrete, Name = "Driveway" }, f)
 		part({ Size = Vector3.new(1, 3, 1), Position = origin + Vector3.new(-16, 1.5, -22), Color = Color3.fromRGB(60, 60, 60), Material = Enum.Material.Metal }, f)
 		part({ Size = Vector3.new(1.4, 1, 2), Position = origin + Vector3.new(-16, 3.3, -22), Color = Color3.fromRGB(60, 90, 180), Material = Enum.Material.Metal, Name = "Mailbox" }, f)

@@ -41,6 +41,7 @@ local function myLot()
 end
 local lot
 player:GetAttributeChangedSignal("BuildMode"):Connect(function() panel.Visible = true; lot = myLot() end)
+player:GetAttributeChangedSignal("BuildClose"):Connect(function() panel.Visible = false end)
 game:GetService("RunService").RenderStepped:Connect(function()
 	if not ghost or not panel.Visible then if ghost then ghost.Transparency = 1 end; return end
 	local floor = lot and lot:FindFirstChild("Floor")

@@ -12,12 +12,21 @@ local head = U.label(win, "", UDim2.new(1, -50, 0, 30), UDim2.new(0, 10, 0, 6), 
 local sub = U.label(win, "", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 34), { textSize = 12, color = U.C.dim })
 U.button(win, "✕", UDim2.new(0, 30, 0, 30), UDim2.new(1, -36, 0, 6), U.C.red, function() win.Visible = false end)
 local list = U.scroll(win, UDim2.new(1, -16, 1, -66), UDim2.new(0, 8, 0, 58))
-local target
+local target, targetPart
+local function findTargetPart(id)
+	if id:sub(1, 1) == "u" then local pl = Players:GetPlayerByUserId(tonumber(id:sub(2))); return pl and pl.Character and pl.Character:FindFirstChild("HumanoidRootPart") end
+	for _, fld in ipairs({ "Citizens", "Staff" }) do local f = workspace:FindFirstChild(fld); local m = f and f:FindFirstChild(id); if m then return m:FindFirstChild("HumanoidRootPart") end end
+end
+game:GetService("RunService").Heartbeat:Connect(function()
+	if not win.Visible or not targetPart then return end
+	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if hrp and (hrp.Position - targetPart.Position).Magnitude > 14 then win.Visible = false end
+end)
 Remotes.Social.OnClientEvent:Connect(function(kind, id, a, b, rel)
 	local status, displayName = a, b
 	if kind == "result" then status, displayName = b, a end
 	if kind == "open" then
-		target = id; win.Visible = true
+		target = id; targetPart = findTargetPart(id); win.Visible = true
 		head.Text = "🧑 " .. (displayName or id); sub.Text = T(status)
 		for _, x in ipairs(list:GetChildren()) do if x:IsA("TextButton") then x:Destroy() end end
 		for i, ic in ipairs(Config.Interactions) do
