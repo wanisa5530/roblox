@@ -497,8 +497,8 @@ function M.build()
 		part({ Size = Vector3.new(1.4, 0.3, 1.8), Position = origin + Vector3.new(13, 3.25, 0.5), Color = Color3.fromRGB(190, 190, 195), Material = Enum.Material.Metal }, f)
 		part({ Size = Vector3.new(1.2, 2.2, 6), Position = origin + Vector3.new(13.4, 7.5, 2), Color = Color3.fromRGB(235, 235, 235), Material = Enum.Material.SmoothPlastic }, f)
 		-- โคมไฟเพดาน
-		local lamp = part({ Size = Vector3.new(2, 0.3, 2), Position = origin + Vector3.new(0, FH - 0.6, 0), Color = Color3.fromRGB(255, 245, 220), Material = Enum.Material.Neon, CanCollide = false }, f)
-		local l = Instance.new("PointLight"); l.Range = 22; l.Brightness = 0.9; l.Color = Color3.fromRGB(255, 240, 210); l.Parent = lamp
+		local lamp = part({ Size = Vector3.new(2, 0.3, 2), Position = origin + Vector3.new(0, FH - 0.6, 0), Color = Color3.fromRGB(255, 245, 220), Material = Enum.Material.SmoothPlastic, CanCollide = false }, f)
+		local l = Instance.new("PointLight"); l.Range = 18; l.Brightness = 0.45; l.Shadows = true; l.Color = Color3.fromRGB(255, 240, 210); l.Parent = lamp
 		local ns = sign(f, "Apt " .. i, CFrame.new(origin + Vector3.new(0, FH - 1.5, RD / 2 + 0.5)) * CFrame.Angles(0, math.pi, 0), Vector3.new(8, 1.6, 0.4)); ns.Name = "NameSign"
 		M.lots["apt" .. i] = { index = "apt" .. i, origin = origin + Vector3.new(0, 0.25, 0), model = f, owner = nil, apartment = true }
 	end
@@ -525,12 +525,12 @@ function M.build()
 	local spawn = Instance.new("SpawnLocation"); spawn.Size = Vector3.new(10, 0.4, 10); spawn.Position = Vector3.new(160, 0.35, -30); spawn.Anchored = true; spawn.Neutral = true; spawn.Transparency = 1; spawn.CanCollide = false; spawn.Parent = city
 	local dec = spawn:FindFirstChildOfClass("Decal"); if dec then dec:Destroy() end
 	-- แสงบรรยากาศ
-	local L = game:GetService("Lighting"); L.Brightness = 2.2; L.Ambient = Color3.fromRGB(120, 125, 140); L.OutdoorAmbient = Color3.fromRGB(140, 145, 160); L.EnvironmentDiffuseScale = 0.6; L.EnvironmentSpecularScale = 0.6; L.GlobalShadows = true; L.FogEnd = 1200; L.FogColor = Color3.fromRGB(200, 210, 230)
+	local L = game:GetService("Lighting"); L.Brightness = 1.6; L.Ambient = Color3.fromRGB(120, 125, 140); L.OutdoorAmbient = Color3.fromRGB(140, 145, 160); L.EnvironmentDiffuseScale = 0.4; L.EnvironmentSpecularScale = 0.4; L.ExposureCompensation = -0.15; L.GlobalShadows = true; L.FogEnd = 1200; L.FogColor = Color3.fromRGB(200, 210, 230)
 	if not L:FindFirstChildOfClass("SunRaysEffect") then local sr = Instance.new("SunRaysEffect"); sr.Intensity = 0.08; sr.Parent = L end
-	if not L:FindFirstChildOfClass("ColorCorrectionEffect") then local cc = Instance.new("ColorCorrectionEffect"); cc.Saturation = 0.12; cc.Contrast = 0.06; cc.Parent = L end
+	if not L:FindFirstChildOfClass("ColorCorrectionEffect") then local cc = Instance.new("ColorCorrectionEffect"); cc.Saturation = 0.1; cc.Contrast = 0.03; cc.Parent = L end
 	if not L:FindFirstChildOfClass("Sky") then local sky = Instance.new("Sky"); sky.SkyboxBk = "rbxassetid://591058823"; sky.SkyboxDn = "rbxassetid://591059876"; sky.SkyboxFt = "rbxassetid://591058104"; sky.SkyboxLf = "rbxassetid://591057861"; sky.SkyboxRt = "rbxassetid://591057625"; sky.SkyboxUp = "rbxassetid://591059642"; sky.Parent = L end
 	if not L:FindFirstChildOfClass("Atmosphere") then local at = Instance.new("Atmosphere"); at.Density = 0.3; at.Parent = L end
-	if not L:FindFirstChildOfClass("BloomEffect") then local bl = Instance.new("BloomEffect"); bl.Intensity = 0.4; bl.Parent = L end
+	if not L:FindFirstChildOfClass("BloomEffect") then local bl = Instance.new("BloomEffect"); bl.Intensity = 0.12; bl.Size = 20; bl.Threshold = 1.6; bl.Parent = L end
 end
 -- รถยนต์: ตัวถังโค้งด้วย wedge กระจกเอียง ล้อยาง+ดุม ไฟหน้า/ท้าย กันชน ป้ายทะเบียน
 function M.car(pos, color, parent, yaw)
@@ -609,8 +609,8 @@ function M.houseShell(f, origin, i)
 	for _, wx in ipairs({ -W / 4 - 1.75, W / 4 + 1.75 }) do part({ Size = Vector3.new(7.6, 5.8, 0.2), Position = o + Vector3.new(wx, 5.5, D / 2 - 0.5), Color = Color3.fromRGB(200, 170, 140), Material = Enum.Material.Fabric, CanCollide = false, Transparency = 0.35 }, f) end
 	-- พื้นภายในไม้ + ไฟเพดาน + ทางเดินหน้าบ้าน
 	part({ Size = Vector3.new(W - 1, 0.3, D - 1), Position = o + Vector3.new(0, 0.15, 0), Color = Color3.fromRGB(205, 175, 130), Material = Enum.Material.WoodPlanks, CanCollide = false, Name = "InnerFloor" }, f)
-	local lamp = part({ Size = Vector3.new(2, 0.3, 2), Position = o + Vector3.new(0, H - 0.5, 0), Color = Color3.fromRGB(255, 245, 220), Material = Enum.Material.Neon, CanCollide = false }, f)
-	local l = Instance.new("PointLight"); l.Range = 26; l.Brightness = 0.9; l.Parent = lamp
+	local lamp = part({ Size = Vector3.new(2, 0.3, 2), Position = o + Vector3.new(0, H - 0.5, 0), Color = Color3.fromRGB(255, 245, 220), Material = Enum.Material.SmoothPlastic, CanCollide = false }, f)
+	local l = Instance.new("PointLight"); l.Range = 20; l.Brightness = 0.45; l.Shadows = true; l.Parent = lamp
 	part({ Size = Vector3.new(6, 0.3, 8), Position = origin + Vector3.new(0, 0.55, D / 2 + 6), Color = Color3.fromRGB(180, 180, 185), Material = Enum.Material.Concrete }, f)
 end
 -- ตุ๊กตุ๊ก 3 ล้อ

@@ -111,7 +111,7 @@ local DETAIL = {
 	Lamp = function(m, body, s, col)
 		body.Size = Vector3.new(0.15, s.Y - 1.2, 0.15); body.CFrame = body.CFrame * CFrame.new(0, -0.5, 0); body.Color = METAL; body.Material = Enum.Material.Metal
 		sub(m, Vector3.new(1, 0.15, 1), body.CFrame * CFrame.new(0, -(s.Y - 1.2) / 2, 0), DARK)
-		sub(m, Vector3.new(1.4, 1.2, 1.4), body.CFrame * CFrame.new(0, (s.Y - 1.2) / 2 + 0.6, 0), Color3.fromRGB(255, 235, 190), Enum.Material.Neon)
+		sub(m, Vector3.new(1.4, 1.2, 1.4), body.CFrame * CFrame.new(0, (s.Y - 1.2) / 2 + 0.6, 0), Color3.fromRGB(255, 235, 190), Enum.Material.SmoothPlastic)
 	end,
 	Plant = function(m, body, s, col)
 		body.Size = Vector3.new(1.2, 1.2, 1.2); body.CFrame = body.CFrame * CFrame.new(0, -s.Y / 2 + 0.6, 0); body.Color = Color3.fromRGB(190, 110, 70)   -- กระถาง
@@ -152,7 +152,7 @@ local function buildItem(cfg, cf, parent, id)
 	local d = DETAIL[cfg.key] or (cfg.cat == "bed" and DETAIL.bed) or (cfg.key:sub(1, 2) == "TV" and DETAIL.TV)
 	if d then pcall(d, m, body, s, col) end
 	if cfg.light and not DETAIL[cfg.key] then local l = Instance.new("PointLight"); l.Range = 14; l.Brightness = 1.2; l.Color = Color3.fromRGB(255, 230, 170); l.Parent = body end
-	if cfg.key == "Lamp" then local l = Instance.new("PointLight"); l.Range = 16; l.Brightness = 1.2; l.Color = Color3.fromRGB(255, 230, 170); l.Parent = body end
+	if cfg.key == "Lamp" then local l = Instance.new("PointLight"); l.Range = 12; l.Brightness = 0.6; l.Color = Color3.fromRGB(255, 230, 170); l.Parent = body end
 	if cfg.cat == "outdoor" then local plant = body:Clone(); plant.Size = Vector3.new(s.X - 1, 1.5, s.Z - 1); plant.CFrame = body.CFrame * CFrame.new(0, 1.2, 0); plant.Color = Color3.fromRGB(60, 160, 60); plant.Material = Enum.Material.Grass; plant.Name = "Plant"; plant.Parent = m end
 	m.Parent = parent
 	return m
