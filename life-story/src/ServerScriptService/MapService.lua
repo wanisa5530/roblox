@@ -198,7 +198,7 @@ function M.build()
 		part({ Size = Vector3.new(60, 14, 30), Position = gp + Vector3.new(0, 7, 0), Color = Color3.fromRGB(250, 248, 240), Material = Enum.Material.Marble }, palace)
 		goldRoof(palace, gp + Vector3.new(0, 14, 0), 60, 30, 5, 3)
 		for _, cx in ipairs({ -55, 55 }) do part({ Size = Vector3.new(30, 12, 24), Position = gp + Vector3.new(cx, 6, 10), Color = Color3.fromRGB(250, 248, 240), Material = Enum.Material.Marble }, palace); goldRoof(palace, gp + Vector3.new(cx, 12, 10), 30, 24, 4, 2) end
-		chedi(palace, gp + Vector3.new(-70, 0, -25), 8, 40, Color3.fromRGB(240, 200, 60))
+		if not Assets.place("chedi", 1, gp + Vector3.new(-70, 0, -25), 0, 18, palace) then chedi(palace, gp + Vector3.new(-70, 0, -25), 8, 40, Color3.fromRGB(240, 200, 60)) end
 		for i = 0, 3 do for _, sx in ipairs({ -1, 1 }) do part({ Size = Vector3.new(2, 10, 2), Position = gp + Vector3.new(sx * (10 + i * 12), 5, 16), Color = Color3.fromRGB(240, 200, 60), Material = Enum.Material.Metal, Reflectance = 0.3 }, palace) end end
 		sign(palace, "🏯 Grand Palace", CFrame.new(gp + Vector3.new(0, 8, 46)) * CFrame.Angles(0, math.pi, 0), Vector3.new(30, 3.5, 0.5))
 		part({ Size = Vector3.new(170, 0.4, 70), Position = gp + Vector3.new(0, 0.2, 85), Color = Color3.fromRGB(80, 165, 80), Material = Enum.Material.Grass, Name = "SanamLuang" }, city)
@@ -350,10 +350,11 @@ function M.build()
 		part({ Size = Vector3.new(120, 0.4, 80), Position = jj + Vector3.new(0, 0.2, 0), Color = Color3.fromRGB(180, 170, 150), Material = Enum.Material.Concrete }, mk)
 		for r = 0, 3 do for c = 0, 7 do
 			local sp = jj + Vector3.new(-52 + c * 15, 0, -30 + r * 20)
-			part({ Size = Vector3.new(10, 3, 5), Position = sp + Vector3.new(0, 1.9, 0), Color = Color3.fromRGB(150, 110, 70), Material = Enum.Material.Wood }, mk)
+			local stallAsset = Assets.place("stall", 1, sp, 180, 12, mk)
+			if not stallAsset then part({ Size = Vector3.new(10, 3, 5), Position = sp + Vector3.new(0, 1.9, 0), Color = Color3.fromRGB(150, 110, 70), Material = Enum.Material.Wood }, mk)
 			for _, o in ipairs({ -4.5, 4.5 }) do part({ Size = Vector3.new(0.4, 8, 0.4), Position = sp + Vector3.new(o, 4.4, -2), Color = Color3.fromRGB(80, 80, 85), Material = Enum.Material.Metal }, mk) end
 			part({ Size = Vector3.new(11, 0.4, 8), Position = sp + Vector3.new(0, 8.5, 0), Color = Color3.fromHSV(((r * 8 + c) % 7) / 7, 0.7, 0.9), Material = Enum.Material.Fabric }, mk)
-			for k = 1, 3 do part({ Size = Vector3.new(1.5, 1.5, 1.5), Position = sp + Vector3.new(-3 + k * 1.8, 4.2, 0), Color = Color3.fromHSV(math.random(), 0.6, 0.95), Material = Enum.Material.SmoothPlastic, CanCollide = false }, mk) end
+			for k = 1, 3 do part({ Size = Vector3.new(1.5, 1.5, 1.5), Position = sp + Vector3.new(-3 + k * 1.8, 4.2, 0), Color = Color3.fromHSV(math.random(), 0.6, 0.95), Material = Enum.Material.SmoothPlastic, CanCollide = false }, mk) end end
 		end end
 		sign(mk, "🛍️ Chatuchak Market", CFrame.new(jj + Vector3.new(0, 8, 42)) * CFrame.Angles(0, math.pi, 0), Vector3.new(30, 3.5, 0.5))
 		M.buildings.Chatuchak = { model = mk, pos = jj, door = jj + Vector3.new(0, 0, 46) }
@@ -381,7 +382,9 @@ function M.build()
 		local a1 = i / 24 * math.pi * 2
 		part({ Size = Vector3.new(5, 0.3, 4.5), CFrame = CFrame.new(PC + Vector3.new(math.cos(a1) * 15, 0.4, math.sin(a1) * 15)) * CFrame.Angles(0, -a1, 0), Color = Color3.fromRGB(190, 180, 165), Material = Enum.Material.Cobblestone }, park)
 	end
-	-- น้ำพุ 3 ชั้น
+	-- น้ำพุ 3 ชั้น (ใช้โมเดลจริงถ้าโหลดได้)
+	local fountainAsset = Assets.place("fountain", 1, PC, 0, 22, park)
+	if not fountainAsset then
 	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(1.2, 20, 20), CFrame = CFrame.new(PC + Vector3.new(0, 0.9, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(200, 200, 205), Material = Enum.Material.Marble }, park)
 	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.4, 18, 18), CFrame = CFrame.new(PC + Vector3.new(0, 1.5, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(70, 170, 230), Material = Enum.Material.Glass, Transparency = 0.35, Reflectance = 0.3, Name = "Pond" }, park)
 	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(4, 2, 2), CFrame = CFrame.new(PC + Vector3.new(0, 3, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(200, 200, 205), Material = Enum.Material.Marble }, park)
@@ -390,6 +393,7 @@ function M.build()
 	local jet = part({ Size = Vector3.new(0.6, 6, 0.6), Position = PC + Vector3.new(0, 8.5, 0), Color = Color3.fromRGB(200, 230, 255), Material = Enum.Material.Neon, Transparency = 0.4, CanCollide = false }, park)
 	local pe = Instance.new("ParticleEmitter"); pe.Texture = "rbxasset://textures/particles/sparkles_main.dds"; pe.Rate = 40; pe.Speed = NumberRange.new(6, 9); pe.Lifetime = NumberRange.new(0.8, 1.4); pe.Color = ColorSequence.new(Color3.fromRGB(200, 235, 255)); pe.Size = NumberSequence.new(0.6); pe.Acceleration = Vector3.new(0, -14, 0); pe.SpreadAngle = Vector2.new(25, 25); pe.Parent = jet
 	local fl = Instance.new("PointLight"); fl.Color = Color3.fromRGB(150, 200, 255); fl.Range = 18; fl.Brightness = 1.5; fl.Parent = jet
+	end
 	-- แปลงดอกไม้ 4 มุม
 	for _, q in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
 		local fp = PC + Vector3.new(q[1] * 26, 0, q[2] * 20)
@@ -408,7 +412,8 @@ function M.build()
 		local a1 = i / 8 * math.pi * 2 + math.pi / 8
 		local bp = PC + Vector3.new(math.cos(a1) * 19, 0, math.sin(a1) * 19)
 		local look = CFrame.lookAt(bp, PC)
-		part({ Size = Vector3.new(5, 0.4, 1.6), CFrame = look * CFrame.new(0, 1.6, 0), Color = Color3.fromRGB(150, 105, 60), Material = Enum.Material.Wood, Name = "Bench" }, park)
+		local benchAsset = Assets.place("bench", 1, bp, math.deg(math.atan2(-look.LookVector.X, -look.LookVector.Z)), 6, park)
+		if not benchAsset then part({ Size = Vector3.new(5, 0.4, 1.6), CFrame = look * CFrame.new(0, 1.6, 0), Color = Color3.fromRGB(150, 105, 60), Material = Enum.Material.Wood, Name = "Bench" }, park) end
 		part({ Size = Vector3.new(5, 1.6, 0.3), CFrame = look * CFrame.new(0, 2.4, 0.75) * CFrame.Angles(math.rad(-10), 0, 0), Color = Color3.fromRGB(150, 105, 60), Material = Enum.Material.Wood }, park)
 		for _, sx in ipairs({ -2.2, 2.2 }) do part({ Size = Vector3.new(0.3, 1.4, 1.6), CFrame = look * CFrame.new(sx, 0.9, 0), Color = Color3.fromRGB(40, 40, 45), Material = Enum.Material.Metal }, park) end
 		if i % 2 == 0 then
