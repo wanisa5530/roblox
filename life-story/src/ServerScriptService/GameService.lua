@@ -208,6 +208,26 @@ function G.init()
 		end
 	end)
 	G.onPlayer = onPlayer
+	-- ตรวจเนื้อหาแพ็กโมเดลใหม่ (ชั่วคราว): บันทึกชื่อชิ้นส่วน/ขนาดลง diag เพื่อวางแผนจัดวาง
+	task.spawn(function()
+		for _, id in ipairs({ 6418277837, 13168370735, 15264880043, 6853922596, 14800136759, 18888365209, 6850108252, 9432856072 }) do
+			local ok, res = pcall(function() return game:GetService("InsertService"):LoadAsset(id) end)
+			if not ok or not res then Core.diag("pack " .. id .. " FAIL " .. tostring(res):sub(1, 60))
+			else
+				local m = res:FindFirstChildOfClass("Model") or res
+				local kids = {}
+				for i, k in ipairs(m:GetChildren()) do
+					if i > 40 then break end
+					local sz = k:IsA("Model") and k:GetExtentsSize() or (k:IsA("BasePart") and k.Size) or Vector3.new()
+					kids[#kids + 1] = k.Name:sub(1, 22) .. "(" .. k.ClassName:sub(1, 5) .. ":" .. math.floor(sz.X) .. "x" .. math.floor(sz.Y) .. "x" .. math.floor(sz.Z) .. ")"
+				end
+				local ext = m:IsA("Model") and m:GetExtentsSize() or Vector3.new()
+				local txt = "pack " .. id .. " n=" .. #m:GetChildren() .. " ext=" .. math.floor(ext.X) .. "x" .. math.floor(ext.Y) .. "x" .. math.floor(ext.Z) .. " | " .. table.concat(kids, ", ")
+				for i = 1, math.ceil(#txt / 900) do Core.diag(("pack %d part%d: "):format(id, i) .. txt:sub((i - 1) * 900 + 1, i * 900)) end
+				res:Destroy()
+			end
+		end
+	end)
 	Core.diag("boot v" .. tostring(game.PlaceVersion) .. " assets=" .. tostring(Map.assetsUsed) .. (Map.terrainErr and (" terrainErr=" .. Map.terrainErr:sub(1, 80)) or ""))
 	return G
 end
