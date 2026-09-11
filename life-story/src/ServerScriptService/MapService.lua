@@ -88,7 +88,6 @@ function M.build()
 	local Terrain = workspace.Terrain
 	M.terrainErr = nil
 	local function tfill(fn) local ok, err = pcall(fn); if not ok then M.terrainErr = tostring(err) end end
-	tfill(function() Terrain.Decoration = false end)
 	tfill(function() Terrain:Clear() end)
 	-- เติมเป็นบล็อกย่อย 200x200 (บล็อกใหญ่เกินอาจล้มเหลว)
 	for gx = -660, 660, 200 do for gz = -700, 700, 200 do
