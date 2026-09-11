@@ -98,7 +98,7 @@ function M.build()
 		tfill(function() Terrain:FillBall(hp + Vector3.new(0, -10, 0), 60 + (i % 3) * 20, Enum.Material.Grass) end)
 	end
 	-- พื้นหญ้าสำรอง (Part) เผื่อ Terrain ไม่ทำงาน อยู่ต่ำกว่าผิว Terrain เล็กน้อย
-	part({ Size = Vector3.new(1400, 1, 1400), Position = Vector3.new(40, -0.7, 0), Color = Color3.fromRGB(88, 145, 78), Material = Enum.Material.Grass, Name = "Ground" }, city)
+	part({ Size = Vector3.new(1400, 1, 1400), Position = Vector3.new(40, -13, 0), Color = Color3.fromRGB(70, 110, 90), Material = Enum.Material.Ground, Name = "Ground" }, city)
 	-- ===== แม่น้ำเจ้าพระยา (โค้ง) + ตลิ่ง + ท่าเรือ =====
 	local RIVER = { Vector3.new(-120, 0, -480), Vector3.new(-90, 0, -260), Vector3.new(-40, 0, -90), Vector3.new(-60, 0, 80), Vector3.new(-120, 0, 260), Vector3.new(-100, 0, 480) }
 	M.river = RIVER
