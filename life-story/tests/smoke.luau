@@ -13,6 +13,16 @@ for _, m in ipairs({ "Core", "DataService", "TimeService", "MapService", "HomeSe
 end
 local ok, err = pcall(function() local s = game:GetService("DataStoreService"):GetDataStore("LifeStory_v1"); s:SetAsync("smoke", { cash = 1 }); assert(s:GetAsync("smoke").cash == 1); s:RemoveAsync("smoke") end)
 check("datastore " .. tostring(err or ""), ok)
+-- ทดสอบโหลดโมเดลจาก Creator Store
+do
+	local okA, Assets = pcall(require, SSS.Assets)
+	if okA then
+		local n, fails2 = 0, {}
+		for kind, list in pairs(Assets.IDS) do for _, id in ipairs(list) do local m = Assets.load(id); if m then n += 1; m:Destroy() else fails2[#fails2 + 1] = kind .. ":" .. id end end end
+		print("assets loaded", n, "failed:", table.concat(fails2, " "))
+		check("assets load >= 10", n >= 10)
+	end
+end
 -- อ่านบันทึกวินิจฉัย (จำกัดเวลา 40 วิ กันค้าง)
 do
 	local done = false

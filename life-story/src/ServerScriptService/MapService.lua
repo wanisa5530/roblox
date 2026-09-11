@@ -1,6 +1,7 @@
 -- เมือง: ถนน อาคาร ที่ดินบ้าน สวน — สร้างจาก Part ล้วน ให้ทดสอบบนคลาวด์ได้
 local Config = require(game.ReplicatedStorage.Config)
-local M = { buildings = {}, lots = {} }
+local Assets = require(script.Parent.Assets)
+local M = { buildings = {}, lots = {}, assetsUsed = 0 }
 local function part(props, parent)
 	local p = Instance.new("Part"); p.Anchored = true; p.TopSurface = Enum.SurfaceType.Smooth; p.BottomSurface = Enum.SurfaceType.Smooth
 	for k, v in pairs(props) do p[k] = v end
@@ -40,12 +41,16 @@ local function road(parent, p1, p2, width, name)
 	return cf, len
 end
 local function lampAt(parent, pos)
+	local am = Assets.place("lamp", 1, pos, 0, nil, parent)
+	if am then local sz = am:GetExtentsSize(); if sz.Y < 8 or sz.Y > 30 then am:Destroy() else local l = Instance.new("PointLight"); l.Range = 24; l.Brightness = 0.9; l.Color = Color3.fromRGB(255, 230, 180); local top = am:FindFirstChildWhichIsA("BasePart"); if top then l.Parent = top end; return am end end
 	part({ Size = Vector3.new(0.5, 12, 0.5), Position = pos + Vector3.new(0, 6, 0), Color = Color3.fromRGB(60, 60, 65), Material = Enum.Material.Metal }, parent)
 	local head = part({ Size = Vector3.new(2, 0.5, 1), Position = pos + Vector3.new(0, 12, 0), Color = Color3.fromRGB(255, 240, 200), Material = Enum.Material.Neon }, parent)
 	local l = Instance.new("PointLight"); l.Range = 22; l.Brightness = 0.9; l.Color = Color3.fromRGB(255, 230, 180); l.Parent = head
 end
 local function tree(parent, tp, sc)
 	sc = sc or 1
+	local am = Assets.place("tree", math.random(1, 3), tp, math.random(0, 359), 14 * sc, parent)
+	if am then return am end
 	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(7 * sc, 1.4 * sc, 1.4 * sc), CFrame = CFrame.new(tp + Vector3.new(0, 3.5 * sc, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(95, 65, 40), Material = Enum.Material.Wood }, parent)
 	for _, o in ipairs({ { 0, 9, 0, 9 }, { 2.5, 11, 1.5, 6.5 }, { -2.5, 11.5, -1.5, 6 } }) do part({ Shape = Enum.PartType.Ball, Size = Vector3.new(o[4] * sc, o[4] * sc, o[4] * sc), Position = tp + Vector3.new(o[1] * sc, o[2] * sc, o[3] * sc), Color = Color3.fromRGB(45 + math.random(0, 20), 130 + math.random(0, 30), 50), Material = Enum.Material.Grass, CanCollide = false }, parent) end
 end
@@ -130,6 +135,19 @@ function M.build()
 	-- ===== อาคาร =====
 	local MATS = { Enum.Material.Brick, Enum.Material.Concrete, Enum.Material.Slate, Enum.Material.Marble }
 	for bi, b in ipairs(BUILDINGS) do
+		-- ลองใช้โมเดลจริงจาก Creator Store ก่อน ถ้าโหลดไม่ได้ค่อยสร้างจากกล่อง
+		local am, asz = Assets.place(b.key, 1, b.pos, b.yaw or 0, math.max(b.size.X, 34), city)
+		if am then
+			M.assetsUsed += 1
+			local rot = CFrame.new(b.pos) * CFrame.Angles(0, math.rad(b.yaw or 0), 0)
+			local front = rot.LookVector * -1
+			local doorPos = b.pos + front * (asz.Z / 2 + 4) + Vector3.new(0, 4, 0)
+			local door = part({ Size = Vector3.new(8, 8, 1), CFrame = CFrame.lookAt(doorPos, doorPos + front), Transparency = 1, CanCollide = false, Name = "Entrance" }, am)
+			sign(am, b.icon .. " " .. (b.label or b.key), CFrame.lookAt(b.pos + front * (asz.Z / 2 + 1) + Vector3.new(0, math.min(asz.Y + 3, 40), 0), b.pos + front * (asz.Z / 2 + 10) + Vector3.new(0, math.min(asz.Y + 3, 40), 0)) * CFrame.Angles(0, math.pi, 0), Vector3.new(30, 3.2, 0.5))
+			part({ Size = Vector3.new(14, 0.3, 10), Position = b.pos + front * (asz.Z / 2 + 5) + Vector3.new(0, 0.15, 0), Color = Color3.fromRGB(180, 180, 185), Material = Enum.Material.Concrete }, am)
+			M.buildings[b.key] = { model = am, pos = b.pos, door = door.Position + front * 4 - Vector3.new(0, 4, 0), front = front, right = rot.RightVector, size = asz }
+			continue
+		end
 		local m = Instance.new("Model"); m.Name = b.key; m.Parent = city
 		local col = Color3.fromRGB(unpack(b.color))
 		local base = Vector3.new(0, 0, 0)
@@ -236,6 +254,8 @@ function M.build()
 	end
 	-- ===== ตึกเติมเมือง: คอนโด/ออฟฟิศสูงย่านสีลม-สาทร-สุขุมวิท + ตึกแถวเยาวราช/เจริญกรุง =====
 	local function tower(pos, w, d, h, style)
+		local am = Assets.place("tower", style + 1, pos, (style * 90) % 360, math.max(w, 26), city)
+		if am then M.assetsUsed += 1; return am end
 		local m = Instance.new("Model"); m.Name = "Tower"; m.Parent = city
 		local base = { Color3.fromRGB(200, 205, 215), Color3.fromRGB(230, 225, 215), Color3.fromRGB(160, 170, 185), Color3.fromRGB(120, 140, 170) }
 		local col = base[style % #base + 1]
@@ -273,6 +293,8 @@ function M.build()
 		return m
 	end
 	local function palm(pos)
+		local am = Assets.place("palm", math.random(1, 2), pos, math.random(0, 359), 12, city)
+		if am then return am end
 		part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(14, 1, 1), CFrame = CFrame.new(pos + Vector3.new(0, 7, 0)) * CFrame.Angles(0, 0, math.rad(90)) * CFrame.Angles(0, 0, math.rad(4)), Color = Color3.fromRGB(120, 90, 60), Material = Enum.Material.Wood }, city)
 		for i = 1, 6 do local a = i / 6 * math.pi * 2; local leaf = Instance.new("WedgePart"); leaf.Anchored = true; leaf.CanCollide = false; leaf.Size = Vector3.new(1.6, 0.4, 7); leaf.CFrame = CFrame.new(pos + Vector3.new(0, 14, 0)) * CFrame.Angles(0, a, 0) * CFrame.new(0, 0, -3.5) * CFrame.Angles(math.rad(-25), 0, 0); leaf.Color = Color3.fromRGB(50, 150, 60); leaf.Material = Enum.Material.Grass; leaf.Parent = city end
 	end
