@@ -150,7 +150,7 @@ function G.init()
 		end
 	end)
 	G.onPlayer = onPlayer
-	Core.diag("boot v" .. tostring(game.PlaceVersion))
+	Core.diag("boot v" .. tostring(game.PlaceVersion) .. " assets=" .. tostring(Map.assetsUsed))
 	return G
 end
 return G
