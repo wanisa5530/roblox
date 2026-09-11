@@ -21,8 +21,8 @@ Remotes.Social.OnClientEvent:Connect(function(kind, id, a, b, rel)
 		head.Text = "🧑 " .. (displayName or id); sub.Text = T(status)
 		for _, x in ipairs(list:GetChildren()) do if x:IsA("TextButton") then x:Destroy() end end
 		for i, ic in ipairs(Config.Interactions) do
-			local b = U.button(list, T(ic.key), UDim2.new(1, 0, 0, 32), nil, ic.romance > 0 and Color3.fromRGB(200, 80, 130) or (ic.friend < 0 and U.C.red or U.C.card), function() Remotes.Social:FireServer("interact", target, ic.key) end)
-			b.LayoutOrder = i
+			local btn = U.button(list, T(ic.key), UDim2.new(1, 0, 0, 32), nil, ic.romance > 0 and Color3.fromRGB(200, 80, 130) or (ic.friend < 0 and U.C.red or U.C.card), function() Remotes.Social:FireServer("interact", target, ic.key) end)
+			btn.LayoutOrder = i
 		end
 	elseif kind == "result" then
 		if id == target then sub.Text = T(status) .. (rel and ("  ❤ " .. math.floor(rel.f) .. " / 💕 " .. math.floor(rel.r)) or "") .. (displayName == false and "  ✗" or "  ✓") end
