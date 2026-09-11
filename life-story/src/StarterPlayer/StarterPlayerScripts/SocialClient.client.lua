@@ -34,6 +34,6 @@ Remotes.Social.OnClientEvent:Connect(function(kind, id, a, b, rel)
 			btn.LayoutOrder = i
 		end
 	elseif kind == "result" then
-		if id == target then sub.Text = T(status) .. (rel and ("  ❤ " .. math.floor(rel.f) .. " / 💕 " .. math.floor(rel.r)) or "") .. (displayName == false and "  ✗" or "  ✓") end
+		if id == target then sub.Text = (status and T(status) or "") .. (rel and ("  ❤ " .. math.floor(rel.f) .. " / 💕 " .. math.floor(rel.r)) or "") .. (displayName == false and "  ✗" or "  ✓") end
 	end
 end)
