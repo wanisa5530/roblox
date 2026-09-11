@@ -14,7 +14,8 @@ local Career = require(script.Parent.CareerService)
 local Social = require(script.Parent.SocialService)
 local Biz = require(script.Parent.BusinessService)
 local LB = require(script.Parent.LeaderboardService)
-local G = { Data = Data, Core = Core, Map = Map, Home = Home, Sim = Sim, Career = Career, Social = Social, Biz = Biz, Time = Time }
+local Vehicle = require(script.Parent.VehicleService)
+local G = { Vehicle = Vehicle, Data = Data, Core = Core, Map = Map, Home = Home, Sim = Sim, Career = Career, Social = Social, Biz = Biz, Time = Time }
 local started = false
 -- ประตูอาคาร: prompt เข้างาน/เรียน/รักษา/ซื้อของ
 local function buildingPrompts()
@@ -61,6 +62,8 @@ function G.init()
 		elseif kind == "clean" then Home.active[p] = { key = "clean", cfg = { need = nil }, act = "clean", t0 = os.clock() }; p:SetAttribute("Action", "clean"); task.delay(15, function() if Home.active[p] and Home.active[p].act == "clean" then Home.stopAction(p); c.needs.environment = math.min(c.envBase or 60, c.needs.environment + 40) end end)
 		elseif kind == "goHome" then teleport(p, Home.homePos(p))
 		elseif kind == "goTo" then local d = Map.door(a); if d then if Core.ownsPass(p, "SportsCar") or Core.spend(p, 20) then teleport(p, d) end end
+		elseif kind == "buyCar" then Vehicle.buy(p, a)
+		elseif kind == "callCar" then Vehicle.callCar(p)
 		elseif kind == "treat" then Sim.treat(p)
 		elseif kind == "insurance" then Sim.buyInsurance(p)
 		elseif kind == "homework" then if c.stage >= 3 and c.stage <= 4 then c.school.homework = (c.school.homework or 0) + 1; Sim.addXp(p, "logic", 15); c.needs.fun = math.max(0, c.needs.fun - 10); Core.push(p) end
@@ -139,7 +142,7 @@ function G.init()
 	end
 	Players.PlayerAdded:Connect(onPlayer)
 	for _, p in ipairs(Players:GetPlayers()) do task.spawn(onPlayer, p) end
-	Players.PlayerRemoving:Connect(function(p) Home.release(p); Biz.onLeave(p); Home.active[p] = nil; Career.shift[p] = nil end)
+	Players.PlayerRemoving:Connect(function(p) Home.release(p); Biz.onLeave(p); Vehicle.onLeave(p); Home.active[p] = nil; Career.shift[p] = nil end)
 	-- เตะออกเมื่อมีเวอร์ชันใหม่
 	task.spawn(function()
 		local DSS = game:GetService("DataStoreService")

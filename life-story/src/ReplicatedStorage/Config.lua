@@ -215,4 +215,11 @@ C.DevProducts = {
 	{ key = "Rename",  id = 0, robux = 25 },
 }
 C.VIPDaily = 500
+-- รถยนต์: ซื้อแล้วเรียกมาขับได้ทุกที่ (speed = studs/วินาที, turn = rad/วินาที)
+C.Cars = {
+	{ key = "CityCar",  price = 8000,  speed = 42, turn = 1.6, color = { 235, 235, 235 } },
+	{ key = "Sedan",    price = 18000, speed = 55, turn = 1.4, color = { 40, 60, 140 } },
+	{ key = "Pickup",   price = 26000, speed = 50, turn = 1.3, color = { 180, 50, 50 } },
+	{ key = "SportsCar", price = 0,    speed = 80, turn = 2.0, color = { 240, 200, 40 }, pass = "SportsCar" },
+}
 return C

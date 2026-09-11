@@ -1,7 +1,7 @@
 -- ข้อความ 5 ภาษา (ภาษาที่ไม่มีคีย์จะถอยไปใช้ en)
 local L = { strings = {} }
 L.strings.en = {
-	updateKick = "Game updated! Please rejoin 🎉", title = "Life Story", cash = "Money", day = "Day %d", clock = "%02d:%02d", season = "Season", Summer = "Summer", Rainy = "Rainy", Winter = "Winter", Spring = "Spring",
+	CityCar = "City car", Sedan = "Sedan", Pickup = "Pickup truck", vehicles = "Vehicles", callCar = "Call my car", drive = "Drive", buyCar = "Buy car", updateKick = "Game updated! Please rejoin 🎉", title = "Life Story", cash = "Money", day = "Day %d", clock = "%02d:%02d", season = "Season", Summer = "Summer", Rainy = "Rainy", Winter = "Winter", Spring = "Spring",
 	hunger = "Hunger", energy = "Energy", bladder = "Bladder", hygiene = "Hygiene", fun = "Fun", social = "Social", environment = "Environment", health = "Health",
 	Baby = "Baby", Toddler = "Toddler", Child = "Child", Teen = "Teen", YoungAdult = "Young Adult", Adult = "Adult", Elder = "Elder", age = "Age", stage = "Life stage", generation = "Generation %d",
 	Happy = "Happy", Sad = "Sad", Angry = "Angry", Stressed = "Stressed", Embarrassed = "Embarrassed", Inspired = "Inspired", Confident = "Confident", Focused = "Focused", Playful = "Playful", Flirty = "Flirty", Bored = "Bored", Scared = "Scared", Sick = "Sick", mood = "Mood",
@@ -37,7 +37,7 @@ L.strings.en = {
 	mgTiming = "Press SPACE / tap in the green zone!", lang = "Language", welcome = "Welcome to Life Story! Create your character", loading = "Loading...", version = "v%s", taxi = "Taxi to", walkTo = "Go to",
 }
 L.strings.th = {
-	updateKick = "เกมอัปเดตแล้ว! กรุณาเข้าใหม่ 🎉", title = "ไลฟ์สตอรี่", cash = "เงิน", day = "วันที่ %d", season = "ฤดู", Summer = "ฤดูร้อน", Rainy = "ฤดูฝน", Winter = "ฤดูหนาว", Spring = "ฤดูใบไม้ผลิ",
+	CityCar = "รถเล็ก", Sedan = "รถเก๋ง", Pickup = "รถกระบะ", vehicles = "ยานพาหนะ", callCar = "เรียกรถของฉัน", drive = "ขับ", buyCar = "ซื้อรถ", updateKick = "เกมอัปเดตแล้ว! กรุณาเข้าใหม่ 🎉", title = "ไลฟ์สตอรี่", cash = "เงิน", day = "วันที่ %d", season = "ฤดู", Summer = "ฤดูร้อน", Rainy = "ฤดูฝน", Winter = "ฤดูหนาว", Spring = "ฤดูใบไม้ผลิ",
 	hunger = "หิว", energy = "พลังงาน", bladder = "ห้องน้ำ", hygiene = "สะอาด", fun = "สนุก", social = "สังคม", environment = "สภาพบ้าน", health = "สุขภาพ",
 	Baby = "ทารก", Toddler = "เด็กเล็ก", Child = "เด็ก", Teen = "วัยรุ่น", YoungAdult = "วัยหนุ่มสาว", Adult = "ผู้ใหญ่", Elder = "ผู้สูงอายุ", age = "อายุ", stage = "ช่วงชีวิต", generation = "รุ่นที่ %d",
 	Happy = "มีความสุข", Sad = "เศร้า", Angry = "โกรธ", Stressed = "เครียด", Embarrassed = "อาย", Inspired = "มีแรงบันดาลใจ", Confident = "มั่นใจ", Focused = "มีสมาธิ", Playful = "ขี้เล่น", Flirty = "โรแมนติก", Bored = "เบื่อ", Scared = "กลัว", Sick = "ไม่สบาย", mood = "อารมณ์",

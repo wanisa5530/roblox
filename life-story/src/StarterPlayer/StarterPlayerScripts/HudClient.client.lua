@@ -33,6 +33,7 @@ local btnRow = Instance.new("Frame"); btnRow.Size = UDim2.new(0, 240, 0, 50); bt
 local bl = Instance.new("UIListLayout"); bl.FillDirection = Enum.FillDirection.Horizontal; bl.Padding = UDim.new(0, 10); bl.Parent = btnRow
 local menuBtn = U.iconButton(btnRow, "☰", T("menu"), 34, nil, U.C.accent)
 U.iconButton(btnRow, "🏠", T("home"), 34, nil, U.C.card, function() Remotes.Action:FireServer("goHome") end)
+U.iconButton(btnRow, "🚗", T("drive"), 34, nil, U.C.card, function() Remotes.Action:FireServer("callCar") end)
 local _stopBtn, stopHolder = U.iconButton(btnRow, "■", T("stop"), 34, nil, U.C.red, function() Remotes.Action:FireServer("stop") end); stopHolder.Visible = false
 local langBtn = U.iconButton(btnRow, "🌐", lang, 34, nil, U.C.card, function()
 	local i = table.find(Config.Languages, lang) or 1; lang = Config.Languages[i % #Config.Languages + 1]

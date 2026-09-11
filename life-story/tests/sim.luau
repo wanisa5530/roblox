@@ -97,5 +97,10 @@ check("heir keeps home", d.char.lotIndex == c.lotIndex and #d.char.furniture == 
 for i = 1, 5 do Sim.randomEvent(p) end; check("random events ok", true)
 check("time", G.Time.now().hour >= 0 and G.Time.now().season ~= nil)
 check("daily claim", (Sim.claimDaily(p)))
+-- รถ
+d.cash = 50000
+check("buy car", G.Vehicle.buy(p, "CityCar") and d.char.car == "CityCar")
+check("car spawned", G.Vehicle.cars[p] ~= nil and G.Vehicle.cars[p].model.Parent == workspace and G.Vehicle.cars[p].model:FindFirstChild("DriverSeat") ~= nil)
+G.Vehicle.despawn(p); check("car despawn", G.Vehicle.cars[p] == nil)
 print(#fails == 0 and "ALL PASS" or ("FAILED: " .. table.concat(fails, ", ")))
 return #fails == 0, fails

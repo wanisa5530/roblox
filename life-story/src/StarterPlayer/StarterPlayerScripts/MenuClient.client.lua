@@ -118,7 +118,13 @@ render.business = function()
 	end
 end
 render.shop = function()
+	local ch = c()
 	U.card(content, T("Shop"), T("buildMode"), T("build"), U.C.accent, function() player:SetAttribute("BuildMode", os.clock()); win.Visible = false end)
+	U.card(content, "🚗 " .. T("vehicles"), ch and ch.car and (T(ch.car)) or "-", ch and ch.car and T("callCar") or nil, U.C.green, function() Remotes.Action:FireServer("callCar"); win.Visible = false end)
+	for _, car in ipairs(Config.Cars) do
+		local owned = ch and ch.car == car.key
+		U.card(content, "🚘 " .. T(car.key), (car.pass and T("SportsCar") or ("฿" .. U.fmt(car.price))) .. " · " .. car.speed .. " km/h", owned and T("owned") or T("buyCar"), owned and U.C.card or U.C.blue, function() if not owned then Remotes.Action:FireServer("buyCar", car.key) end end)
+	end
 end
 render.quests = function()
 	local ch = c(); if not ch or not ch.quests then return end
