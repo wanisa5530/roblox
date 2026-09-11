@@ -32,7 +32,18 @@ local BUILDINGS = {
 	{ key = "Gallery",    pos = Vector3.new(340, 0, -160), size = Vector3.new(30, 14, 24), color = { 230, 230, 230 }, icon = "🎨", yaw = 90,  label = "Thonglor Gallery" },
 }
 -- ถนน: เส้นตรงระหว่างจุด (หมุนตามทิศ) + ทางเท้า + เส้นกลางถนน
+M.roads = {}
+-- ระยะจากจุดถึงถนนที่ใกล้สุด (ใช้กันต้นไม้/ของตกแต่งไปอยู่กลางถนน)
+function M.nearRoad(pos, margin)
+	for _, r in ipairs(M.roads) do
+		local a, b = r[1], r[2]; local ab = b - a; local t = math.clamp((pos - a):Dot(ab) / ab:Dot(ab), 0, 1)
+		local q = a + ab * t
+		if (Vector3.new(pos.X - q.X, 0, pos.Z - q.Z)).Magnitude < r[3] / 2 + (margin or 6) then return true end
+	end
+	return false
+end
 local function road(parent, p1, p2, width, name)
+	table.insert(M.roads, { p1, p2, width })
 	local d = p2 - p1; local len = d.Magnitude; local mid = (p1 + p2) / 2
 	local cf = CFrame.lookAt(mid, p2) * CFrame.new(0, 0.15, 0)
 	part({ Size = Vector3.new(width, 0.3, len), CFrame = cf, Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Asphalt, Name = name or "Road" }, parent)
@@ -49,6 +60,7 @@ local function lampAt(parent, pos)
 end
 local function tree(parent, tp, sc)
 	sc = sc or 1
+	if M.nearRoad(tp, 8) then return end
 	local am = Assets.place("tree", math.random(1, 3), tp, math.random(0, 359), 14 * sc, parent)
 	if am then return am end
 	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(7 * sc, 1.4 * sc, 1.4 * sc), CFrame = CFrame.new(tp + Vector3.new(0, 3.5 * sc, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(95, 65, 40), Material = Enum.Material.Wood }, parent)
@@ -293,6 +305,7 @@ function M.build()
 		return m
 	end
 	local function palm(pos)
+		if M.nearRoad(pos, 6) then return end
 		local am = Assets.place("palm", math.random(1, 2), pos, math.random(0, 359), 12, city)
 		if am then return am end
 		part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(14, 1, 1), CFrame = CFrame.new(pos + Vector3.new(0, 7, 0)) * CFrame.Angles(0, 0, math.rad(90)) * CFrame.Angles(0, 0, math.rad(4)), Color = Color3.fromRGB(120, 90, 60), Material = Enum.Material.Wood }, city)
