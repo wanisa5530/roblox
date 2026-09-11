@@ -52,7 +52,8 @@ function G.init()
 		local aspOk = false; for _, a in ipairs(Config.Aspirations) do if a.key == aspiration then aspOk = true end end
 		d.char = Data.newCharacter(name, tr, aspOk and aspiration or "Wealth", 1)
 		Home.assign(p); Sim.ensureQuests(p); Sim.applyScale(p); Core.push(p)
-		teleport(p, Home.homePos(p))
+		teleport(p, Home.homePos(p)); p:SetAttribute("AtHome", true)
+		task.delay(1, function() Core.notify(p, "welcome2", "green") end)
 		return true
 	end
 	Remotes.Action.OnServerEvent:Connect(function(p, kind, a, b, c2)
@@ -60,7 +61,7 @@ function G.init()
 		local c = Core.char(p); if not c then return end
 		if kind == "stop" then Home.stopAction(p)
 		elseif kind == "clean" then Home.active[p] = { key = "clean", cfg = { need = nil }, act = "clean", t0 = os.clock() }; p:SetAttribute("Action", "clean"); task.delay(15, function() if Home.active[p] and Home.active[p].act == "clean" then Home.stopAction(p); c.needs.environment = math.min(c.envBase or 60, c.needs.environment + 40) end end)
-		elseif kind == "goHome" then teleport(p, Home.homePos(p))
+		elseif kind == "goHome" then teleport(p, Home.homePos(p)); p:SetAttribute("AtHome", true)
 		elseif kind == "goTo" then local d = Map.door(a); if d then if Core.ownsPass(p, "SportsCar") or Core.spend(p, 20) then teleport(p, d) end end
 		elseif kind == "buyCar" then Vehicle.buy(p, a)
 		elseif kind == "callCar" then Vehicle.callCar(p)
@@ -120,6 +121,14 @@ function G.init()
 		LB.setup(p, d)
 		for _, gp in ipairs(Config.GamePasses) do Core.ownsPass(p, gp.key) end
 		if d.char then Home.assign(p); Biz.restore(p); Sim.ensureQuests(p); Sim.applyScale(p) end
+		-- อยู่ที่บ้านไหม (ใช้กับคู่มือ/โหมดสร้าง)
+		task.spawn(function()
+			while p.Parent do
+				task.wait(2)
+				local hp = Home.homePos(p); local hrp = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+				if hp and hrp then p:SetAttribute("AtHome", (hrp.Position - hp).Magnitude < 40 or nil) end
+			end
+		end)
 		Social.attachPlayerPrompt(p)
 		if Core.isReal(p) then p.CharacterAdded:Connect(function() task.wait(0.5); Sim.applyScale(p); if d.char then teleport(p, Home.homePos(p)) end end) end
 		Core.push(p)

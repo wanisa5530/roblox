@@ -40,7 +40,10 @@ local function myLot()
 	return folder and folder:FindFirstChild(name)
 end
 local lot
-player:GetAttributeChangedSignal("BuildMode"):Connect(function() panel.Visible = true; lot = myLot() end)
+player:GetAttributeChangedSignal("BuildMode"):Connect(function()
+	if not player:GetAttribute("AtHome") then Remotes.Action:FireServer("goHome"); task.wait(0.5) end
+	panel.Visible = true; lot = myLot()
+end)
 player:GetAttributeChangedSignal("BuildClose"):Connect(function() panel.Visible = false end)
 game:GetService("RunService").RenderStepped:Connect(function()
 	if not ghost or not panel.Visible then if ghost then ghost.Transparency = 1 end; return end

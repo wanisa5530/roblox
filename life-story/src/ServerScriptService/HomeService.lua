@@ -212,6 +212,8 @@ function H.startAction(p, key, id, act, model)
 	end
 	if act == "feedPet" then if c.pet then c.pet.fed = os.time(); c.needs.fun = math.min(100, c.needs.fun + 10); Core.notify(p, "feedPet", "green") end; return end
 	H.active[p] = { key = key, cfg = cfg, act = act, t0 = os.clock(), model = model }
+	if act == "sleep" then c.slept = (c.slept or 0) + 1 elseif act == "eat" or act == "cook" then c.ate = (c.ate or 0) + 1 end
+	Core.push(p)
 	if Core.isReal(p) then p:SetAttribute("Action", act); p:SetAttribute("ActionItem", cfg.key) end
 	if Core.isReal(p) and p.Character and model and model.PrimaryPart then
 		local hrp = p.Character:FindFirstChild("HumanoidRootPart")
@@ -300,7 +302,7 @@ function H.buy(p, key, x, z, rot)
 	local half = 14; if lotCfg and lotCfg.key == "Apartment" then half = 11 end
 	x = math.clamp(math.floor(x / 2 + 0.5) * 2, -half + 2, half - 2); z = math.clamp(math.floor(z / 2 + 0.5) * 2, -half + 2, half - 2)
 	if not Core.spend(p, cfg.price) then return false end
-	table.insert(c.furniture, { key = key, x = x, z = z, rot = rot or 0 })
+	table.insert(c.furniture, { key = key, x = x, z = z, rot = rot or 0 }); c.bought = (c.bought or 0) + 1
 	H.rebuild(p); Core.notify(p, "bought", "green", Core.T(p, key)); Core.push(p)
 	return true
 end
