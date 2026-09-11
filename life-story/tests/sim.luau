@@ -71,7 +71,7 @@ d.dayCount = c.pregnantUntil; Sim.newDay(p)
 check("baby born", #c.kids == 1)
 check("adopt pet", Social.adoptPet(p, "Cat") and c.pet ~= nil)
 -- โรค + รักษา
-Sim.makeSick(p, "Flu"); check("sick", c.illness and c.illness.key == "Flu")
+c.illness = nil; Sim.makeSick(p, "Flu"); check("sick", c.illness and c.illness.key == "Flu")
 d.cash = 5000; check("treat", Sim.treat(p) and c.illness == nil)
 -- ไฟไหม้: กดดับ
 c.fire = nil; local stove = Map.lots[c.lotIndex].model.Furniture:GetChildren()[3]
