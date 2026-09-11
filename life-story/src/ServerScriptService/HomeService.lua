@@ -154,7 +154,7 @@ function H.buy(p, key, x, z, rot)
 	local cfg = fcfg(key); if not cfg then return false end
 	local lotCfg; for _, l in ipairs(Config.Lots) do if l.key == c.lot then lotCfg = l end end
 	if #c.furniture >= (lotCfg and lotCfg.size or 12) then Core.notify(p, "tooManyItems", "red"); return false end
-	local half = 20; if lotCfg and lotCfg.key == "Apartment" then half = 11 end
+	local half = 14; if lotCfg and lotCfg.key == "Apartment" then half = 11 end
 	x = math.clamp(math.floor(x / 2 + 0.5) * 2, -half + 2, half - 2); z = math.clamp(math.floor(z / 2 + 0.5) * 2, -half + 2, half - 2)
 	if not Core.spend(p, cfg.price) then return false end
 	table.insert(c.furniture, { key = key, x = x, z = z, rot = rot or 0 })
@@ -197,7 +197,7 @@ function H.buyLot(p, key)
 	Core.notify(p, "moveIn", "green"); Core.push(p)
 	return true
 end
-function H.homePos(p) local lot = lotOf(p); return lot and lot.origin + Vector3.new(0, 3, 18) end
+function H.homePos(p) local lot = lotOf(p); return lot and lot.origin + Vector3.new(0, 3, lot.apartment and 18 or 22) end
 -- บิลรายวัน
 function H.dailyBills(p)
 	local c = Core.char(p); if not c then return end
