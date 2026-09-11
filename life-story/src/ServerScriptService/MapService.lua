@@ -99,19 +99,79 @@ function M.build()
 	end
 	local CARS = { { 200, 40, 40 }, { 50, 80, 190 }, { 235, 235, 235 }, { 35, 35, 40 }, { 225, 170, 40 } }
 	for i, x in ipairs({ -100, -20, 50, 120, 140 }) do M.car(Vector3.new(x, 0, 4.5), Color3.fromRGB(unpack(CARS[i])), city) end
-	-- สวนสาธารณะ (NPC เดินเล่น)
+	-- สวนสาธารณะ: ทางเดินวงกลม น้ำพุ แปลงดอกไม้ ม้านั่งมีพนัก โคมไฟ พุ่มไม้ สนามเด็กเล่น ศาลา
 	local park = Instance.new("Model"); park.Name = "Park"; park.Parent = city
-	part({ Size = Vector3.new(60, 0.4, 50), Position = Vector3.new(20, 0.2, 65), Color = Color3.fromRGB(70, 160, 70), Material = Enum.Material.Grass, Name = "ParkGround" }, park)
-	part({ Size = Vector3.new(16, 0.6, 16), Position = Vector3.new(20, 0.5, 65), Color = Color3.fromRGB(80, 160, 220), Material = Enum.Material.Glass, Transparency = 0.3, Name = "Pond" }, park)
-	for i = 1, 8 do
-		local a = i / 8 * math.pi * 2
-		local tp = Vector3.new(20 + math.cos(a) * 24, 0, 65 + math.sin(a) * 20)
-		part({ Size = Vector3.new(1.5, 6, 1.5), Position = tp + Vector3.new(0, 3, 0), Color = Color3.fromRGB(100, 70, 40), Material = Enum.Material.Wood }, park)
-		part({ Shape = Enum.PartType.Ball, Size = Vector3.new(8, 8, 8), Position = tp + Vector3.new(0, 8, 0), Color = Color3.fromRGB(40, 130, 50), Material = Enum.Material.Grass }, park)
+	local PC = Vector3.new(20, 0, 65)
+	part({ Size = Vector3.new(70, 0.4, 56), Position = PC + Vector3.new(0, 0.2, 0), Color = Color3.fromRGB(60, 150, 65), Material = Enum.Material.Grass, Name = "ParkGround" }, park)
+	-- รั้วเตี้ย + ทางเข้า
+	for _, e in ipairs({ { Vector3.new(70, 1.2, 0.4), Vector3.new(0, 0.9, 28) }, { Vector3.new(0.4, 1.2, 56), Vector3.new(-35, 0.9, 0) }, { Vector3.new(0.4, 1.2, 56), Vector3.new(35, 0.9, 0) }, { Vector3.new(28, 1.2, 0.4), Vector3.new(-21, 0.9, -28) }, { Vector3.new(28, 1.2, 0.4), Vector3.new(21, 0.9, -28) } }) do
+		part({ Size = e[1], Position = PC + e[2], Color = Color3.fromRGB(40, 40, 45), Material = Enum.Material.Metal }, park)
 	end
-	for i = 1, 4 do part({ Size = Vector3.new(6, 1, 2), Position = Vector3.new(0 + i * 10, 1.5, 45), Color = Color3.fromRGB(140, 100, 60), Material = Enum.Material.Wood, Name = "Bench" }, park) end
-	sign(park, "🌳 Park", CFrame.new(20, 6, 40), Vector3.new(14, 3, 0.5))
-	M.buildings.Park = { model = park, pos = Vector3.new(20, 0, 65), door = Vector3.new(20, 0, 42) }
+	-- ทางเดินหินจากทางเข้าไปน้ำพุ + วงแหวนรอบน้ำพุ
+	part({ Size = Vector3.new(8, 0.3, 22), Position = PC + Vector3.new(0, 0.4, -17), Color = Color3.fromRGB(190, 180, 165), Material = Enum.Material.Cobblestone }, park)
+	for i = 0, 23 do
+		local a1 = i / 24 * math.pi * 2
+		part({ Size = Vector3.new(5, 0.3, 4.5), CFrame = CFrame.new(PC + Vector3.new(math.cos(a1) * 15, 0.4, math.sin(a1) * 15)) * CFrame.Angles(0, -a1, 0), Color = Color3.fromRGB(190, 180, 165), Material = Enum.Material.Cobblestone }, park)
+	end
+	-- น้ำพุ 3 ชั้น
+	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(1.2, 20, 20), CFrame = CFrame.new(PC + Vector3.new(0, 0.9, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(200, 200, 205), Material = Enum.Material.Marble }, park)
+	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.4, 18, 18), CFrame = CFrame.new(PC + Vector3.new(0, 1.5, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(70, 170, 230), Material = Enum.Material.Glass, Transparency = 0.35, Reflectance = 0.3, Name = "Pond" }, park)
+	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(4, 2, 2), CFrame = CFrame.new(PC + Vector3.new(0, 3, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(200, 200, 205), Material = Enum.Material.Marble }, park)
+	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.8, 9, 9), CFrame = CFrame.new(PC + Vector3.new(0, 5.2, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(200, 200, 205), Material = Enum.Material.Marble }, park)
+	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.3, 8, 8), CFrame = CFrame.new(PC + Vector3.new(0, 5.7, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(70, 170, 230), Material = Enum.Material.Glass, Transparency = 0.35 }, park)
+	local jet = part({ Size = Vector3.new(0.6, 6, 0.6), Position = PC + Vector3.new(0, 8.5, 0), Color = Color3.fromRGB(200, 230, 255), Material = Enum.Material.Neon, Transparency = 0.4, CanCollide = false }, park)
+	local pe = Instance.new("ParticleEmitter"); pe.Texture = "rbxasset://textures/particles/sparkles_main.dds"; pe.Rate = 40; pe.Speed = NumberRange.new(6, 9); pe.Lifetime = NumberRange.new(0.8, 1.4); pe.Color = ColorSequence.new(Color3.fromRGB(200, 235, 255)); pe.Size = NumberSequence.new(0.6); pe.Acceleration = Vector3.new(0, -14, 0); pe.SpreadAngle = Vector2.new(25, 25); pe.Parent = jet
+	local fl = Instance.new("PointLight"); fl.Color = Color3.fromRGB(150, 200, 255); fl.Range = 18; fl.Brightness = 1.5; fl.Parent = jet
+	-- แปลงดอกไม้ 4 มุม
+	for _, q in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do
+		local fp = PC + Vector3.new(q[1] * 26, 0, q[2] * 20)
+		part({ Size = Vector3.new(10, 0.8, 8), Position = fp + Vector3.new(0, 0.6, 0), Color = Color3.fromRGB(110, 75, 45), Material = Enum.Material.Ground }, park)
+		for i = 1, 14 do part({ Shape = Enum.PartType.Ball, Size = Vector3.new(1.1, 1.1, 1.1), Position = fp + Vector3.new(math.random(-4, 4), 1.4, math.random(-3, 3)), Color = ({ Color3.fromRGB(255, 80, 120), Color3.fromRGB(255, 210, 60), Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 90, 230) })[math.random(4)], Material = Enum.Material.Grass, CanCollide = false }, park) end
+	end
+	-- ต้นไม้ (ลำต้น + พุ่ม 3 ลูกซ้อน) รอบสวน
+	for i = 1, 10 do
+		local a1 = i / 10 * math.pi * 2
+		local tp = PC + Vector3.new(math.cos(a1) * 30, 0, math.sin(a1) * 23)
+		part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(7, 1.4, 1.4), CFrame = CFrame.new(tp + Vector3.new(0, 3.5, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(95, 65, 40), Material = Enum.Material.Wood }, park)
+		for _, o in ipairs({ { 0, 9, 0, 9 }, { 2.5, 11, 1.5, 6.5 }, { -2.5, 11.5, -1.5, 6 } }) do part({ Shape = Enum.PartType.Ball, Size = Vector3.new(o[4], o[4], o[4]), Position = tp + Vector3.new(o[1], o[2], o[3]), Color = Color3.fromRGB(40 + i * 3, 130 + (i % 3) * 12, 50), Material = Enum.Material.Grass, CanCollide = false }, park) end
+	end
+	-- ม้านั่งมีพนัก + ถังขยะ + โคมไฟสวน
+	for i = 0, 7 do
+		local a1 = i / 8 * math.pi * 2 + math.pi / 8
+		local bp = PC + Vector3.new(math.cos(a1) * 19, 0, math.sin(a1) * 19)
+		local look = CFrame.lookAt(bp, PC)
+		part({ Size = Vector3.new(5, 0.4, 1.6), CFrame = look * CFrame.new(0, 1.6, 0), Color = Color3.fromRGB(150, 105, 60), Material = Enum.Material.Wood, Name = "Bench" }, park)
+		part({ Size = Vector3.new(5, 1.6, 0.3), CFrame = look * CFrame.new(0, 2.4, 0.75) * CFrame.Angles(math.rad(-10), 0, 0), Color = Color3.fromRGB(150, 105, 60), Material = Enum.Material.Wood }, park)
+		for _, sx in ipairs({ -2.2, 2.2 }) do part({ Size = Vector3.new(0.3, 1.4, 1.6), CFrame = look * CFrame.new(sx, 0.9, 0), Color = Color3.fromRGB(40, 40, 45), Material = Enum.Material.Metal }, park) end
+		if i % 2 == 0 then
+			part({ Size = Vector3.new(0.4, 9, 0.4), CFrame = look * CFrame.new(3.5, 4.5, 0), Color = Color3.fromRGB(30, 30, 35), Material = Enum.Material.Metal }, park)
+			local lamp = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(1.6, 1.6, 1.6), CFrame = look * CFrame.new(3.5, 9.5, 0), Color = Color3.fromRGB(255, 240, 200), Material = Enum.Material.Neon }, park)
+			local l = Instance.new("PointLight"); l.Range = 20; l.Brightness = 0.8; l.Color = Color3.fromRGB(255, 225, 170); l.Parent = lamp
+		else
+			part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(2.6, 1.6, 1.6), CFrame = look * CFrame.new(3.5, 1.3, 0) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(60, 110, 70), Material = Enum.Material.Metal }, park)
+		end
+	end
+	-- สนามเด็กเล่น (สไลเดอร์ + ชิงช้า) มุมขวาบน
+	local pg = PC + Vector3.new(24, 0, 0)
+	part({ Size = Vector3.new(16, 0.3, 14), Position = pg + Vector3.new(0, 0.45, 0), Color = Color3.fromRGB(230, 170, 110), Material = Enum.Material.Sand }, park)
+	part({ Size = Vector3.new(3, 6, 3), Position = pg + Vector3.new(-5, 3.5, -3), Color = Color3.fromRGB(240, 90, 90), Material = Enum.Material.SmoothPlastic }, park)
+	local slide = Instance.new("WedgePart"); slide.Anchored = true; slide.Size = Vector3.new(3, 6, 9); slide.CFrame = CFrame.new(pg + Vector3.new(-5, 3.5, 3)); slide.Color = Color3.fromRGB(250, 200, 60); slide.Material = Enum.Material.SmoothPlastic; slide.Parent = park
+	for _, sx in ipairs({ -3, 3 }) do part({ Size = Vector3.new(0.4, 8, 0.4), Position = pg + Vector3.new(4 + sx, 4.5, -3), Color = Color3.fromRGB(60, 120, 200), Material = Enum.Material.Metal }, park) end
+	part({ Size = Vector3.new(7, 0.4, 0.4), Position = pg + Vector3.new(4, 8.5, -3), Color = Color3.fromRGB(60, 120, 200), Material = Enum.Material.Metal }, park)
+	for _, sx in ipairs({ -1.2, 1.2 }) do
+		part({ Size = Vector3.new(0.15, 5, 0.15), Position = pg + Vector3.new(4 + sx, 6, -3), Color = Color3.fromRGB(120, 120, 125), Material = Enum.Material.Metal, CanCollide = false }, park)
+	end
+	part({ Size = Vector3.new(2.6, 0.3, 1), Position = pg + Vector3.new(4, 3.4, -3), Color = Color3.fromRGB(40, 40, 45), Material = Enum.Material.Rubber }, park)
+	-- ศาลาแปดเหลี่ยม มุมซ้าย
+	local gz = PC + Vector3.new(-24, 0, 0)
+	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.6, 14, 14), CFrame = CFrame.new(gz + Vector3.new(0, 0.7, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(190, 180, 165), Material = Enum.Material.Cobblestone }, park)
+	for i = 0, 7 do local a1 = i / 8 * math.pi * 2; part({ Size = Vector3.new(0.6, 9, 0.6), Position = gz + Vector3.new(math.cos(a1) * 6, 5, math.sin(a1) * 6), Color = Color3.fromRGB(245, 245, 245), Material = Enum.Material.Wood }, park) end
+	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.5, 15, 15), CFrame = CFrame.new(gz + Vector3.new(0, 9.7, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(120, 60, 50), Material = Enum.Material.Slate }, park)
+	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(2.5, 10, 10), CFrame = CFrame.new(gz + Vector3.new(0, 11.2, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(120, 60, 50), Material = Enum.Material.Slate }, park)
+	part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(2, 5, 5), CFrame = CFrame.new(gz + Vector3.new(0, 13.4, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(120, 60, 50), Material = Enum.Material.Slate }, park)
+	local gs = sign(park, "🌳 Central Park", CFrame.new(PC + Vector3.new(0, 4.5, -30)) * CFrame.Angles(0, math.pi, 0), Vector3.new(14, 2.4, 0.5)); gs.Position = PC + Vector3.new(0, 4.5, -30)
+	for _, sx in ipairs({ -6.5, 6.5 }) do part({ Size = Vector3.new(1, 5.5, 1), Position = PC + Vector3.new(sx, 2.75, -30), Color = Color3.fromRGB(190, 180, 165), Material = Enum.Material.Cobblestone }, park) end
+	M.buildings.Park = { model = park, pos = PC, door = PC + Vector3.new(0, 0, -32) }
 	-- ที่ดินบ้าน 12 แปลง (2 แถว) ผู้เล่นละ 1 แปลง
 	local lots = Instance.new("Folder"); lots.Name = "Lots"; lots.Parent = workspace
 	for i = 1, 12 do
@@ -147,7 +207,8 @@ function M.build()
 	for floor = 0, 2 do part({ Size = Vector3.new(6, 0.5, 40), CFrame = CFrame.new(-235, 4 + floor * 12 - 6 + 6, 60) * CFrame.Angles(math.rad(-17), 0, 0), Color = Color3.fromRGB(120, 120, 120), Name = "Ramp" }, apts) end
 	part({ Size = Vector3.new(6, 0.5, 130), Position = Vector3.new(-235, 0.3, 40), Color = Color3.fromRGB(120, 120, 120) }, apts)
 	-- สปอน
-	local spawn = Instance.new("SpawnLocation"); spawn.Size = Vector3.new(10, 1, 10); spawn.Position = Vector3.new(20, 0.8, 10); spawn.Anchored = true; spawn.Neutral = true; spawn.Parent = city
+	local spawn = Instance.new("SpawnLocation"); spawn.Size = Vector3.new(10, 0.4, 10); spawn.Position = Vector3.new(20, 0.35, 12); spawn.Anchored = true; spawn.Neutral = true; spawn.Transparency = 1; spawn.CanCollide = false; spawn.Parent = city
+	local dec = spawn:FindFirstChildOfClass("Decal"); if dec then dec:Destroy() end
 	-- แสงบรรยากาศ
 	local L = game:GetService("Lighting"); L.Brightness = 2; L.Ambient = Color3.fromRGB(110, 110, 120); L.OutdoorAmbient = Color3.fromRGB(130, 130, 140)
 	if not L:FindFirstChildOfClass("Sky") then local sky = Instance.new("Sky"); sky.SkyboxBk = "rbxassetid://591058823"; sky.SkyboxDn = "rbxassetid://591059876"; sky.SkyboxFt = "rbxassetid://591058104"; sky.SkyboxLf = "rbxassetid://591057861"; sky.SkyboxRt = "rbxassetid://591057625"; sky.SkyboxUp = "rbxassetid://591059642"; sky.Parent = L end
