@@ -75,7 +75,7 @@ function M.build()
 	-- พื้นดินเป็น Terrain หญ้าจริง (มีเนินเล็กน้อยรอบเมือง) + น้ำจริงในแม่น้ำ
 	local Terrain = workspace.Terrain
 	pcall(function()
-		Terrain:Clear()
+		Terrain:Clear(); Terrain.Decoration = false
 		Terrain:FillBlock(CFrame.new(40, -6, 0), Vector3.new(1400, 12, 1400), Enum.Material.Grass)
 		Terrain:FillBlock(CFrame.new(40, -30, 0), Vector3.new(1400, 40, 1400), Enum.Material.Ground)
 		for i = 1, 14 do  -- เนินรอบขอบเมือง
@@ -364,8 +364,8 @@ function M.build()
 	for z = -380, 460, 60 do lampAt(city, Vector3.new(-208, 0, z)); if z % 120 == 40 then tree(city, Vector3.new(-192, 0, z)) end end
 	for z = -380, 240, 80 do lampAt(city, Vector3.new(198, 0, z)); lampAt(city, Vector3.new(308, 0, z)) end
 	local TAXI = { { 240, 80, 160 }, { 40, 180, 90 }, { 250, 210, 40 }, { 240, 80, 160 }, { 60, 90, 200 }, { 235, 235, 235 } }
-	for i, spot in ipairs({ { 40, 12, 0 }, { 120, -12, 180 }, { 260, 12, 0 }, { 380, -12, 180 }, { 205, -130, 90 }, { 175, 100, 270 } }) do
-		M.car(Vector3.new(spot[1], 0, spot[2]), Color3.fromRGB(unpack(TAXI[i])), city, math.rad(spot[3]))
+	for i, spot in ipairs({ { 40, 5, 0 }, { 120, -5, 180 }, { 260, 5, 0 }, { 380, -5, 180 }, { 195, -130, 90 }, { 185, 100, 270 } }) do
+		M.car(Vector3.new(spot[1], 0.4, spot[2]), Color3.fromRGB(unpack(TAXI[i])), city, math.rad(spot[3]))
 	end
 	for _, spot in ipairs({ Vector3.new(70, 0, -280), Vector3.new(30, 0, -120), Vector3.new(220, 0, -30) }) do M.tuktuk(spot, city) end
 	-- ===== สวนลุมพินี =====

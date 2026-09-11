@@ -17,7 +17,7 @@ function V.spawnCar(p, key, pos)
 	local cc = V.cfg(key); if not cc then return end
 	local color = Color3.fromRGB(unpack(cc.color))
 	local m = Instance.new("Model"); m.Name = "Car_" .. p.UserId; m:SetAttribute("Owner", p.UserId)
-	local cf = CFrame.new(pos + Vector3.new(0, 2.2, 0))
+	local cf = CFrame.new(pos + Vector3.new(0, 3.2, 0))
 	local chassis = part({ Size = Vector3.new(6, 1.4, 13), CFrame = cf, Color = color, Material = Enum.Material.Metal, Reflectance = 0.15, Name = "Chassis", CustomPhysicalProperties = PhysicalProperties.new(2, 0.6, 0.3) }, m)
 	m.PrimaryPart = chassis
 	local function sub(props) local q = part(props, m); q.Massless = true; q.CanCollide = false; weld(chassis, q); return q end
