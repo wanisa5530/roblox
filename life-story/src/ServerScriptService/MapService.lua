@@ -140,6 +140,25 @@ function M.build()
 	-- ฝั่งธน: ถนนอรุณอมรินทร์ + ซอยบ้าน
 	road(city, Vector3.new(-200, 0, -390), Vector3.new(-200, 0, 480), 14, "ArunAmarin")
 	for _, z in ipairs({ 90, 210, 330, 450 }) do road(city, Vector3.new(-380, 0, z), Vector3.new(-200, 0, z), 10, "Soi") end
+	-- สี่แยก/สามแยก: ปูยางมะตอยทับจุดตัดให้เรียบ ไม่มีขอบทางเท้าขวางรถ
+	local function seg2d(r) local a, b = r[1], r[2]; local d = b - a; local u = d.Unit * (r[3] / 2 + 3); return a - u, b + u end
+	for i = 1, #M.roads do for j = i + 1, #M.roads do
+		local a1, a2 = seg2d(M.roads[i]); local b1, b2 = seg2d(M.roads[j])
+		local r, sdir = a2 - a1, b2 - b1
+		local den = r.X * sdir.Z - r.Z * sdir.X
+		if math.abs(den) > 1e-3 then
+			local q = b1 - a1
+			local t = (q.X * sdir.Z - q.Z * sdir.X) / den
+			local u = (q.X * r.Z - q.Z * r.X) / den
+			if t >= 0 and t <= 1 and u >= 0 and u <= 1 then
+				local ip = a1 + r * t
+				local wa, wb = M.roads[i][3], M.roads[j][3]
+				local yawA = math.atan2(-(M.roads[i][2] - M.roads[i][1]).X, -(M.roads[i][2] - M.roads[i][1]).Z)
+				local cf = CFrame.new(Vector3.new(ip.X, 0.65, ip.Z)) * CFrame.Angles(0, yawA, 0)
+				part({ Size = Vector3.new(wb + 7, 1.3, wa + 7), CFrame = cf, Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Asphalt, Name = "Junction" }, city)
+			end
+		end
+	end end
 	-- สะพานข้ามแม่น้ำ: สะพานพุทธ (z -140) และสะพานตากสิน (z 150)
 	for _, bz in ipairs({ -140, 150 }) do
 		local bp1, bp2 = Vector3.new(-200, 0, bz), Vector3.new(10, 0, bz)
