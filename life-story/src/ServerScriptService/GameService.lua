@@ -15,6 +15,7 @@ local Social = require(script.Parent.SocialService)
 local Biz = require(script.Parent.BusinessService)
 local LB = require(script.Parent.LeaderboardService)
 local Vehicle = require(script.Parent.VehicleService)
+local Work = require(script.Parent.Workplaces)
 local G = { Vehicle = Vehicle, Data = Data, Core = Core, Map = Map, Home = Home, Sim = Sim, Career = Career, Social = Social, Biz = Biz, Time = Time }
 local started = false
 -- ประตูอาคาร: prompt เข้างาน/เรียน/รักษา/ซื้อของ
@@ -22,14 +23,24 @@ local function buildingPrompts()
 	local function pp(key, action, label, cb)
 		local b = Map.buildings[key]; if not b then return end
 		local door = b.model:FindFirstChild("Entrance"); if not door then return end
-		local x = Instance.new("ProximityPrompt"); x.ActionText = label; x.ObjectText = key; x.HoldDuration = 0; x.MaxActivationDistance = 10; x.RequiresLineOfSight = false; x.Parent = door
+		local x = Instance.new("ProximityPrompt"); x.ActionText = label; x.ObjectText = key; x.HoldDuration = 0; x.MaxActivationDistance = 14; x.RequiresLineOfSight = false; x.Parent = door
 		x:SetAttribute("Action", action); x.Triggered:Connect(cb)
+		-- ป้ายลอยหน้าประตูให้เห็นจุดเข้าชัด ๆ
+		local bb = Instance.new("BillboardGui"); bb.Size = UDim2.new(0, 160, 0, 44); bb.StudsOffset = Vector3.new(0, 7, 0); bb.AlwaysOnTop = false; bb.MaxDistance = 90; bb.Parent = door
+		local tl = Instance.new("TextLabel"); tl.Size = UDim2.fromScale(1, 1); tl.BackgroundColor3 = Color3.fromRGB(16, 26, 36); tl.BackgroundTransparency = 0.25; tl.TextColor3 = Color3.fromRGB(255, 225, 90); tl.Font = Enum.Font.GothamBold; tl.TextScaled = true; tl.Text = "🚪 " .. key; tl.Parent = bb
+		local uc = Instance.new("UICorner"); uc.Parent = tl
 	end
 	for _, cc in ipairs(Config.Careers) do
-		pp(cc.building, "work", "Work", function(who) local c = Core.char(who); if c and c.career == cc.key then Career.startShift(who, "work") elseif c then Remotes.Career:FireClient(who, "openJob", cc.key) end end)
+		pp(cc.building, "work", "Work", function(who)
+			local c = Core.char(who); if not c then return end
+			if c.career == cc.key then
+				local ok, why = Career.startShift(who, "work")
+				if not ok then if why == "notTime" then Core.notify(who, "workHours", "yellow", cc.hours[1], cc.hours[2]) elseif why == "done" then Core.notify(who, "shiftDoneToday", "yellow") end end
+			else Remotes.Career:FireClient(who, "openJob", cc.key) end
+		end)
 	end
 	pp("Cafe", "work", "Work", function(who) local c = Core.char(who); if c and c.career == "Barista" then Career.startShift(who, "work") end end)
-	pp("School", "school", "School", function(who) Career.startShift(who, "school") end)
+	pp("School", "school", "School", function(who) local ok, why = Career.startShift(who, "school"); if not ok and why == "notTime" then Core.notify(who, "workHours", "yellow", Config.SchoolHours[1], Config.SchoolHours[2]) elseif not ok and why == "done" then Core.notify(who, "shiftDoneToday", "yellow") end end)
 	pp("University", "uni", "University", function(who) local c = Core.char(who); if c and c.uni then Career.startShift(who, "uni") else Remotes.Career:FireClient(who, "openUni") end end)
 	pp("Hospital", "hospital", "Clinic", function(who) Remotes.Career:FireClient(who, "openHospital") end)
 	pp("Shop", "shop", "Shop", function(who) Remotes.Build:FireClient(who, "openShop") end)
@@ -41,7 +52,7 @@ end
 function G.init()
 	if started then return G end
 	started = true
-	Map.build(); Time.start(); buildingPrompts(); Biz.setup(); Social.spawnNpcs(); Social.spawnStaff()
+	Map.build(); Work.build(); Time.start(); buildingPrompts(); Biz.setup(); Social.spawnNpcs(); Social.spawnStaff()
 	-- ===== Remotes =====
 	Remotes.GetData.OnServerInvoke = function(p) return Data.get(p) end
 	Remotes.CreateCharacter.OnServerInvoke = function(p, name, traits, aspiration)

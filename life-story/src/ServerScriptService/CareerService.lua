@@ -6,6 +6,7 @@ local Core = require(script.Parent.Core)
 local Map = require(script.Parent.MapService)
 local Sim = require(script.Parent.SimService)
 local Time = require(script.Parent.TimeService)
+local Work = require(script.Parent.Workplaces)
 local Cr = { shift = {} }   -- shift[player] = {kind, round, score, career}
 function Cr.apply(p, key)
 	local c = Core.char(p); if not c then return false end
@@ -34,7 +35,12 @@ function Cr.startShift(p, kind)
 		if not c.uni then return false end
 		Cr.shift[p] = { kind = "uni", round = 0, score = 0 }
 	else return false end
-	if Core.isReal(p) and p.Character then Core.wearUniform(p.Character, kind == "work" and c.career or "Student") end
+	if Core.isReal(p) and p.Character then
+		Core.wearUniform(p.Character, kind == "work" and c.career or "Student")
+		local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+		if hrp then Cr.shift[p].back = hrp.CFrame; local room = Work.roomFor(kind, c.career); if room then hrp.CFrame = CFrame.new(room) * CFrame.Angles(0, math.pi, 0) end end
+	end
+	Core.notify(p, "shiftStart", "green")
 	Cr.nextRound(p)
 	return true
 end
@@ -57,7 +63,7 @@ end
 function Cr.finishShift(p)
 	local s = Cr.shift[p]; Cr.shift[p] = nil; if not s then return end
 	local c, d = Core.char(p); if not c then return end
-	if Core.isReal(p) and p.Character then task.delay(1, Core.removeUniform, p.Character) end
+	if Core.isReal(p) and p.Character then task.delay(1, Core.removeUniform, p.Character); local hrp = p.Character:FindFirstChild("HumanoidRootPart"); if hrp and s.back then task.delay(0.5, function() if hrp.Parent then hrp.CFrame = s.back end end) end end
 	local q = s.score / Config.ShiftRounds
 	local moodMult = (c.mood == "Happy" or c.mood == "Confident" or c.mood == "Focused") and 1.2 or ((c.mood == "Sad" or c.mood == "Sick" or c.mood == "Stressed") and 0.7 or 1)
 	c.shiftDay = d.dayCount
