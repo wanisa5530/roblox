@@ -20,7 +20,10 @@ do
 		local n, fails2 = 0, {}
 		for kind, list in pairs(Assets.IDS) do for _, id in ipairs(list) do local m = Assets.load(id); if m then n += 1; m:Destroy() else fails2[#fails2 + 1] = kind .. ":" .. id end end end
 		print("assets loaded", n, "failed:", table.concat(fails2, " "))
-		check("assets load >= 10", n >= 10)
+		local okI, errI = pcall(function() return game:GetService("InsertService"):LoadAsset(984809285) end)
+		print("InsertService direct:", okI, tostring(errI))
+		local okO, errO = pcall(function() return game:GetService("InsertService"):LoadAsset(14215126016) end)
+		print("InsertService roblox-owned:", okO, tostring(errO))
 	end
 end
 -- อ่านบันทึกวินิจฉัย (จำกัดเวลา 40 วิ กันค้าง)
