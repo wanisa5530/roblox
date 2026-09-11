@@ -132,7 +132,7 @@ function So.spawnStaff()
 		if b then
 			local npc = Core.spawnNpc(100 + i, e[3])
 			if npc then
-				npc:PivotTo(CFrame.new(b.door + Vector3.new(5, 3, 2), b.door + Vector3.new(5, 3, 20))); npc.Parent = folder
+				local fr = b.front or Vector3.new(0, 0, 1); local rt = b.right or Vector3.new(1, 0, 0); npc:PivotTo(CFrame.lookAt(b.door + rt * 5 + Vector3.new(0, 3, 0), b.door + rt * 5 + fr * 20 + Vector3.new(0, 3, 0))); npc.Parent = folder
 				Core.wearUniform(npc, e[2])
 				local h = npc:FindFirstChildOfClass("Humanoid"); if h then h.WalkSpeed = 0 end
 				local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Talk"; pp.ObjectText = e[3]; pp.HoldDuration = 0; pp.MaxActivationDistance = 8; pp.RequiresLineOfSight = false; pp.Parent = npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart")

@@ -9,11 +9,11 @@ local B = { owner = nil, queue = {}, employees = {} }  -- MVP: คาเฟ่�
 local counterPrompt
 function B.setup()
 	local cafe = Map.buildings.Cafe; if not cafe then return end
-	local counter = Instance.new("Part"); counter.Anchored = true; counter.Size = Vector3.new(10, 3, 2); counter.Position = cafe.pos + Vector3.new(0, 1.5, cafe.size.Z / 2 + 8); counter.Color = Color3.fromRGB(120, 80, 50); counter.Material = Enum.Material.Wood; counter.Name = "CafeCounter"; counter.Parent = cafe.model
+	local counter = Instance.new("Part"); counter.Anchored = true; counter.Size = Vector3.new(10, 3, 2); counter.CFrame = CFrame.lookAt(cafe.door + cafe.front * 8 + Vector3.new(0, 1.5, 0), cafe.door + cafe.front * 8 + Vector3.new(0, 1.5, 0) + cafe.front); counter.Color = Color3.fromRGB(120, 80, 50); counter.Material = Enum.Material.Wood; counter.Name = "CafeCounter"; counter.Parent = cafe.model
 	counterPrompt = Instance.new("ProximityPrompt"); counterPrompt.ActionText = "Serve"; counterPrompt.ObjectText = "Cafe"; counterPrompt.HoldDuration = 0; counterPrompt.MaxActivationDistance = 10; counterPrompt.RequiresLineOfSight = false; counterPrompt.Parent = counter
 	counterPrompt:SetAttribute("Action", "serve")
 	counterPrompt.Triggered:Connect(function(who) B.serve(who) end)
-	local hirePart = Instance.new("Part"); hirePart.Anchored = true; hirePart.Size = Vector3.new(2, 4, 2); hirePart.Position = cafe.pos + Vector3.new(8, 2, cafe.size.Z / 2 + 8); hirePart.Color = Color3.fromRGB(240, 200, 80); hirePart.Name = "CafeBoard"; hirePart.Parent = cafe.model
+	local hirePart = Instance.new("Part"); hirePart.Anchored = true; hirePart.Size = Vector3.new(2, 4, 2); hirePart.Position = cafe.door + cafe.front * 8 + cafe.right * 8 + Vector3.new(0, 2, 0); hirePart.Color = Color3.fromRGB(240, 200, 80); hirePart.Name = "CafeBoard"; hirePart.Parent = cafe.model
 	local hp = Instance.new("ProximityPrompt"); hp.ActionText = "Cafe"; hp.ObjectText = "Business"; hp.HoldDuration = 0; hp.MaxActivationDistance = 10; hp.RequiresLineOfSight = false; hp.Parent = hirePart
 	hp:SetAttribute("Action", "cafe")
 	hp.Triggered:Connect(function(who) Remotes.Business:FireClient(who, "open", B.owner and B.owner.Name or nil, B.level()) end)
@@ -47,11 +47,11 @@ function B.spawnCustomer()
 	local cafe = Map.buildings.Cafe
 	local npc = Core.spawnNpc(math.random(1, 30), "☕ Customer")
 	if not npc then return end
-	npc:PivotTo(CFrame.new(cafe.pos + Vector3.new(-14, 3, cafe.size.Z / 2 + 14))); npc.Parent = cafe.model
+	npc:PivotTo(CFrame.new(cafe.door + cafe.front * 14 - cafe.right * 14 + Vector3.new(0, 3, 0))); npc.Parent = cafe.model
 	local hum = npc:FindFirstChildOfClass("Humanoid"); if hum then hum.DisplayName = "☕ Customer" end
 	table.insert(B.queue, npc)
 	local slot = #B.queue
-	if hum then hum:MoveTo(cafe.pos + Vector3.new(-4 + slot * 2.5, 0, cafe.size.Z / 2 + 12)) end
+	if hum then hum:MoveTo(cafe.door + cafe.front * 12 + cafe.right * (-4 + slot * 2.5)) end
 	task.delay(60, function() if npc.Parent then for i, n in ipairs(B.queue) do if n == npc then table.remove(B.queue, i) end end; npc:Destroy() end end)
 end
 function B.serve(who)
