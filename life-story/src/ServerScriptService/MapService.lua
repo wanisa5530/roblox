@@ -408,7 +408,7 @@ function M.build()
 	for _, spot in ipairs({ Vector3.new(70, 0.6, -280), Vector3.new(30, 0.6, -120), Vector3.new(220, 0.6, -30) }) do M.tuktuk(spot, city) end
 	-- ===== สวนลุมพินี =====
 	local park = Instance.new("Model"); park.Name = "Park"; park.Parent = city
-	local PC = Vector3.new(230, 0, 80)
+	local PC = Vector3.new(245, 0, 80)  -- ห่างถนนพญาไท (x≈200) และอโศก (x≈290)
 	-- รั้วเตี้ย + ทางเข้า
 	for _, e in ipairs({ { Vector3.new(70, 1.2, 0.4), Vector3.new(0, 0.9, 28) }, { Vector3.new(0.4, 1.2, 56), Vector3.new(-35, 0.9, 0) }, { Vector3.new(0.4, 1.2, 56), Vector3.new(35, 0.9, 0) }, { Vector3.new(28, 1.2, 0.4), Vector3.new(-21, 0.9, -28) }, { Vector3.new(28, 1.2, 0.4), Vector3.new(21, 0.9, -28) } }) do
 		part({ Size = e[1], Position = PC + e[2], Color = Color3.fromRGB(40, 40, 45), Material = Enum.Material.Metal }, park)
