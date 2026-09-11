@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 local T = U.T
 local gui = Instance.new("ScreenGui"); gui.Name = "LifeGuide"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui"); U.scaleGui(gui)
 local panel = U.frame(gui, UDim2.new(0, 330, 0, 250), UDim2.new(0, 12, 0, 70), U.C.navy, 14, U.C.teal); panel.BackgroundTransparency = 0.15; panel.Visible = false
-U.label(panel, "📘 " .. T("guide"), UDim2.new(1, -60, 0, 26), UDim2.new(0, 12, 0, 8), { textSize = 17, color = U.C.accent })
+local titleL = U.label(panel, "📘 " .. T("guide"), UDim2.new(1, -60, 0, 26), UDim2.new(0, 12, 0, 8), { textSize = 17, color = U.C.accent })
 local hideBtn = U.button(panel, "—", UDim2.new(0, 26, 0, 26), UDim2.new(1, -34, 0, 8), U.C.card, nil)
 local list = Instance.new("Frame"); list.Size = UDim2.new(1, -20, 1, -44); list.Position = UDim2.new(0, 10, 0, 40); list.BackgroundTransparency = 1; list.Parent = panel
 U.list(list, 4)
@@ -45,5 +45,6 @@ local last
 Remotes.DataUpdate.OnClientEvent:Connect(function(d) last = d; render(d) end)
 hideBtn.MouseButton1Click:Connect(function() collapsed = not collapsed; hideBtn.Text = collapsed and "+" or "—"; render(last) end)
 player:GetAttributeChangedSignal("AtHome"):Connect(function() render(last) end)
-player:GetAttributeChangedSignal("LangTick"):Connect(function() render(last) end)
+player:GetAttributeChangedSignal("LangTick"):Connect(function() titleL.Text = "📘 " .. T("guide"); render(last) end)
+player:GetAttributeChangedSignal("Lang"):Connect(function() titleL.Text = "📘 " .. T("guide"); render(last) end)
 task.delay(2, function() local d = Remotes.GetData:InvokeServer(); if d then last = d; render(d) end end)

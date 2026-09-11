@@ -221,10 +221,11 @@ function H.startAction(p, key, id, act, model)
 			local hum = p.Character:FindFirstChildOfClass("Humanoid")
 			if act == "sleep" then
 				-- นอนบนที่นอน: หัวหันไปทางหัวเตียง ล็อกตัวละครไว้ (ปุ่ม ■ หรือกดเดิน = ลุก)
-				local bbCf, bbSize = model:GetBoundingBox()
+				local frame = model.PrimaryPart
 				if hum then hum.PlatformStand = true end
 				hrp.Anchored = true
-				hrp.CFrame = CFrame.new(bbCf.Position + Vector3.new(0, bbSize.Y / 2 + 0.9, 0)) * CFrame.Angles(0, select(2, model.PrimaryPart.CFrame:ToOrientation()), 0) * CFrame.Angles(math.rad(-90), 0, 0)
+				-- นอนหงายบนที่นอน: ที่นอนสูงจากกลางโครง ~1.2 ตัวละครหนา ~1 → HRP สูง 1.9 จากโครง หัวไปทางหัวเตียง (−Z ของเตียง)
+				hrp.CFrame = frame.CFrame * CFrame.new(0, 1.9, 0.6) * CFrame.Angles(math.rad(-90), 0, 0)
 			elseif act == "sit" or act == "watch" then hrp.CFrame = model.PrimaryPart.CFrame * CFrame.new(0, 1.5, 0) end
 		end
 	end
