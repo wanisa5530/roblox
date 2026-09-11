@@ -3,7 +3,7 @@ local Players = game:GetService("Players")
 local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
 local Remotes = require(RS.Remotes)
-local U = require(script.Parent.UI)
+local U = require(script.Parent:WaitForChild("UI"))
 local player = Players.LocalPlayer
 local T = U.T
 local gui = Instance.new("ScreenGui"); gui.Name = "LifeMenu"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui")

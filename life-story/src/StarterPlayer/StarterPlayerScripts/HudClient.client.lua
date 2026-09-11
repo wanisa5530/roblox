@@ -6,7 +6,7 @@ local RS = game.ReplicatedStorage
 local Config = require(RS.Config)
 local Locale = require(RS.Locale)
 local Remotes = require(RS.Remotes)
-local U = require(script.Parent.UI)
+local U = require(script.Parent:WaitForChild("UI"))
 local player = Players.LocalPlayer
 game:GetService("ScriptContext").Error:Connect(function(msg, trace) pcall(function() Remotes.Action:FireServer("clientError", msg .. " | " .. trace:sub(1, 80)) end) end)
 local lang = Locale.detect(LocalizationService.RobloxLocaleId)
