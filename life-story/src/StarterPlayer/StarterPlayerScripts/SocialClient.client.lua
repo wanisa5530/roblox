@@ -13,7 +13,9 @@ local sub = U.label(win, "", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 34), 
 U.button(win, "✕", UDim2.new(0, 30, 0, 30), UDim2.new(1, -36, 0, 6), U.C.red, function() win.Visible = false end)
 local list = U.scroll(win, UDim2.new(1, -16, 1, -66), UDim2.new(0, 8, 0, 58))
 local target
-Remotes.Social.OnClientEvent:Connect(function(kind, id, status, displayName, rel)
+Remotes.Social.OnClientEvent:Connect(function(kind, id, a, b, rel)
+	local status, displayName = a, b
+	if kind == "result" then status, displayName = b, a end
 	if kind == "open" then
 		target = id; win.Visible = true
 		head.Text = "🧑 " .. (displayName or id); sub.Text = T(status)
@@ -23,6 +25,6 @@ Remotes.Social.OnClientEvent:Connect(function(kind, id, status, displayName, rel
 			b.LayoutOrder = i
 		end
 	elseif kind == "result" then
-		if id == target then sub.Text = T(status) .. (rel and ("  ❤ " .. math.floor(rel.f) .. " / 💕 " .. math.floor(rel.r)) or "") .. (displayName == false and "  ✗" or "") end
+		if id == target then sub.Text = T(status) .. (rel and ("  ❤ " .. math.floor(rel.f) .. " / 💕 " .. math.floor(rel.r)) or "") .. (displayName == false and "  ✗" or "  ✓") end
 	end
 end)

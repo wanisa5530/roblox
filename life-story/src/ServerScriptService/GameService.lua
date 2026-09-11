@@ -55,7 +55,7 @@ function G.init()
 		return true
 	end
 	Remotes.Action.OnServerEvent:Connect(function(p, kind, a, b, c2)
-		if kind == "clientError" then Core.diag("client:" .. tostring(a):sub(1, 60)); return end
+		if kind == "clientError" then Core.diag("client:" .. tostring(a):sub(1, 300)); return end
 		local c = Core.char(p); if not c then return end
 		if kind == "stop" then Home.stopAction(p)
 		elseif kind == "clean" then Home.active[p] = { key = "clean", cfg = { need = nil }, act = "clean", t0 = os.clock() }; p:SetAttribute("Action", "clean"); task.delay(15, function() if Home.active[p] and Home.active[p].act == "clean" then Home.stopAction(p); c.needs.environment = math.min(c.envBase or 60, c.needs.environment + 40) end end)

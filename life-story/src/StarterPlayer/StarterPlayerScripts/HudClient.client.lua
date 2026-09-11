@@ -59,7 +59,9 @@ local function refresh()
 		for k, f in pairs(needBars) do local v = (c.needs[k] or 0) / 100; f.Size = UDim2.new(v, 0, 1, 0); f.BackgroundColor3 = v < 0.25 and U.C.red or (v < 0.5 and U.C.accent or U.C.green) end
 	end
 end
-Remotes.DataUpdate.OnClientEvent:Connect(function(d) data = d; refresh(); player:SetAttribute("HasChar", d.char ~= nil) end)
+local createShown = false
+local function showCreate() end  -- กำหนดจริงด้านล่าง
+Remotes.DataUpdate.OnClientEvent:Connect(function(d) data = d; refresh(); player:SetAttribute("HasChar", d.char ~= nil); if not d.char and not createShown then createShown = true; showCreate() end end)
 player:GetAttributeChangedSignal("Action"):Connect(function() stopBtn.Visible = player:GetAttribute("Action") ~= nil end)
 task.spawn(function()
 	while true do
@@ -69,7 +71,7 @@ task.spawn(function()
 	end
 end)
 -- ===== สร้างตัวละคร =====
-local function showCreate()
+showCreate = function()
 	local ov = U.frame(gui, UDim2.new(0, 560, 0, 520), UDim2.new(0.5, -280, 0.5, -260), U.C.bg, 14)
 	U.label(ov, T("welcome"), UDim2.new(1, -20, 0, 30), UDim2.new(0, 10, 0, 8), { textSize = 18, color = U.C.accent })
 	U.label(ov, T("yourName"), UDim2.new(0, 120, 0, 30), UDim2.new(0, 10, 0, 44), { textSize = 14 })
@@ -115,7 +117,7 @@ Remotes.Family.OnClientEvent:Connect(function(kind, kids, cause)
 end)
 data = Remotes.GetData:InvokeServer()
 refresh()
-if data and not data.char then showCreate() end
+if data and not data.char and not createShown then createShown = true; showCreate() end
 player:SetAttribute("HasChar", data and data.char ~= nil)
 -- ปุ่มเมนูส่งสัญญาณให้ MenuClient
 menuBtn.MouseButton1Click:Connect(function() player:SetAttribute("MenuToggle", os.clock()) end)
