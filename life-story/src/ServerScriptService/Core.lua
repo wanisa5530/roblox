@@ -63,7 +63,7 @@ local KNOWN = { 1, 156, 261, 916, 2032622, 21557, 1207, 23415609, 45585262, 1848
 function Core.npcDescription(seed)
 	seed = seed or math.random(1000)
 	if descCache[seed] then return descCache[seed] end
-	local ids = { KNOWN[(seed - 1) % #KNOWN + 1], math.random(100000000, 3000000000), math.random(100000000, 3000000000) }
+	local ids = { KNOWN[(seed - 1) % #KNOWN + 1], math.random(100000000, 2000000000), math.random(100000000, 2000000000) }
 	for _, id in ipairs(ids) do
 		local ok, desc = pcall(Players.GetHumanoidDescriptionFromUserId, Players, id)
 		if ok and desc then descCache[seed] = desc; return desc end
