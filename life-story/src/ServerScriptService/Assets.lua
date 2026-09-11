@@ -15,7 +15,12 @@ A.IDS = {
 local function sanitize(m)
 	for _, x in ipairs(m:GetDescendants()) do
 		if x:IsA("BaseScript") or x:IsA("ModuleScript") or x:IsA("RemoteEvent") or x:IsA("RemoteFunction") or x:IsA("BindableEvent") then x:Destroy()
-		elseif x:IsA("BasePart") then x.Anchored = true; x.Massless = true
+		elseif x:IsA("SpawnLocation") then x:Destroy()
+		elseif x:IsA("BasePart") then
+			x.Anchored = true; x.Massless = true
+			-- ตัด "พื้นฐาน/baseplate" ที่ติดมากับโมเดล (แผ่นกว้างแบน) ออก
+			local n = x.Name:lower()
+			if (x.Size.X * x.Size.Z > 1600 and x.Size.Y <= 4) or n:find("baseplate") or n == "base" or n == "ground" or n:find("floorplate") then x:Destroy() end
 		elseif x:IsA("Sound") then x:Destroy() end
 	end
 end
