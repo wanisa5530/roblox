@@ -47,6 +47,22 @@ local function render(d)
 	end
 	if allDone then rows[1].Text = "🌟 " .. T("guideDone"); rows[1].Visible = true; rows[1].TextColor3 = U.C.green end
 	local doneN = 0; for _, st in ipairs(STEPS) do if st.done(d) then doneN += 1 end end
+	-- เป้าหมายลูกศรนำทางของขั้นปัจจุบัน
+	local function nearHome(prefix)
+		local hp = player:GetAttribute("HomePos"); if typeof(hp) ~= "Vector3" then return nil end
+		local best, bd
+		for _, m in ipairs(workspace:GetDescendants()) do
+			if m:IsA("Model") then local k = m:GetAttribute("Key"); if type(k) == "string" and k:sub(1, #prefix) == prefix then local pos = m:GetPivot().Position; local dist = (pos - hp).Magnitude; if dist < 45 and (not bd or dist < bd) then best, bd = pos, dist end end end
+		end
+		return best
+	end
+	local target = nil
+	if firstOpen == 1 then target = player:GetAttribute("HomePos")
+	elseif firstOpen == 2 then target = nearHome("Bed")
+	elseif firstOpen == 3 then target = nearHome("Fridge")
+	elseif firstOpen == 5 then target = player:GetAttribute("WorkDoor")
+	elseif firstOpen == 6 then target = player:GetAttribute("ParkPos") end
+	player:SetAttribute("NavTarget", typeof(target) == "Vector3" and target or nil)
 	qbar.Visible = not allDone
 	if firstOpen then qtext.Text = "🎯 " .. T(STEPS[firstOpen].key) end
 	qfill.Size = UDim2.new(doneN / #STEPS, 0, 1, 0)
@@ -59,3 +75,5 @@ player:GetAttributeChangedSignal("AtHome"):Connect(function() render(last) end)
 player:GetAttributeChangedSignal("LangTick"):Connect(function() titleL.Text = "📘 " .. T("guide"); render(last) end)
 player:GetAttributeChangedSignal("Lang"):Connect(function() titleL.Text = "📘 " .. T("guide"); render(last) end)
 task.delay(2, function() local d = Remotes.GetData:InvokeServer(); if d then last = d; render(d) end end)
+for _, a in ipairs({ "HomePos", "WorkDoor", "ParkPos" }) do player:GetAttributeChangedSignal(a):Connect(function() render(last) end) end
+task.spawn(function() while true do task.wait(8); if last then render(last) end end end)

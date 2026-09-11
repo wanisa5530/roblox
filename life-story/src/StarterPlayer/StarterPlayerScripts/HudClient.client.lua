@@ -34,6 +34,7 @@ local bl = Instance.new("UIListLayout"); bl.FillDirection = Enum.FillDirection.H
 local menuBtn = U.iconButton(btnRow, "☰", T("menu"), 34, nil, U.C.accent)
 U.iconButton(btnRow, "🏠", T("home"), 34, nil, U.C.card, function() Remotes.Action:FireServer("goHome") end)
 U.iconButton(btnRow, "🚗", T("drive"), 34, nil, U.C.card, function() Remotes.Action:FireServer("callCar") end)
+U.iconButton(btnRow, "👗", T("wardrobe"), 34, nil, U.C.card, function() player:SetAttribute("WardrobeToggle", os.clock()) end)
 local _stopBtn, stopHolder = U.iconButton(btnRow, "■", T("stop"), 34, nil, U.C.red, function() Remotes.Action:FireServer("stop") end); stopHolder.Visible = false
 local langBtn = U.iconButton(btnRow, "🌐", lang, 34, nil, U.C.card, function()
 	local i = table.find(Config.Languages, lang) or 1; lang = Config.Languages[i % #Config.Languages + 1]
@@ -58,7 +59,7 @@ local modeRow = Instance.new("Frame"); modeRow.Size = UDim2.new(0, 190, 0, 50); 
 local ml = Instance.new("UIListLayout"); ml.FillDirection = Enum.FillDirection.Horizontal; ml.Padding = UDim.new(0, 10); ml.HorizontalAlignment = Enum.HorizontalAlignment.Right; ml.Parent = modeRow
 U.iconButton(modeRow, "▶", "Live", 34, nil, U.C.green, function() player:SetAttribute("BuildClose", os.clock()) end)
 U.iconButton(modeRow, "🔨", T("build"), 34, nil, U.C.accent, function() player:SetAttribute("BuildMode", os.clock()) end)
-U.iconButton(modeRow, "🛒", T("shop"), 34, nil, U.C.blue, function() player:SetAttribute("BuildMode", os.clock()) end)
+U.iconButton(modeRow, "🛒", T("shop"), 34, nil, U.C.blue, function() player:SetAttribute("MenuTab", "shop"); player:SetAttribute("MenuToggle", os.clock()) end)
 U.iconButton(modeRow, "🎯", T("quests"), 34, nil, U.C.card, function() player:SetAttribute("MenuTab", "quests"); player:SetAttribute("MenuToggle", os.clock()) end)
 -- ===== แจ้งเตือน =====
 local notifF = Instance.new("Frame"); notifF.Size = UDim2.new(0, 380, 0, 200); notifF.Position = UDim2.new(0.5, -190, 0, 90); notifF.BackgroundTransparency = 1; notifF.Parent = gui

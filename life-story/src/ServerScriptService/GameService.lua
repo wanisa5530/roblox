@@ -46,6 +46,34 @@ local function buildingPrompts()
 	pp("Shop", "shop", "Shop", function(who) Remotes.Build:FireClient(who, "openShop") end)
 	pp("CityHall", "cityhall", "Lots", function(who) Remotes.Build:FireClient(who, "openLots") end)
 end
+-- ===== ระบบแต่งตัว: ใส่ไอเท็มจาก catalog ผ่าน HumanoidDescription (บันทึกใน c.outfit) =====
+local OUTFIT_SLOTS = { hair = "HairAccessory", hat = "HatAccessory", shirt = "Shirt", pants = "Pants", face = "Face", tshirt = "GraphicTShirt", glasses = "FaceAccessory", back = "BackAccessory" }
+function G.applyOutfit(p)
+	local c = Core.char(p); if not c or not c.outfit or not Core.isReal(p) then return end
+	local hum = p.Character and p.Character:FindFirstChildOfClass("Humanoid"); if not hum then return end
+	local ok, desc = pcall(function() return hum:GetAppliedDescription() end); if not ok or not desc then return end
+	for slot, prop in pairs(OUTFIT_SLOTS) do
+		local v = c.outfit[slot]
+		if v ~= nil then
+			if slot == "hair" or slot == "hat" or slot == "glasses" or slot == "back" then desc[prop] = v == 0 and "" or tostring(v) else desc[prop] = v end
+		end
+	end
+	if c.outfit.skin then local col = Color3.fromRGB(unpack(c.outfit.skin)); for _, k in ipairs({ "HeadColor", "TorsoColor", "LeftArmColor", "RightArmColor", "LeftLegColor", "RightLegColor" }) do desc[k] = col end end
+	pcall(function() hum:ApplyDescription(desc) end)
+	task.delay(0.3, function() Sim.applyScale(p) end)
+end
+function G.setOutfit(p, slot, value)
+	local c = Core.char(p); if not c or type(slot) ~= "string" then return end
+	c.outfit = c.outfit or {}
+	if slot == "skin" then
+		if type(value) ~= "table" or #value ~= 3 then return end
+		c.outfit.skin = { math.clamp(tonumber(value[1]) or 0, 0, 255), math.clamp(tonumber(value[2]) or 0, 0, 255), math.clamp(tonumber(value[3]) or 0, 0, 255) }
+	elseif OUTFIT_SLOTS[slot] then
+		local id = tonumber(value); if not id or id < 0 or id > 1e12 then return end
+		c.outfit[slot] = math.floor(id)
+	else return end
+	G.applyOutfit(p); Core.push(p)
+end
 local function teleport(p, pos)
 	if Core.isReal(p) and p.Character and pos then local hrp = p.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0)) end end
 end
@@ -73,6 +101,7 @@ function G.init()
 		if kind == "stop" then Home.stopAction(p)
 		elseif kind == "clean" then Home.active[p] = { key = "clean", cfg = { need = nil }, act = "clean", t0 = os.clock() }; p:SetAttribute("Action", "clean"); task.delay(15, function() if Home.active[p] and Home.active[p].act == "clean" then Home.stopAction(p); c.needs.environment = math.min(c.envBase or 60, c.needs.environment + 40) end end)
 		elseif kind == "goHome" then teleport(p, Home.homePos(p)); p:SetAttribute("AtHome", true)
+		elseif kind == "outfit" then G.setOutfit(p, a, b)
 		elseif kind == "goTo" then local d = Map.door(a); if d then if Core.ownsPass(p, "SportsCar") or Core.spend(p, 20) then teleport(p, d) end end
 		elseif kind == "buyCar" then Vehicle.buy(p, a)
 		elseif kind == "callCar" then Vehicle.callCar(p)
@@ -138,10 +167,16 @@ function G.init()
 				task.wait(2)
 				local hp = Home.homePos(p); local hrp = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
 				if hp and hrp then p:SetAttribute("AtHome", (hrp.Position - hp).Magnitude < 40 or nil) end
+				-- จุดหมายสำหรับลูกศรนำทาง (บ้าน / ที่ทำงาน / สวน)
+				if hp then p:SetAttribute("HomePos", hp) end
+				local c = Core.char(p)
+				if c and c.career then for _, cc in ipairs(Config.Careers) do if cc.key == c.career then local b = Map.buildings[cc.building]; if b then p:SetAttribute("WorkDoor", b.door) end end end else p:SetAttribute("WorkDoor", nil) end
+				if Map.buildings.Park then p:SetAttribute("ParkPos", Map.buildings.Park.door) end
 			end
 		end)
 		Social.attachPlayerPrompt(p)
-		if Core.isReal(p) then p.CharacterAdded:Connect(function() task.wait(0.5); Sim.applyScale(p); if d.char then teleport(p, Home.homePos(p)) end end) end
+		if Core.isReal(p) then p.CharacterAdded:Connect(function() task.wait(0.5); Sim.applyScale(p); G.applyOutfit(p); if d.char then teleport(p, Home.homePos(p)) end end) end
+		task.delay(1, function() G.applyOutfit(p) end)
 		Core.push(p)
 		task.spawn(function()
 			local last = os.clock()
