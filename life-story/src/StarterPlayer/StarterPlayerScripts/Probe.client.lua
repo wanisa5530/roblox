@@ -1,6 +1,6 @@
 -- ส่งสัญญาณว่า LocalScript ทำงาน + รายงาน error ฝั่งผู้เล่นทั้งหมดไปเซิร์ฟเวอร์ (ก่อนโหลดโมดูลอื่น)
 local RS = game:GetService("ReplicatedStorage")
-local f = RS:WaitForChild("Remotes", 30)
+local f = RS:WaitForChild("RemoteFolder", 30)
 local act = f and f:WaitForChild("Action", 30)
 if act then
 	act:FireServer("clientError", "probe alive; scripts=" .. #script.Parent:GetChildren())

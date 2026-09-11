@@ -7,11 +7,11 @@ local names = {
 }
 local folder
 if RunService:IsServer() then
-	folder = Instance.new("Folder"); folder.Name = "Remotes"; folder.Parent = RS
+	folder = Instance.new("Folder"); folder.Name = "RemoteFolder"; folder.Parent = RS
 	for _, n in ipairs(names.events) do local e = Instance.new("RemoteEvent"); e.Name = n; e.Parent = folder end
 	for _, n in ipairs(names.functions) do local f = Instance.new("RemoteFunction"); f.Name = n; f.Parent = folder end
 else
-	folder = RS:WaitForChild("Remotes")
+	folder = RS:WaitForChild("RemoteFolder")
 end
 local R = {}
 for _, n in ipairs(names.events) do R[n] = folder:WaitForChild(n) end
