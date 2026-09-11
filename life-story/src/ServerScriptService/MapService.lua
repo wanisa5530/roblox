@@ -97,14 +97,8 @@ function M.build()
 		part({ Size = Vector3.new(1.2, 5, 1.2), Position = Vector3.new(tx, 2.5, -52), Color = Color3.fromRGB(100, 70, 40), Material = Enum.Material.Wood }, city)
 		part({ Shape = Enum.PartType.Ball, Size = Vector3.new(7, 7, 7), Position = Vector3.new(tx, 7.5, -52), Color = Color3.fromRGB(50, 140, 60), Material = Enum.Material.Grass }, city)
 	end
-	local CARS = { { 220, 60, 60 }, { 60, 90, 200 }, { 240, 240, 240 }, { 40, 40, 45 }, { 230, 180, 50 } }
-	for i, x in ipairs({ -100, -20, 50, 120, 140 }) do
-		local c = Color3.fromRGB(unpack(CARS[i]))
-		local car = Instance.new("Model"); car.Name = "Car"; car.Parent = city
-		part({ Size = Vector3.new(4.2, 1.6, 9), Position = Vector3.new(x, 1.4, 4.5), Color = c, Material = Enum.Material.Metal, Reflectance = 0.2 }, car)
-		part({ Size = Vector3.new(3.8, 1.4, 4.5), Position = Vector3.new(x, 2.9, 4), Color = Color3.fromRGB(40, 50, 60), Material = Enum.Material.Glass, Transparency = 0.3 }, car)
-		for _, off in ipairs({ { -1.9, -3 }, { 1.9, -3 }, { -1.9, 3 }, { 1.9, 3 } }) do part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.7, 1.6, 1.6), CFrame = CFrame.new(x + off[1], 0.8, 4.5 + off[2]) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(25, 25, 25), Material = Enum.Material.Rubber }, car) end
-	end
+	local CARS = { { 200, 40, 40 }, { 50, 80, 190 }, { 235, 235, 235 }, { 35, 35, 40 }, { 225, 170, 40 } }
+	for i, x in ipairs({ -100, -20, 50, 120, 140 }) do M.car(Vector3.new(x, 0, 4.5), Color3.fromRGB(unpack(CARS[i])), city) end
 	-- สวนสาธารณะ (NPC เดินเล่น)
 	local park = Instance.new("Model"); park.Name = "Park"; park.Parent = city
 	part({ Size = Vector3.new(60, 0.4, 50), Position = Vector3.new(20, 0.2, 65), Color = Color3.fromRGB(70, 160, 70), Material = Enum.Material.Grass, Name = "ParkGround" }, park)
@@ -159,6 +153,33 @@ function M.build()
 	if not L:FindFirstChildOfClass("Sky") then local sky = Instance.new("Sky"); sky.SkyboxBk = "rbxassetid://591058823"; sky.SkyboxDn = "rbxassetid://591059876"; sky.SkyboxFt = "rbxassetid://591058104"; sky.SkyboxLf = "rbxassetid://591057861"; sky.SkyboxRt = "rbxassetid://591057625"; sky.SkyboxUp = "rbxassetid://591059642"; sky.Parent = L end
 	if not L:FindFirstChildOfClass("Atmosphere") then local at = Instance.new("Atmosphere"); at.Density = 0.3; at.Parent = L end
 	if not L:FindFirstChildOfClass("BloomEffect") then local bl = Instance.new("BloomEffect"); bl.Intensity = 0.4; bl.Parent = L end
+end
+-- รถยนต์: ตัวถังโค้งด้วย wedge กระจกเอียง ล้อยาง+ดุม ไฟหน้า/ท้าย กันชน ป้ายทะเบียน
+function M.car(pos, color, parent, yaw)
+	local car = Instance.new("Model"); car.Name = "Car"; car.Parent = parent
+	local cf = CFrame.new(pos + Vector3.new(0, 1.1, 0)) * CFrame.Angles(0, yaw or 0, 0)
+	local function pc(props) local q = part(props, car); return q end
+	local metal = Enum.Material.Metal
+	pc({ Size = Vector3.new(6, 1.6, 13), CFrame = cf * CFrame.new(0, 0.8, 0), Color = color, Material = metal, Reflectance = 0.15 })            -- ตัวถังล่าง
+	pc({ Size = Vector3.new(5.6, 1.5, 6.5), CFrame = cf * CFrame.new(0, 2.3, 0.3), Color = color, Material = metal, Reflectance = 0.15 })      -- หลังคา/ห้องโดยสาร
+	local w1 = Instance.new("WedgePart"); w1.Anchored = true; w1.Size = Vector3.new(5.6, 1.5, 2.6); w1.CFrame = cf * CFrame.new(0, 2.3, -4.2) * CFrame.Angles(0, math.pi, 0); w1.Color = Color3.fromRGB(40, 60, 80); w1.Material = Enum.Material.Glass; w1.Transparency = 0.35; w1.Parent = car  -- กระจกหน้า
+	local w2 = Instance.new("WedgePart"); w2.Anchored = true; w2.Size = Vector3.new(5.6, 1.5, 2.2); w2.CFrame = cf * CFrame.new(0, 2.3, 4.7); w2.Color = Color3.fromRGB(40, 60, 80); w2.Material = Enum.Material.Glass; w2.Transparency = 0.35; w2.Parent = car  -- กระจกหลัง
+	for _, sx in ipairs({ -1, 1 }) do
+		pc({ Size = Vector3.new(0.2, 1.1, 5.8), CFrame = cf * CFrame.new(sx * 2.85, 2.3, 0.3), Color = Color3.fromRGB(40, 60, 80), Material = Enum.Material.Glass, Transparency = 0.4 })  -- กระจกข้าง
+		pc({ Size = Vector3.new(0.3, 0.3, 0.8), CFrame = cf * CFrame.new(sx * 3.2, 1.9, -2.2), Color = color, Material = metal })  -- กระจกมองข้าง
+		for _, z in ipairs({ -4, 4 }) do
+			pc({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.9, 2.2, 2.2), CFrame = cf * CFrame.new(sx * 2.8, -0.1, z) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(25, 25, 25), Material = Enum.Material.Rubber })
+			pc({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.95, 1.3, 1.3), CFrame = cf * CFrame.new(sx * 2.85, -0.1, z) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(200, 200, 205), Material = metal, Reflectance = 0.4 })
+		end
+		local hl = pc({ Size = Vector3.new(1.2, 0.6, 0.3), CFrame = cf * CFrame.new(sx * 2, 1.1, -6.6), Color = Color3.fromRGB(255, 250, 220), Material = Enum.Material.Neon })
+		local l = Instance.new("SpotLight"); l.Range = 20; l.Angle = 60; l.Brightness = 1; l.Face = Enum.NormalId.Front; l.Parent = hl
+		pc({ Size = Vector3.new(1.2, 0.5, 0.3), CFrame = cf * CFrame.new(sx * 2, 1.1, 6.6), Color = Color3.fromRGB(230, 40, 40), Material = Enum.Material.Neon })
+	end
+	pc({ Size = Vector3.new(6.2, 0.6, 0.6), CFrame = cf * CFrame.new(0, 0.3, -6.6), Color = Color3.fromRGB(40, 40, 45), Material = Enum.Material.SmoothPlastic })   -- กันชนหน้า
+	pc({ Size = Vector3.new(6.2, 0.6, 0.6), CFrame = cf * CFrame.new(0, 0.3, 6.6), Color = Color3.fromRGB(40, 40, 45), Material = Enum.Material.SmoothPlastic })    -- กันชนหลัง
+	pc({ Size = Vector3.new(3, 0.8, 0.2), CFrame = cf * CFrame.new(0, 0.9, -6.7), Color = Color3.fromRGB(30, 30, 30), Material = Enum.Material.SmoothPlastic })      -- กระจังหน้า
+	pc({ Size = Vector3.new(1.6, 0.5, 0.1), CFrame = cf * CFrame.new(0, 0.7, 6.75), Color = Color3.fromRGB(250, 250, 250), Material = Enum.Material.SmoothPlastic })  -- ป้ายทะเบียน
+	return car
 end
 function M.door(key) local b = M.buildings[key]; return b and b.door end
 return M

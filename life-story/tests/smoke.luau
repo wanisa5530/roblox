@@ -17,6 +17,7 @@ pcall(function()
 	local ds = game:GetService("DataStoreService"):GetDataStore("LifeDiag")
 	game:GetService("DataStoreService"):GetDataStore("LifeMeta"):SetAsync("version", game.PlaceVersion)
 	print("PlaceVersion", game.PlaceVersion)
+	for _, x in ipairs(game.StarterPlayer.StarterPlayerScripts:GetChildren()) do print("SPS", x.Name, x.ClassName) end
 	for _, k in ipairs(ds:ListKeysAsync():GetCurrentPage()) do print("DIAG", k.KeyName, ds:GetAsync(k.KeyName)) end
 end)
 print(#fails == 0 and "ALL PASS" or ("FAILED: " .. table.concat(fails, ", ")))

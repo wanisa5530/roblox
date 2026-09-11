@@ -38,7 +38,7 @@ local diagLast = {}
 function Core.diag(msg)
 	if diagLast[msg] and os.clock() - diagLast[msg] < 60 then return end
 	diagLast[msg] = os.clock()
-	task.spawn(function() pcall(function() DSS:GetDataStore("LifeDiag"):SetAsync(msg:sub(1, 40), os.date("%Y-%m-%d %H:%M:%S") .. " " .. msg) end) end)
+	task.spawn(function() pcall(function() DSS:GetDataStore("LifeDiag"):SetAsync(msg:sub(1, 48), os.date("%Y-%m-%d %H:%M:%S") .. " " .. msg) end) end)
 end
 function Core.addCash(p, amount)
 	local d = Data.get(p); if not d then return end
