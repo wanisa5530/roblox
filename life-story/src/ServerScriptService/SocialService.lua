@@ -123,6 +123,25 @@ function So.spawnNpcs()
 		end
 	end
 end
+-- พนักงานประจำอาคาร (หมอ ตำรวจ เชฟ ครู) ยืนหน้าประตู แต่งชุดตามอาชีพ
+function So.spawnStaff()
+	local folder = Instance.new("Folder"); folder.Name = "Staff"; folder.Parent = workspace
+	local list = { { "Hospital", "Doctor", "Dr. Nan" }, { "Police", "Police", "Officer Dao" }, { "Restaurant", "Chef", "Chef Ton" }, { "School", "Teacher", "Kru Fon" }, { "TechOffice", "Programmer", "Dev Oat" }, { "Gallery", "Artist", "Artist Mint" }, { "Cafe", "Barista", "Barista Kwan" } }
+	for i, e in ipairs(list) do
+		local b = Map.buildings[e[1]]
+		if b then
+			local npc = Core.spawnNpc(100 + i, e[3])
+			if npc then
+				npc:PivotTo(CFrame.new(b.door + Vector3.new(5, 3, 2), b.door + Vector3.new(5, 3, 20))); npc.Parent = folder
+				Core.wearUniform(npc, e[2])
+				local h = npc:FindFirstChildOfClass("Humanoid"); if h then h.WalkSpeed = 0 end
+				local pp = Instance.new("ProximityPrompt"); pp.ActionText = "Talk"; pp.ObjectText = e[3]; pp.HoldDuration = 0; pp.MaxActivationDistance = 8; pp.RequiresLineOfSight = false; pp.Parent = npc.PrimaryPart or npc:FindFirstChild("HumanoidRootPart")
+				pp:SetAttribute("Action", "talk")
+				pp.Triggered:Connect(function(who) Remotes.Social:FireClient(who, "open", e[3], So.status(Core.char(who) or { rel = {} }, e[3])) end)
+			end
+		end
+	end
+end
 -- ให้ผู้เล่นคุยกับผู้เล่นด้วยกัน: prompt บนตัวละคร
 function So.attachPlayerPrompt(p)
 	if not Core.isReal(p) then return end

@@ -40,7 +40,7 @@ end
 function G.init()
 	if started then return G end
 	started = true
-	Map.build(); Time.start(); buildingPrompts(); Biz.setup(); Social.spawnNpcs()
+	Map.build(); Time.start(); buildingPrompts(); Biz.setup(); Social.spawnNpcs(); Social.spawnStaff()
 	-- ===== Remotes =====
 	Remotes.GetData.OnServerInvoke = function(p) return Data.get(p) end
 	Remotes.CreateCharacter.OnServerInvoke = function(p, name, traits, aspiration)
