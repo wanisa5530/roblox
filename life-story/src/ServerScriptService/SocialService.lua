@@ -103,11 +103,8 @@ function So.spawnNpcs()
 	if not Map.buildings.Park then return end
 	local folder = Instance.new("Folder"); folder.Name = "Citizens"; folder.Parent = workspace
 	for i, name in ipairs(Config.Npcs) do
-		local desc = Instance.new("HumanoidDescription")
-		desc.HeadColor = Color3.fromHSV(0.08, 0.3 + (i % 3) * 0.15, 0.9); desc.TorsoColor = Color3.fromHSV(i / #Config.Npcs, 0.6, 0.9); desc.LeftLegColor = Color3.fromRGB(50, 50, 80); desc.RightLegColor = desc.LeftLegColor
-		local ok, npc = pcall(Players.CreateHumanoidModelFromDescription, Players, desc, Enum.HumanoidRigType.R15)
-		if ok then
-			npc.Name = name
+		local npc = Core.spawnNpc(i, name)
+		if npc then
 			local a = (i / #Config.Npcs) * math.pi * 2
 			local home = Map.buildings.Park.pos + Vector3.new(math.cos(a) * 14, 3, math.sin(a) * 12)
 			npc:PivotTo(CFrame.new(home)); npc.Parent = folder

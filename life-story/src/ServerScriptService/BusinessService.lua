@@ -1,5 +1,4 @@
 -- ธุรกิจ: คาเฟ่ของผู้เล่น ลูกค้า NPC เดินมา เจ้าของ/พนักงานกด Serve
-local Players = game:GetService("Players")
 local Config = require(game.ReplicatedStorage.Config)
 local Remotes = require(game.ReplicatedStorage.Remotes)
 local Data = require(script.Parent.DataService)
@@ -46,10 +45,9 @@ function B.workHere(p)
 end
 function B.spawnCustomer()
 	local cafe = Map.buildings.Cafe
-	local desc = Instance.new("HumanoidDescription"); desc.TorsoColor = Color3.fromHSV(math.random(), 0.5, 0.9)
-	local ok, npc = pcall(Players.CreateHumanoidModelFromDescription, Players, desc, Enum.HumanoidRigType.R15)
-	if not ok then return end
-	npc.Name = "Customer"; npc:PivotTo(CFrame.new(cafe.pos + Vector3.new(-14, 3, cafe.size.Z / 2 + 14))); npc.Parent = cafe.model
+	local npc = Core.spawnNpc(math.random(1, 30), "☕ Customer")
+	if not npc then return end
+	npc:PivotTo(CFrame.new(cafe.pos + Vector3.new(-14, 3, cafe.size.Z / 2 + 14))); npc.Parent = cafe.model
 	local hum = npc:FindFirstChildOfClass("Humanoid"); if hum then hum.DisplayName = "☕ Customer" end
 	table.insert(B.queue, npc)
 	local slot = #B.queue

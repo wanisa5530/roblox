@@ -57,4 +57,27 @@ function Core.career(key) for _, c in ipairs(Config.Careers) do if c.key == key 
 function Core.stage(c) return Config.Stages[c.stage] end
 function Core.isAdult(c) return c.stage >= 5 end
 function Core.getPlayerByUserId(id) return Players:GetPlayerByUserId(id) end
+-- รูปลักษณ์ NPC: ดึงอวาตาร์จริงของผู้ใช้ Roblox (เสื้อผ้า/ผม/หน้า เหมือนคนจริง) ถ้าดึงไม่ได้ใช้สีพื้น
+local descCache = {}
+local KNOWN = { 1, 156, 261, 916, 2032622, 21557, 1207, 23415609, 45585262, 1848960 }
+function Core.npcDescription(seed)
+	seed = seed or math.random(1000)
+	if descCache[seed] then return descCache[seed] end
+	local ids = { KNOWN[(seed - 1) % #KNOWN + 1], math.random(100000000, 3000000000), math.random(100000000, 3000000000) }
+	for _, id in ipairs(ids) do
+		local ok, desc = pcall(Players.GetHumanoidDescriptionFromUserId, Players, id)
+		if ok and desc then descCache[seed] = desc; return desc end
+	end
+	local desc = Instance.new("HumanoidDescription")
+	desc.HeadColor = Color3.fromRGB(240, 200, 170); desc.TorsoColor = Color3.fromHSV((seed % 12) / 12, 0.6, 0.9); desc.LeftArmColor = desc.HeadColor; desc.RightArmColor = desc.HeadColor; desc.LeftLegColor = Color3.fromRGB(50, 50, 80); desc.RightLegColor = desc.LeftLegColor
+	descCache[seed] = desc
+	return desc
+end
+function Core.spawnNpc(seed, name)
+	local ok, npc = pcall(Players.CreateHumanoidModelFromDescription, Players, Core.npcDescription(seed), Enum.HumanoidRigType.R15)
+	if not ok then return nil end
+	npc.Name = name or "NPC"
+	local h = npc:FindFirstChildOfClass("Humanoid"); if h then h.DisplayName = name or "NPC"; h.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer end
+	return npc
+end
 return Core
