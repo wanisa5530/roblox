@@ -12,6 +12,7 @@ end
 local p = fake(1, "Tester")
 local d = Data.load(p)
 check("map built", workspace:FindFirstChild("City") ~= nil and #Map.buildings > 0 or Map.buildings.Hospital ~= nil)
+do local n = 0; for _, d in ipairs(workspace:GetDescendants()) do if d.Name == "Junction" then n += 1 end end; print("junctions", n); check("junctions built", n >= 8) end
 check("lots built", Map.lots[1] ~= nil and Map.lots.apt1 ~= nil)
 -- สร้างตัวละคร
 d.char = Data.newCharacter("Tester", { "Active", "Genius", "Frugal" }, "Wealth", 1)
