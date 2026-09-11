@@ -13,12 +13,23 @@ for _, m in ipairs({ "Core", "DataService", "TimeService", "MapService", "HomeSe
 end
 local ok, err = pcall(function() local s = game:GetService("DataStoreService"):GetDataStore("LifeStory_v1"); s:SetAsync("smoke", { cash = 1 }); assert(s:GetAsync("smoke").cash == 1); s:RemoveAsync("smoke") end)
 check("datastore " .. tostring(err or ""), ok)
-pcall(function()
-	local ds = game:GetService("DataStoreService"):GetDataStore("LifeDiag")
-	game:GetService("DataStoreService"):GetDataStore("LifeMeta"):SetAsync("version", game.PlaceVersion)
-	print("PlaceVersion", game.PlaceVersion)
-	for _, x in ipairs(game.StarterPlayer.StarterPlayerScripts:GetChildren()) do print("SPS", x.Name, x.ClassName) end
-	for _, k in ipairs(ds:ListKeysAsync():GetCurrentPage()) do print("DIAG", k.KeyName, ds:GetAsync(k.KeyName)) end
-end)
+-- อ่านบันทึกวินิจฉัย (จำกัดเวลา 40 วิ กันค้าง)
+do
+	local done = false
+	task.spawn(function()
+		pcall(function()
+			local DSS = game:GetService("DataStoreService")
+			DSS:GetDataStore("LifeMeta"):SetAsync("version", game.PlaceVersion)
+			print("PlaceVersion", game.PlaceVersion)
+			for _, x in ipairs(game.StarterPlayer.StarterPlayerScripts:GetChildren()) do print("SPS", x.Name, x.ClassName) end
+			local ds = DSS:GetDataStore("LifeDiag")
+			local keys = ds:ListKeysAsync(nil, 30):GetCurrentPage()
+			for _, k in ipairs(keys) do local ok, v = pcall(ds.GetAsync, ds, k.KeyName); print("DIAG", k.KeyName, ok and v or "?") end
+		end)
+		done = true
+	end)
+	local t0 = os.clock(); while not done and os.clock() - t0 < 40 do task.wait(0.5) end
+	if not done then print("DIAG timeout") end
+end
 print(#fails == 0 and "ALL PASS" or ("FAILED: " .. table.concat(fails, ", ")))
 return #fails == 0, fails
