@@ -146,6 +146,11 @@ data = Remotes.GetData:InvokeServer()
 refresh()
 if data and not data.char and not createShown then createShown = true; showCreate() end
 player:SetAttribute("HasChar", data and data.char ~= nil)
+-- กดเดิน/กระโดดระหว่างทำกิจกรรม (นอน นั่ง) = หยุดกิจกรรมและลุก
+game:GetService("UserInputService").InputBegan:Connect(function(i, gp)
+	if gp then return end
+	if player:GetAttribute("Action") and (i.KeyCode == Enum.KeyCode.W or i.KeyCode == Enum.KeyCode.A or i.KeyCode == Enum.KeyCode.S or i.KeyCode == Enum.KeyCode.D or i.KeyCode == Enum.KeyCode.Space) then Remotes.Action:FireServer("stop") end
+end)
 -- ปุ่มเมนูส่งสัญญาณให้ MenuClient
 menuBtn.MouseButton1Click:Connect(function() player:SetAttribute("MenuToggle", os.clock()) end)
 player:GetAttributeChangedSignal("LangTick"):Connect(function() langBtn.Text = "🌐"; for _, n in ipairs(Config.Needs) do needLabels[n.key].Text = n.emoji .. " " .. T(n.key) end end)

@@ -216,9 +216,14 @@ function H.startAction(p, key, id, act, model)
 	if Core.isReal(p) and p.Character and model and model.PrimaryPart then
 		local hrp = p.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then
-			if act == "sleep" then hrp.CFrame = model.PrimaryPart.CFrame * CFrame.new(0, 1.2, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+			local hum = p.Character:FindFirstChildOfClass("Humanoid")
+			if act == "sleep" then
+				-- นอนบนที่นอน: หัวหันไปทางหัวเตียง ล็อกตัวละครไว้ (ปุ่ม ■ หรือกดเดิน = ลุก)
+				local bbCf, bbSize = model:GetBoundingBox()
+				if hum then hum.PlatformStand = true end
+				hrp.Anchored = true
+				hrp.CFrame = CFrame.new(bbCf.Position + Vector3.new(0, bbSize.Y / 2 + 0.9, 0)) * CFrame.Angles(0, select(2, model.PrimaryPart.CFrame:ToOrientation()), 0) * CFrame.Angles(math.rad(-90), 0, 0)
 			elseif act == "sit" or act == "watch" then hrp.CFrame = model.PrimaryPart.CFrame * CFrame.new(0, 1.5, 0) end
-			local hum = p.Character:FindFirstChildOfClass("Humanoid"); if hum then hum.WalkSpeed = (act == "sleep") and 0 or 16 end
 		end
 	end
 	if H.onAction then H.onAction(p, act, cfg) end
@@ -226,8 +231,8 @@ end
 function H.stopAction(p)
 	local a = H.active[p]; H.active[p] = nil
 	if Core.isReal(p) then p:SetAttribute("Action", nil); p:SetAttribute("ActionItem", nil)
-		local hum = p.Character and p.Character:FindFirstChildOfClass("Humanoid"); if hum then hum.WalkSpeed = 16 end
-		if a and a.act == "sleep" and p.Character then local hrp = p.Character:FindFirstChild("HumanoidRootPart"); if hrp and a.model and a.model.PrimaryPart then hrp.CFrame = a.model.PrimaryPart.CFrame * CFrame.new(0, 3, 4) end end
+		local hum = p.Character and p.Character:FindFirstChildOfClass("Humanoid"); if hum then hum.WalkSpeed = 16; hum.PlatformStand = false end
+		if a and a.act == "sleep" and p.Character then local hrp = p.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.Anchored = false; if a.model and a.model.PrimaryPart then local bbCf, bbSize = a.model:GetBoundingBox(); hrp.CFrame = CFrame.new(bbCf.Position + Vector3.new(0, 3, 0)) * CFrame.Angles(0, select(2, a.model.PrimaryPart.CFrame:ToOrientation()), 0) * CFrame.new(bbSize.X / 2 + 2, 0, 0) end end end
 	end
 end
 -- tick ต่อวินาที: เติม need ตาม rate; ฝึกทักษะ; หยุดเมื่อเต็ม
