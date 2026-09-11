@@ -211,10 +211,12 @@ function G.init()
 	-- ตรวจเนื้อหาแพ็กโมเดลใหม่ (ชั่วคราว): บันทึกชื่อชิ้นส่วน/ขนาดลง diag เพื่อวางแผนจัดวาง
 	task.spawn(function()
 		for _, id in ipairs({ 6418277837, 13168370735, 15264880043, 6853922596, 14800136759, 18888365209, 6850108252, 9432856072 }) do
+			task.wait(1)
 			local ok, res = pcall(function() return game:GetService("InsertService"):LoadAsset(id) end)
 			if not ok or not res then Core.diag("pack " .. id .. " FAIL " .. tostring(res):sub(1, 60))
 			else
-				local m = res:FindFirstChildOfClass("Model") or res
+				local m = res
+				for _ = 1, 3 do local ch = m:GetChildren(); if #ch == 1 and (ch[1]:IsA("Model") or ch[1]:IsA("Folder")) then m = ch[1] else break end end
 				local kids = {}
 				for i, k in ipairs(m:GetChildren()) do
 					if i > 40 then break end
