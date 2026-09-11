@@ -45,10 +45,12 @@ end
 local function road(parent, p1, p2, width, name)
 	table.insert(M.roads, { p1, p2, width })
 	local d = p2 - p1; local len = d.Magnitude; local mid = (p1 + p2) / 2
-	local cf = CFrame.lookAt(mid, p2) * CFrame.new(0, 0.15, 0)
-	part({ Size = Vector3.new(width, 0.3, len), CFrame = cf, Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Asphalt, Name = name or "Road" }, parent)
-	for _, sd in ipairs({ -1, 1 }) do part({ Size = Vector3.new(3, 0.4, len), CFrame = cf * CFrame.new(sd * (width / 2 + 1.5), 0.05, 0), Color = Color3.fromRGB(175, 175, 180), Material = Enum.Material.Concrete }, parent) end
-	for z = -len / 2 + 4, len / 2 - 4, 8 do part({ Size = Vector3.new(0.4, 0.05, 3), CFrame = cf * CFrame.new(0, 0.18, z), Color = Color3.fromRGB(240, 220, 120), CanCollide = false }, parent) end
+	local cf = CFrame.lookAt(mid, p2) * CFrame.new(0, 0.3, 0)
+	-- เจาะ Terrain ใต้ถนนออก แล้ววางถนนหนา 1.2 ให้โผล่เหนือผิวหญ้าแน่นอน (ผิว Terrain อาจนูนถึง y≈0.5)
+	pcall(function() workspace.Terrain:FillBlock(cf * CFrame.new(0, -2, 0), Vector3.new(width + 8, 5, len + 2), Enum.Material.Air) end)
+	part({ Size = Vector3.new(width, 1.2, len), CFrame = cf, Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Asphalt, Name = name or "Road" }, parent)
+	for _, sd in ipairs({ -1, 1 }) do part({ Size = Vector3.new(3, 1.4, len), CFrame = cf * CFrame.new(sd * (width / 2 + 1.5), 0.5, 0), Color = Color3.fromRGB(175, 175, 180), Material = Enum.Material.Concrete }, parent) end
+	for z = -len / 2 + 4, len / 2 - 4, 8 do part({ Size = Vector3.new(0.4, 0.05, 3), CFrame = cf * CFrame.new(0, 0.63, z), Color = Color3.fromRGB(240, 220, 120), CanCollide = false }, parent) end
 	return cf, len
 end
 local function lampAt(parent, pos)
@@ -382,9 +384,9 @@ function M.build()
 	for z = -380, 240, 80 do lampAt(city, Vector3.new(198, 0, z)); lampAt(city, Vector3.new(308, 0, z)) end
 	local TAXI = { { 240, 80, 160 }, { 40, 180, 90 }, { 250, 210, 40 }, { 240, 80, 160 }, { 60, 90, 200 }, { 235, 235, 235 } }
 	for i, spot in ipairs({ { 40, 6.5, 90 }, { 120, -6.5, 270 }, { 260, 6.5, 90 }, { 380, -6.5, 270 }, { 195, -130, 0 }, { 185, 100, 180 } }) do
-		M.car(Vector3.new(spot[1], 0.4, spot[2]), Color3.fromRGB(unpack(TAXI[i])), city, math.rad(spot[3]))
+		M.car(Vector3.new(spot[1], 1.0, spot[2]), Color3.fromRGB(unpack(TAXI[i])), city, math.rad(spot[3]))
 	end
-	for _, spot in ipairs({ Vector3.new(70, 0, -280), Vector3.new(30, 0, -120), Vector3.new(220, 0, -30) }) do M.tuktuk(spot, city) end
+	for _, spot in ipairs({ Vector3.new(70, 0.6, -280), Vector3.new(30, 0.6, -120), Vector3.new(220, 0.6, -30) }) do M.tuktuk(spot, city) end
 	-- ===== สวนลุมพินี =====
 	local park = Instance.new("Model"); park.Name = "Park"; park.Parent = city
 	local PC = Vector3.new(230, 0, 80)
