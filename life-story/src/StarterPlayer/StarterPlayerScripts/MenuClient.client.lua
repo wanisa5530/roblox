@@ -6,7 +6,7 @@ local Remotes = require(RS.Remotes)
 local U = require(script.Parent:WaitForChild("UI"))
 local player = Players.LocalPlayer
 local T = U.T
-local gui = Instance.new("ScreenGui"); gui.Name = "LifeMenu"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui"); gui.Name = "LifeMenu"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui"); U.scaleGui(gui)
 local data = Remotes.GetData:InvokeServer()
 Remotes.DataUpdate.OnClientEvent:Connect(function(d) data = d end)
 local win = U.frame(gui, UDim2.new(0, 680, 0, 470), UDim2.new(0.5, -340, 0.5, -290), U.C.bg, 16, U.C.teal); win.Visible = false; win.BackgroundTransparency = 0.05

@@ -8,7 +8,7 @@ local U = require(script.Parent:WaitForChild("UI"))
 local player = Players.LocalPlayer
 local T = U.T
 local mouse = player:GetMouse()
-local gui = Instance.new("ScreenGui"); gui.Name = "LifeBuild"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui"); gui.Name = "LifeBuild"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui"); U.scaleGui(gui)
 local panel = U.frame(gui, UDim2.new(0, 260, 0, 440), UDim2.new(1, -270, 0.5, -220), U.C.bg, 12); panel.Visible = false
 U.label(panel, "🛋️ " .. T("build"), UDim2.new(1, -50, 0, 30), UDim2.new(0, 10, 0, 6), { textSize = 16, color = U.C.accent })
 U.button(panel, "✕", UDim2.new(0, 30, 0, 30), UDim2.new(1, -36, 0, 6), U.C.red, function() panel.Visible = false end)

@@ -21,6 +21,18 @@ function U.iconButton(parent, icon, label, size, pos, color, cb)
 	return b, holder
 end
 -- แถบความต้องการสไตล์ Sims: ไล่สีเขียว→เหลือง→แดง ตามค่า
+-- ขยาย UI ตามขนาดจอ (จอใหญ่ = ตัวหนังสือ/ไอคอนใหญ่ขึ้น) และปรับเมื่อขนาดจอเปลี่ยน
+function U.scaleGui(gui, base)
+	local sc = Instance.new("UIScale"); sc.Parent = gui
+	local cam = workspace.CurrentCamera
+	local function apply()
+		local v = cam and cam.ViewportSize or Vector2.new(1280, 720)
+		sc.Scale = math.clamp(math.min(v.Y / (base or 720), v.X / 1280), 1, 1.9)
+	end
+	apply()
+	if cam then cam:GetPropertyChangedSignal("ViewportSize"):Connect(apply) end
+	return sc
+end
 function U.needColor(v) if v < 0.25 then return U.C.red elseif v < 0.5 then return U.C.yellow end return U.C.green end
 function U.label(parent, text, size, pos, opts)
 	opts = opts or {}

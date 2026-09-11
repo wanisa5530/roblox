@@ -6,7 +6,7 @@ local Remotes = require(RS.Remotes)
 local U = require(script.Parent:WaitForChild("UI"))
 local player = Players.LocalPlayer
 local T = U.T
-local gui = Instance.new("ScreenGui"); gui.Name = "LifeMinigame"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui"); gui.Name = "LifeMinigame"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui"); U.scaleGui(gui)
 local win = U.frame(gui, UDim2.new(0, 440, 0, 220), UDim2.new(0.5, -220, 0.5, -110), U.C.bg, 14); win.Visible = false
 local title = U.label(win, "", UDim2.new(1, -20, 0, 30), UDim2.new(0, 10, 0, 8), { textSize = 18, color = U.C.accent, align = Enum.TextXAlignment.Center })
 local hint = U.label(win, "", UDim2.new(1, -20, 0, 24), UDim2.new(0, 10, 0, 40), { textSize = 13, color = U.C.dim, align = Enum.TextXAlignment.Center })

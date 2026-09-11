@@ -6,7 +6,7 @@ local Remotes = require(RS.Remotes)
 local U = require(script.Parent:WaitForChild("UI"))
 local player = Players.LocalPlayer
 local T = U.T
-local gui = Instance.new("ScreenGui"); gui.Name = "LifeSocial"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui"); gui.Name = "LifeSocial"; gui.ResetOnSpawn = false; gui.Parent = player:WaitForChild("PlayerGui"); U.scaleGui(gui)
 local win = U.frame(gui, UDim2.new(0, 300, 0, 400), UDim2.new(1, -320, 0.5, -200), U.C.bg, 12); win.Visible = false
 local head = U.label(win, "", UDim2.new(1, -50, 0, 30), UDim2.new(0, 10, 0, 6), { textSize = 16, color = U.C.accent })
 local sub = U.label(win, "", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 34), { textSize = 12, color = U.C.dim })

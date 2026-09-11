@@ -12,7 +12,7 @@ game:GetService("ScriptContext").Error:Connect(function(msg, trace) pcall(functi
 local lang = Locale.detect(LocalizationService.RobloxLocaleId)
 player:SetAttribute("Lang", lang); Remotes.Action:FireServer("lang", lang)
 local T = U.T
-local gui = Instance.new("ScreenGui"); gui.Name = "LifeHud"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.Parent = player:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui"); gui.Name = "LifeHud"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.Parent = player:WaitForChild("PlayerGui"); U.scaleGui(gui)
 local data
 -- ===== แถบล่างสไตล์ The Sims: ซ้าย=ตัวละคร/อารมณ์/ปุ่ม กลาง=ความต้องการ ขวา=เงิน/เวลา/โหมด =====
 local BAR_H = 118
