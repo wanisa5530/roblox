@@ -67,16 +67,34 @@ end
 function M.build()
 	if workspace:FindFirstChild("City") then return end
 	local city = Instance.new("Folder"); city.Name = "City"; city.Parent = workspace
-	part({ Size = Vector3.new(1000, 2, 1000), Position = Vector3.new(40, -1, 0), Color = Color3.fromRGB(90, 150, 80), Material = Enum.Material.Grass, Name = "Ground" }, city)
+	-- พื้นดินเป็น Terrain หญ้าจริง (มีเนินเล็กน้อยรอบเมือง) + น้ำจริงในแม่น้ำ
+	local Terrain = workspace.Terrain
+	pcall(function()
+		Terrain:Clear()
+		Terrain:FillBlock(CFrame.new(40, -6, 0), Vector3.new(1400, 12, 1400), Enum.Material.Grass)
+		Terrain:FillBlock(CFrame.new(40, -30, 0), Vector3.new(1400, 40, 1400), Enum.Material.Ground)
+		for i = 1, 14 do  -- เนินรอบขอบเมือง
+			local a = i / 14 * math.pi * 2; local hp = Vector3.new(40 + math.cos(a) * 600, 0, math.sin(a) * 600)
+			Terrain:FillBall(hp + Vector3.new(0, -10, 0), 60 + (i % 3) * 20, Enum.Material.Grass)
+		end
+	end)
+	part({ Size = Vector3.new(1000, 0.2, 1000), Position = Vector3.new(40, -0.2, 0), Color = Color3.fromRGB(90, 150, 80), Material = Enum.Material.Grass, Name = "Ground", Transparency = 1 }, city)
 	-- ===== แม่น้ำเจ้าพระยา (โค้ง) + ตลิ่ง + ท่าเรือ =====
 	local RIVER = { Vector3.new(-120, 0, -480), Vector3.new(-90, 0, -260), Vector3.new(-40, 0, -90), Vector3.new(-60, 0, 80), Vector3.new(-120, 0, 260), Vector3.new(-100, 0, 480) }
 	M.river = RIVER
 	for i = 1, #RIVER - 1 do
 		local p1, p2 = RIVER[i], RIVER[i + 1]; local mid = (p1 + p2) / 2; local len = (p2 - p1).Magnitude + 30
 		local cf = CFrame.lookAt(mid, p2)
-		part({ Size = Vector3.new(70, 1, len), CFrame = cf * CFrame.new(0, -0.6, 0), Color = Color3.fromRGB(70, 120, 140), Material = Enum.Material.Glass, Transparency = 0.15, Reflectance = 0.25, Name = "Water", CanCollide = false }, city)
-		part({ Size = Vector3.new(74, 2.5, len), CFrame = cf * CFrame.new(0, -2, 0), Color = Color3.fromRGB(60, 90, 70), Material = Enum.Material.Mud, Name = "RiverBed" }, city)
-		for _, sd in ipairs({ -1, 1 }) do part({ Size = Vector3.new(6, 1.2, len), CFrame = cf * CFrame.new(sd * 38, 0.3, 0), Color = Color3.fromRGB(170, 165, 150), Material = Enum.Material.Concrete, Name = "Bank" }, city) end
+		pcall(function()
+			Terrain:FillBlock(cf * CFrame.new(0, -6, 0), Vector3.new(84, 14, len), Enum.Material.Air)
+			Terrain:FillBlock(cf * CFrame.new(0, -9, 0), Vector3.new(84, 6, len), Enum.Material.Mud)
+			Terrain:FillBlock(cf * CFrame.new(0, -3.5, 0), Vector3.new(80, 6, len), Enum.Material.Water)
+		end)
+		for _, sd in ipairs({ -1, 1 }) do
+			part({ Size = Vector3.new(8, 1.6, len), CFrame = cf * CFrame.new(sd * 44, 0.3, 0), Color = Color3.fromRGB(170, 165, 150), Material = Enum.Material.Concrete, Name = "Bank" }, city)
+			for k = -len / 2 + 15, len / 2 - 15, 30 do part({ Size = Vector3.new(0.3, 2.2, 0.3), CFrame = cf * CFrame.new(sd * 41, 2.1, k), Color = Color3.fromRGB(40, 40, 45), Material = Enum.Material.Metal }, city) end
+			part({ Size = Vector3.new(0.2, 0.2, len - 20), CFrame = cf * CFrame.new(sd * 41, 3.1, 0), Color = Color3.fromRGB(40, 40, 45), Material = Enum.Material.Metal }, city)
+		end
 	end
 	-- ท่าเรือ 2 แห่ง (ท่าช้าง ฝั่งพระนคร / ท่าวัดอรุณ ฝั่งธน)
 	for _, pr in ipairs({ Vector3.new(-5, 0, -100), Vector3.new(-100, 0, -30) }) do
@@ -213,6 +231,94 @@ function M.build()
 					while os.clock() - t0 < dur do local a = (os.clock() - t0) / dur; a = a * a * (3 - 2 * a); train:PivotTo(CFrame.new(xs[1] + (xs[2] - xs[1]) * a, y + 4.5, z0)); task.wait() end
 					task.wait(4)
 				end
+			end
+		end)
+	end
+	-- ===== ตึกเติมเมือง: คอนโด/ออฟฟิศสูงย่านสีลม-สาทร-สุขุมวิท + ตึกแถวเยาวราช/เจริญกรุง =====
+	local function tower(pos, w, d, h, style)
+		local m = Instance.new("Model"); m.Name = "Tower"; m.Parent = city
+		local base = { Color3.fromRGB(200, 205, 215), Color3.fromRGB(230, 225, 215), Color3.fromRGB(160, 170, 185), Color3.fromRGB(120, 140, 170) }
+		local col = base[style % #base + 1]
+		part({ Size = Vector3.new(w, h, d), Position = pos + Vector3.new(0, h / 2, 0), Color = col, Material = style % 2 == 0 and Enum.Material.Concrete or Enum.Material.Metal, Name = "Body" }, m)
+		local floors = math.floor(h / 8)
+		for i = 1, floors do
+			local lit = math.random() < 0.55
+			for _, f in ipairs({ { Vector3.new(w + 0.3, 3.2, 0.3), Vector3.new(0, i * 8 - 3, d / 2 + 0.1) }, { Vector3.new(w + 0.3, 3.2, 0.3), Vector3.new(0, i * 8 - 3, -d / 2 - 0.1) }, { Vector3.new(0.3, 3.2, d + 0.3), Vector3.new(w / 2 + 0.1, i * 8 - 3, 0) }, { Vector3.new(0.3, 3.2, d + 0.3), Vector3.new(-w / 2 - 0.1, i * 8 - 3, 0) } }) do
+				part({ Size = f[1], Position = pos + f[2], Color = lit and Color3.fromRGB(255, 235, 170) or Color3.fromRGB(90, 150, 200), Material = lit and Enum.Material.Neon or Enum.Material.Glass, Transparency = lit and 0.25 or 0.2, Reflectance = 0.3, CanCollide = false }, m)
+			end
+		end
+		part({ Size = Vector3.new(w + 1, 1, d + 1), Position = pos + Vector3.new(0, h + 0.5, 0), Color = Color3.fromRGB(70, 70, 75), Material = Enum.Material.Concrete }, m)
+		if h > 60 then local sp = part({ Size = Vector3.new(0.8, 12, 0.8), Position = pos + Vector3.new(0, h + 7, 0), Color = Color3.fromRGB(200, 200, 205), Material = Enum.Material.Metal }, m); local bl = part({ Size = Vector3.new(1, 1, 1), Position = pos + Vector3.new(0, h + 13.5, 0), Color = Color3.fromRGB(255, 60, 60), Material = Enum.Material.Neon }, m); local pl = Instance.new("PointLight"); pl.Color = Color3.fromRGB(255, 60, 60); pl.Range = 30; pl.Parent = bl; sp.Name = "Spire" end
+		return m
+	end
+	local function shophouse(pos, yaw, n, neon)  -- ตึกแถว n คูหา 3 ชั้น
+		local m = Instance.new("Model"); m.Name = "Shophouse"; m.Parent = city
+		local cf = CFrame.new(pos) * CFrame.Angles(0, yaw, 0)
+		local cols = { Color3.fromRGB(240, 225, 200), Color3.fromRGB(230, 200, 170), Color3.fromRGB(215, 225, 235), Color3.fromRGB(245, 235, 225), Color3.fromRGB(200, 215, 200) }
+		for i = 0, n - 1 do
+			local x = (i - (n - 1) / 2) * 12
+			part({ Size = Vector3.new(12, 24, 16), CFrame = cf * CFrame.new(x, 12, 0), Color = cols[(i % #cols) + 1], Material = Enum.Material.Concrete }, m)
+			part({ Size = Vector3.new(10, 7, 0.4), CFrame = cf * CFrame.new(x, 3.6, 8.2), Color = Color3.fromRGB(80, 60, 50), Material = Enum.Material.Metal }, m)                         -- ประตูม้วน
+			part({ Size = Vector3.new(11, 0.4, 4), CFrame = cf * CFrame.new(x, 8, 10), Color = Color3.fromRGB(180, 40, 40), Material = Enum.Material.Metal }, m)                             -- กันสาด
+			for fl = 1, 2 do part({ Size = Vector3.new(6, 4, 0.3), CFrame = cf * CFrame.new(x, 8 + fl * 7, 8.2), Color = Color3.fromRGB(120, 180, 220), Material = Enum.Material.Glass, Transparency = 0.3, CanCollide = false }, m); part({ Size = Vector3.new(8, 0.3, 2), CFrame = cf * CFrame.new(x, 6 + fl * 7, 9), Color = Color3.fromRGB(200, 200, 205), Material = Enum.Material.Concrete }, m) end
+			if neon then
+				local c = ({ Color3.fromRGB(255, 60, 60), Color3.fromRGB(255, 200, 40), Color3.fromRGB(60, 220, 120), Color3.fromRGB(255, 80, 200) })[(i % 4) + 1]
+				local np = part({ Size = Vector3.new(2, 7, 0.4), CFrame = cf * CFrame.new(x + 5, 15, 9.5), Color = c, Material = Enum.Material.Neon }, m)
+				local l = Instance.new("PointLight"); l.Color = c; l.Range = 18; l.Brightness = 1; l.Parent = np
+				local g = Instance.new("SurfaceGui"); g.Face = Enum.NormalId.Front; g.CanvasSize = Vector2.new(100, 350); g.Parent = np
+				local t = Instance.new("TextLabel"); t.Size = UDim2.fromScale(1, 1); t.BackgroundTransparency = 1; t.TextScaled = true; t.Font = Enum.Font.GothamBlack; t.TextColor3 = Color3.new(1, 1, 1); t.Text = ({ "金", "福", "龍", "茶" })[(i % 4) + 1]; t.Parent = g
+			end
+		end
+		part({ Size = Vector3.new(n * 12 + 1, 1, 17), CFrame = cf * CFrame.new(0, 24.5, 0), Color = Color3.fromRGB(80, 80, 85), Material = Enum.Material.Concrete }, m)
+		return m
+	end
+	local function palm(pos)
+		part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(14, 1, 1), CFrame = CFrame.new(pos + Vector3.new(0, 7, 0)) * CFrame.Angles(0, 0, math.rad(90)) * CFrame.Angles(0, 0, math.rad(4)), Color = Color3.fromRGB(120, 90, 60), Material = Enum.Material.Wood }, city)
+		for i = 1, 6 do local a = i / 6 * math.pi * 2; local leaf = Instance.new("WedgePart"); leaf.Anchored = true; leaf.CanCollide = false; leaf.Size = Vector3.new(1.6, 0.4, 7); leaf.CFrame = CFrame.new(pos + Vector3.new(0, 14, 0)) * CFrame.Angles(0, a, 0) * CFrame.new(0, 0, -3.5) * CFrame.Angles(math.rad(-25), 0, 0); leaf.Color = Color3.fromRGB(50, 150, 60); leaf.Material = Enum.Material.Grass; leaf.Parent = city end
+	end
+	math.randomseed(7)
+	-- สีลม/สาทร: ตึกสูง
+	for _, t in ipairs({ { 20, 260, 26, 26, 90, 1 }, { 110, 270, 30, 24, 120, 0 }, { 230, 260, 24, 24, 80, 2 }, { 300, 230, 22, 22, 70, 3 }, { 120, 140, 20, 20, 60, 1 }, { 30, 110, 22, 20, 50, 2 }, { 260, 120, 24, 22, 66, 0 } }) do tower(Vector3.new(t[1], 0, t[2]), t[3], t[4], t[5], t[6]) end
+	-- สุขุมวิท/อโศก: คอนโด
+	for _, t in ipairs({ { 400, -240, 24, 30, 70, 3 }, { 400, -120, 28, 28, 90, 0 }, { 400, 40, 26, 26, 60, 1 }, { 400, 140, 24, 24, 76, 2 }, { 250, -240, 26, 26, 56, 1 }, { 250, -150, 22, 22, 44, 3 }, { 120, -30, 24, 24, 48, 2 }, { 20, -60, 22, 22, 40, 0 } }) do tower(Vector3.new(t[1], 0, t[2]), t[3], t[4], t[5], t[6]) end
+	-- เยาวราช: ตึกแถว + ป้ายนีออนจีน สองฝั่งถนน
+	local yA, yB = Vector3.new(10, 0, -160), Vector3.new(200, 0, -90); local ydir = (yB - yA).Unit; local yaw = math.atan2(-ydir.X, -ydir.Z)
+	for _, sd in ipairs({ -1, 1 }) do for k = 0.18, 0.85, 0.3 do local c = yA + (yB - yA) * k; local nrm = Vector3.new(-ydir.Z, 0, ydir.X) * sd * 22; shophouse(c + nrm, yaw + (sd > 0 and math.pi / 2 or -math.pi / 2), 4, true) end end
+	-- เจริญกรุง/ท่าช้าง: ตึกแถวริมน้ำ + ราชดำเนิน: ตึกแถวสไตล์เก่า
+	for _, z in ipairs({ -320, -240, 60, 120 }) do shophouse(Vector3.new(30, 0, z), math.rad(-90), 4, false) end
+	for _, x in ipairs({ 40, 110, 190 }) do shophouse(Vector3.new(x, 0, -270), 0, 5, false); shophouse(Vector3.new(x, 0, -330), math.pi, 5, false) end
+	-- ต้นปาล์ม/ต้นไม้ริมน้ำ ริมถนน สวน
+	for _, pt in ipairs(RIVER) do palm(pt + Vector3.new(50, 0, 10)); palm(pt + Vector3.new(-50, 0, -10)) end
+	for x = 20, 400, 45 do palm(Vector3.new(x, 0, -30)) end
+	for i = 1, 30 do tree(city, Vector3.new(math.random(-380, -230), 0, math.random(-380, 20)), 0.8 + math.random() * 0.6) end
+	for i = 1, 20 do tree(city, Vector3.new(math.random(20, 420), 0, math.random(260, 440)), 0.8 + math.random() * 0.6) end
+	-- คลอง (ฝั่งธน) + สะพานไม้
+	pcall(function()
+		local k1, k2 = Vector3.new(-380, 0, 0), Vector3.new(-200, 0, -20)
+		local cfk = CFrame.lookAt((k1 + k2) / 2, k2)
+		Terrain:FillBlock(cfk * CFrame.new(0, -3, 0), Vector3.new(14, 6, (k2 - k1).Magnitude), Enum.Material.Air)
+		Terrain:FillBlock(cfk * CFrame.new(0, -2.5, 0), Vector3.new(12, 4, (k2 - k1).Magnitude), Enum.Material.Water)
+		part({ Size = Vector3.new(4, 0.4, 18), CFrame = cfk * CFrame.new(0, 1.2, 0) * CFrame.Angles(0, math.rad(90), 0), Color = Color3.fromRGB(130, 90, 50), Material = Enum.Material.WoodPlanks }, city)
+	end)
+	-- เรือด่วนเจ้าพระยา / เรือหางยาว วิ่งตามแม่น้ำ
+	for bi = 1, 3 do
+		local boat = Instance.new("Model"); boat.Name = "Boat"; boat.Parent = city
+		local long = bi == 3
+		local hull = part({ Size = long and Vector3.new(4, 2, 22) or Vector3.new(8, 3, 26), Position = Vector3.new(0, 0, 0), Color = long and Color3.fromRGB(200, 60, 60) or Color3.fromRGB(240, 240, 240), Material = Enum.Material.Wood, CanCollide = false }, boat)
+		boat.PrimaryPart = hull
+		part({ Size = long and Vector3.new(3.6, 2, 12) or Vector3.new(7, 3, 16), Position = Vector3.new(0, 2.4, -2), Color = long and Color3.fromRGB(40, 90, 200) or Color3.fromRGB(230, 120, 40), Material = Enum.Material.Fabric, CanCollide = false }, boat)
+		local bow = Instance.new("WedgePart"); bow.Anchored = true; bow.CanCollide = false; bow.Size = long and Vector3.new(4, 2, 6) or Vector3.new(8, 3, 8); bow.CFrame = hull.CFrame * CFrame.new(0, 0, long and -14 or -17) * CFrame.Angles(0, math.pi, 0); bow.Color = hull.Color; bow.Material = Enum.Material.Wood; bow.Parent = boat
+		task.spawn(function()
+			local idx = bi; local dir = 1
+			while boat.Parent do
+				local p1 = RIVER[idx]; local p2 = RIVER[idx + dir]
+				if not p2 then dir = -dir; p2 = RIVER[idx + dir] end
+				local off = Vector3.new(bi * 10 - 20, 0, 0)
+				local dist = (p2 - p1).Magnitude; local dur = dist / (long and 16 or 10)
+				local t0 = os.clock()
+				while os.clock() - t0 < dur and boat.Parent do local a = (os.clock() - t0) / dur; boat:PivotTo(CFrame.lookAt(p1:Lerp(p2, a) + off + Vector3.new(0, 0.3, 0), p2 + off) * CFrame.new(0, math.sin(os.clock() * 2) * 0.15, 0)); task.wait() end
+				idx += dir
+				if idx >= #RIVER or idx <= 1 then dir = -dir end
 			end
 		end)
 	end
@@ -397,7 +503,9 @@ function M.build()
 	local spawn = Instance.new("SpawnLocation"); spawn.Size = Vector3.new(10, 0.4, 10); spawn.Position = Vector3.new(160, 0.35, -30); spawn.Anchored = true; spawn.Neutral = true; spawn.Transparency = 1; spawn.CanCollide = false; spawn.Parent = city
 	local dec = spawn:FindFirstChildOfClass("Decal"); if dec then dec:Destroy() end
 	-- แสงบรรยากาศ
-	local L = game:GetService("Lighting"); L.Brightness = 2; L.Ambient = Color3.fromRGB(110, 110, 120); L.OutdoorAmbient = Color3.fromRGB(130, 130, 140)
+	local L = game:GetService("Lighting"); L.Brightness = 2.2; L.Ambient = Color3.fromRGB(120, 125, 140); L.OutdoorAmbient = Color3.fromRGB(140, 145, 160); L.EnvironmentDiffuseScale = 0.6; L.EnvironmentSpecularScale = 0.6; L.GlobalShadows = true; L.FogEnd = 1200; L.FogColor = Color3.fromRGB(200, 210, 230)
+	if not L:FindFirstChildOfClass("SunRaysEffect") then local sr = Instance.new("SunRaysEffect"); sr.Intensity = 0.08; sr.Parent = L end
+	if not L:FindFirstChildOfClass("ColorCorrectionEffect") then local cc = Instance.new("ColorCorrectionEffect"); cc.Saturation = 0.12; cc.Contrast = 0.06; cc.Parent = L end
 	if not L:FindFirstChildOfClass("Sky") then local sky = Instance.new("Sky"); sky.SkyboxBk = "rbxassetid://591058823"; sky.SkyboxDn = "rbxassetid://591059876"; sky.SkyboxFt = "rbxassetid://591058104"; sky.SkyboxLf = "rbxassetid://591057861"; sky.SkyboxRt = "rbxassetid://591057625"; sky.SkyboxUp = "rbxassetid://591059642"; sky.Parent = L end
 	if not L:FindFirstChildOfClass("Atmosphere") then local at = Instance.new("Atmosphere"); at.Density = 0.3; at.Parent = L end
 	if not L:FindFirstChildOfClass("BloomEffect") then local bl = Instance.new("BloomEffect"); bl.Intensity = 0.4; bl.Parent = L end
