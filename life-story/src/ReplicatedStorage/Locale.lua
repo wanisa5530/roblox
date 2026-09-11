@@ -1,0 +1,104 @@
+-- ข้อความ 5 ภาษา (ภาษาที่ไม่มีคีย์จะถอยไปใช้ en)
+local L = { strings = {} }
+L.strings.en = {
+	updateKick = "Game updated! Please rejoin 🎉", title = "Life Story", cash = "Money", day = "Day %d", clock = "%02d:%02d", season = "Season", Summer = "Summer", Rainy = "Rainy", Winter = "Winter", Spring = "Spring",
+	hunger = "Hunger", energy = "Energy", bladder = "Bladder", hygiene = "Hygiene", fun = "Fun", social = "Social", environment = "Environment", health = "Health",
+	Baby = "Baby", Toddler = "Toddler", Child = "Child", Teen = "Teen", YoungAdult = "Young Adult", Adult = "Adult", Elder = "Elder", age = "Age", stage = "Life stage", generation = "Generation %d",
+	Happy = "Happy", Sad = "Sad", Angry = "Angry", Stressed = "Stressed", Embarrassed = "Embarrassed", Inspired = "Inspired", Confident = "Confident", Focused = "Focused", Playful = "Playful", Flirty = "Flirty", Bored = "Bored", Scared = "Scared", Sick = "Sick", mood = "Mood",
+	Lazy = "Lazy", Active = "Active", Outgoing = "Outgoing", Loner = "Loner", Glutton = "Glutton", Neat = "Neat", Genius = "Genius", Creative = "Creative", Romantic = "Romantic", Cheerful = "Cheerful", HotHeaded = "Hot-headed", Frugal = "Frugal", Foodie = "Foodie", Bookworm = "Bookworm", Jokester = "Jokester", Athlete = "Athlete", Handy = "Handy", GreenThumb = "Green thumb", NightOwl = "Night owl", Clumsy = "Clumsy",
+	Wealth = "Fabulously Wealthy", BigFamily = "Big Happy Family", TopChef = "Master Chef", Doctor = "Doctor", Entrepreneur = "Entrepreneur", Scholar = "Scholar", Socialite = "Socialite", Legacy = "Family Legacy",
+	cooking = "Cooking", fitness = "Fitness", charisma = "Charisma", logic = "Logic", handiness = "Handiness", gardening = "Gardening", painting = "Painting", music = "Music", programming = "Programming", writing = "Writing",
+	Police = "Police Officer", Chef = "Chef", Programmer = "Programmer", Teacher = "Teacher", Artist = "Artist", Barista = "Barista (part-time)", unemployed = "Unemployed",
+	Hospital = "Hospital", School = "School", Restaurant = "Restaurant", TechOffice = "Tech Office", Gallery = "Art Gallery", Cafe = "Cafe", University = "University", Park = "Park", CityHall = "City Hall", Shop = "Furniture Store", Apartments = "Apartments",
+	Medicine = "Medicine", Engineering = "Engineering", Arts = "Arts", Law = "Law",
+	Cold = "Cold", Flu = "Flu", FoodPoison = "Food poisoning", BrokenBone = "Broken bone", Burnout = "Burnout", Chronic = "Chronic illness", healthy = "Healthy",
+	Apartment = "Apartment", Starter = "Starter House", Family = "Family House", Mansion = "Mansion",
+	Chat = "Chat", Joke = "Tell joke", Compliment = "Compliment", DeepTalk = "Deep talk", Flirt = "Flirt", Kiss = "Kiss", AskDate = "Ask on date", Propose = "Propose", Argue = "Argue", Apologize = "Apologize", Insult = "Insult", Hug = "Hug",
+	stranger = "Stranger", acquaintance = "Acquaintance", friend = "Friend", bestFriend = "Best friend", lover = "Lover", spouse = "Spouse", enemy = "Enemy", ex = "Ex",
+	Dog = "Dog", Cat = "Cat", Rabbit = "Rabbit",
+	-- UI
+	menu = "Menu", character = "Me", skills = "Skills", career = "Career", school = "School", relationships = "People", home = "Home", build = "Build", business = "Business", shop = "Shop", passes = "Passes", robux = "Robux", family = "Family", quests = "Goals",
+	traits = "Traits", aspiration = "Dream", chooseTraits = "Choose 3 traits", chooseAspiration = "Choose your dream", start = "Start life", yourName = "Your name",
+	applyJob = "Apply", quit = "Quit job", level = "Level %d", performance = "Performance", nextPromo = "Next promotion", goWork = "Go to work", workNow = "It's work time! Go to %s", shiftDone = "Shift done! Earned $%s", promoted = "Promoted to level %d!", late = "You missed work. Performance -20", needDegree = "Needs a degree (level %d+)", fired = "You were fired for poor performance",
+	goSchool = "Go to school", schoolDone = "School day done. Grade: %s", homework = "Do homework", enroll = "Enroll (฿%s)", enrolled = "Enrolled in %s!", exam = "Exam", graduated = "Graduated in %s! 🎓", degree = "Degree", noDegree = "No degree", tuition = "Tuition",
+	needs = "Needs", sleep = "Sleep", eat = "Eat", cook = "Cook", useToilet = "Use", shower = "Shower", bath = "Bathe", watch = "Watch TV", sit = "Sit", play = "Play", read = "Read", use = "Use", practice = "Practice", workout = "Work out", tinker = "Tinker", garden = "Garden", harvest = "Harvest", call = "Call a friend", clean = "Clean up", stop = "Stop", stopAction = "Stop %s",
+	buy = "Buy", place = "Place", sell = "Sell", move = "Move", rotate = "Rotate", done = "Done", buildMode = "Build mode: click on your lot to place", owned = "OWNED", notEnough = "Not enough money!", tooManyItems = "Lot is full", buyLot = "Buy lot", moveIn = "Move in", rent = "Rent", tax = "Tax", bills = "Bills paid: $%s", billsUnpaid = "Bills unpaid! Power cut", bought = "Bought %s",
+	hire = "Hire", buyBusiness = "Open cafe (฿%s)", serve = "Serve", customers = "Customers served", revenue = "Revenue", workHere = "Work here", employee = "Employee", bizUpgrade = "Upgrade cafe", bizLevel = "Cafe level %d", bizEarn = "Cafe +฿%s", bizOwner = "Owner", earnedShare = "Wage +฿%s",
+	sick = "You caught %s!", cured = "Cured!", treat = "Treat (฿%s)", rest = "Rest to recover", insurance = "Health insurance", buyInsurance = "Buy insurance (฿%s / 7 days)", dying = "Health critical! See a doctor", died = "%s has passed away (%s)", deathOld = "old age", deathHunger = "starvation", deathFire = "fire", deathIllness = "untreated illness", deathMeteor = "a meteor", deathAccident = "an accident", ghost = "You are a ghost... choose your heir", newLife = "New life as %s (generation %d)", inherit = "Inherited ฿%s and the house", fire = "FIRE in the kitchen! 🔥", fireOut = "Fire is out", extinguish = "Extinguish",
+	married = "Married %s! 💍", tryBaby = "Try for baby", babyBorn = "A baby was born: %s 👶", adopt = "Adopt (฿%s)", adoptPet = "Adopt pet", kids = "Children", pet = "Pet", grewUp = "%s grew up: %s", proposeNo = "%s said no", proposeYes = "%s said yes!", divorce = "Divorce", divorced = "Divorced", wedding = "Wedding (฿%s)", playWithKid = "Play with %s", feedPet = "Feed pet", noSpouse = "You need a spouse",
+	milestone = "Dream milestone reached! +฿%s", aspirationDone = "Dream fulfilled! 🌟", skillUp = "%s skill level %d!", questDone = "Goal complete +฿%s", qskill = "Gain %d skill levels", qsocial = "Chat with %d people", qwork = "Work %d shifts", qneeds = "Keep all needs above 50 for a day", qmoney = "Earn ฿%s",
+	eventLottery = "You won the lottery! +฿%s", eventBurglar = "A burglar stole ฿%s (buy a smoke alarm/security)", eventFriendGift = "A friend sent a gift +฿%s", eventBonus = "Work bonus +฿%s", eventCarRepair = "Car repair -฿%s", eventMeteor = "A meteor fell...", festival = "Festival: %s (gift ฿%s)", NewYear = "New Year", Songkran = "Songkran", Halloween = "Halloween", LoyKrathong = "Loy Krathong", Christmas = "Christmas",
+	daily = "Daily reward", claim = "Claim", claimed = "Come back tomorrow", topPlayers = "Richest families", weekly = "This week",
+	VIP = "VIP", MansionPass = "Mansion", SportsCar = "Sports car", PetPack = "Exotic pets", SecondLife = "Second character", Cash1 = "฿5,000", Cash2 = "฿30,000", Cash3 = "฿150,000", Elixir = "Youth elixir", Rename = "Rename",
+	vipDesc = "Name tag, +฿500 daily, exclusive outfits", mansionDesc = "Unlock the mansion lot", carDesc = "Fast car, no taxi fees", petDesc = "Exotic pets: parrot, fox, mini pig", secondLifeDesc = "Play a second family", elixirDesc = "Go back one life stage",
+	needLow = "%s is very low!", collapsed = "You collapsed from exhaustion", wetSelf = "Oops... accident", starving = "You are starving!", stinky = "People avoid you... take a shower", lonely = "You feel lonely", boredMsg = "So bored...", dirtyHome = "Home is messy. Clean up!",
+	seasonRain = "Rainy season: fun -, colds +", seasonWinter = "Winter: colds +", seasonSummer = "Summer: energy -",
+	npcTalk = "Talk", inviteHome = "Invite home", relationship = "Relationship", romance = "Romance", friendship = "Friendship", you = "You", npc = "Citizen",
+	mgTiming = "Press SPACE / tap in the green zone!", lang = "Language", welcome = "Welcome to Life Story! Create your character", loading = "Loading...", version = "v%s", taxi = "Taxi to", walkTo = "Go to",
+}
+L.strings.th = {
+	updateKick = "เกมอัปเดตแล้ว! กรุณาเข้าใหม่ 🎉", title = "ไลฟ์สตอรี่", cash = "เงิน", day = "วันที่ %d", season = "ฤดู", Summer = "ฤดูร้อน", Rainy = "ฤดูฝน", Winter = "ฤดูหนาว", Spring = "ฤดูใบไม้ผลิ",
+	hunger = "หิว", energy = "พลังงาน", bladder = "ห้องน้ำ", hygiene = "สะอาด", fun = "สนุก", social = "สังคม", environment = "สภาพบ้าน", health = "สุขภาพ",
+	Baby = "ทารก", Toddler = "เด็กเล็ก", Child = "เด็ก", Teen = "วัยรุ่น", YoungAdult = "วัยหนุ่มสาว", Adult = "ผู้ใหญ่", Elder = "ผู้สูงอายุ", age = "อายุ", stage = "ช่วงชีวิต", generation = "รุ่นที่ %d",
+	Happy = "มีความสุข", Sad = "เศร้า", Angry = "โกรธ", Stressed = "เครียด", Embarrassed = "อาย", Inspired = "มีแรงบันดาลใจ", Confident = "มั่นใจ", Focused = "มีสมาธิ", Playful = "ขี้เล่น", Flirty = "โรแมนติก", Bored = "เบื่อ", Scared = "กลัว", Sick = "ไม่สบาย", mood = "อารมณ์",
+	Lazy = "ขี้เกียจ", Active = "กระตือรือร้น", Outgoing = "ชอบสังคม", Loner = "ชอบอยู่คนเดียว", Glutton = "ตะกละ", Neat = "รักสะอาด", Genius = "อัจฉริยะ", Creative = "สร้างสรรค์", Romantic = "โรแมนติก", Cheerful = "ร่าเริง", HotHeaded = "ขี้โมโห", Frugal = "ประหยัด", Foodie = "นักชิม", Bookworm = "หนอนหนังสือ", Jokester = "ตลก", Athlete = "นักกีฬา", Handy = "ช่างซ่อม", GreenThumb = "มือเย็น", NightOwl = "นกฮูก", Clumsy = "ซุ่มซ่าม",
+	Wealth = "มหาเศรษฐี", BigFamily = "ครอบครัวใหญ่", TopChef = "สุดยอดเชฟ", Doctor = "หมอ", Entrepreneur = "เจ้าของธุรกิจ", Scholar = "นักปราชญ์", Socialite = "ดาวสังคม", Legacy = "ตำนานตระกูล",
+	cooking = "ทำอาหาร", fitness = "ฟิตเนส", charisma = "เสน่ห์", logic = "ตรรกะ", handiness = "ซ่อมของ", gardening = "ทำสวน", painting = "วาดรูป", music = "ดนตรี", programming = "เขียนโปรแกรม", writing = "เขียนหนังสือ",
+	Police = "ตำรวจ", Chef = "เชฟ", Programmer = "โปรแกรมเมอร์", Teacher = "ครู", Artist = "ศิลปิน", Barista = "บาริสต้า (พาร์ทไทม์)", unemployed = "ว่างงาน",
+	Hospital = "โรงพยาบาล", School = "โรงเรียน", Restaurant = "ร้านอาหาร", TechOffice = "บริษัทเทค", Gallery = "หอศิลป์", Cafe = "คาเฟ่", University = "มหาวิทยาลัย", Park = "สวนสาธารณะ", CityHall = "ศาลากลาง", Shop = "ร้านเฟอร์นิเจอร์", Apartments = "อพาร์ตเมนต์",
+	Medicine = "แพทยศาสตร์", Engineering = "วิศวกรรม", Arts = "ศิลปศาสตร์", Law = "นิติศาสตร์",
+	Cold = "หวัด", Flu = "ไข้หวัดใหญ่", FoodPoison = "อาหารเป็นพิษ", BrokenBone = "กระดูกหัก", Burnout = "หมดไฟ", Chronic = "โรคเรื้อรัง", healthy = "แข็งแรง",
+	Apartment = "อพาร์ตเมนต์", Starter = "บ้านหลังแรก", Family = "บ้านครอบครัว", Mansion = "คฤหาสน์",
+	Chat = "คุย", Joke = "เล่าเรื่องตลก", Compliment = "ชม", DeepTalk = "คุยลึกซึ้ง", Flirt = "จีบ", Kiss = "จูบ", AskDate = "ชวนเดต", Propose = "ขอแต่งงาน", Argue = "ทะเลาะ", Apologize = "ขอโทษ", Insult = "ด่า", Hug = "กอด",
+	stranger = "คนแปลกหน้า", acquaintance = "คนรู้จัก", friend = "เพื่อน", bestFriend = "เพื่อนสนิท", lover = "คนรัก", spouse = "คู่สมรส", enemy = "ศัตรู", ex = "แฟนเก่า",
+	Dog = "หมา", Cat = "แมว", Rabbit = "กระต่าย",
+	menu = "เมนู", character = "ฉัน", skills = "ทักษะ", career = "อาชีพ", school = "การเรียน", relationships = "ผู้คน", home = "บ้าน", build = "สร้าง", business = "ธุรกิจ", shop = "ร้านค้า", passes = "แพ็กเกจ", robux = "Robux", family = "ครอบครัว", quests = "เป้าหมาย",
+	traits = "นิสัย", aspiration = "ความฝัน", chooseTraits = "เลือกนิสัย 3 อย่าง", chooseAspiration = "เลือกความฝัน", start = "เริ่มชีวิต", yourName = "ชื่อของคุณ",
+	applyJob = "สมัคร", quit = "ลาออก", level = "ระดับ %d", performance = "ผลงาน", nextPromo = "เลื่อนขั้นถัดไป", goWork = "ไปทำงาน", workNow = "ถึงเวลางาน! ไปที่ %s", shiftDone = "เลิกงาน! ได้ ฿%s", promoted = "เลื่อนขั้นเป็นระดับ %d!", late = "ขาดงาน ผลงาน -20", needDegree = "ต้องมีปริญญา (ระดับ %d+)", fired = "ถูกไล่ออกเพราะผลงานแย่",
+	goSchool = "ไปโรงเรียน", schoolDone = "เลิกเรียนแล้ว เกรด: %s", homework = "ทำการบ้าน", enroll = "สมัครเรียน (฿%s)", enrolled = "เข้าเรียนคณะ %s แล้ว!", exam = "สอบ", graduated = "จบการศึกษาคณะ %s! 🎓", degree = "ปริญญา", noDegree = "ไม่มีปริญญา", tuition = "ค่าเทอม",
+	needs = "ความต้องการ", sleep = "นอน", eat = "กิน", cook = "ทำอาหาร", useToilet = "ใช้", shower = "อาบน้ำ", bath = "แช่น้ำ", watch = "ดูทีวี", sit = "นั่ง", play = "เล่น", read = "อ่าน", use = "ใช้", practice = "ฝึก", workout = "ออกกำลังกาย", tinker = "ซ่อมของ", garden = "ทำสวน", harvest = "เก็บเกี่ยว", call = "โทรหาเพื่อน", clean = "ทำความสะอาด", stop = "หยุด", stopAction = "หยุด%s",
+	buy = "ซื้อ", place = "วาง", sell = "ขาย", move = "ย้าย", rotate = "หมุน", done = "เสร็จ", buildMode = "โหมดสร้าง: คลิกบนที่ดินเพื่อวาง", owned = "มีแล้ว", notEnough = "เงินไม่พอ!", tooManyItems = "ที่ดินเต็มแล้ว", buyLot = "ซื้อที่ดิน", moveIn = "ย้ายเข้า", rent = "ค่าเช่า", tax = "ภาษี", bills = "จ่ายบิลแล้ว: ฿%s", billsUnpaid = "ค้างบิล! ไฟถูกตัด", bought = "ซื้อ %s แล้ว",
+	hire = "จ้าง", buyBusiness = "เปิดคาเฟ่ (฿%s)", serve = "เสิร์ฟ", customers = "ลูกค้าที่บริการ", revenue = "รายได้", workHere = "ทำงานที่นี่", employee = "พนักงาน", bizUpgrade = "อัปเกรดคาเฟ่", bizLevel = "คาเฟ่ระดับ %d", bizEarn = "คาเฟ่ +฿%s", bizOwner = "เจ้าของ", earnedShare = "ค่าจ้าง +฿%s",
+	sick = "คุณป่วยเป็น%s!", cured = "หายแล้ว!", treat = "รักษา (฿%s)", rest = "พักผ่อนให้หาย", insurance = "ประกันสุขภาพ", buyInsurance = "ซื้อประกัน (฿%s / 7 วัน)", dying = "สุขภาพวิกฤต! ไปหาหมอ", died = "%s เสียชีวิตแล้ว (%s)", deathOld = "ชรา", deathHunger = "อดอาหาร", deathFire = "ไฟไหม้", deathIllness = "ป่วยไม่รักษา", deathMeteor = "อุกกาบาต", deathAccident = "อุบัติเหตุ", ghost = "คุณเป็นวิญญาณ... เลือกทายาท", newLife = "ชีวิตใหม่ในฐานะ %s (รุ่นที่ %d)", inherit = "ได้รับมรดก ฿%s และบ้าน", fire = "ไฟไหม้ครัว! 🔥", fireOut = "ดับไฟแล้ว", extinguish = "ดับไฟ",
+	married = "แต่งงานกับ %s แล้ว! 💍", tryBaby = "ลองมีลูก", babyBorn = "ลูกเกิดแล้ว: %s 👶", adopt = "รับเลี้ยง (฿%s)", adoptPet = "รับเลี้ยงสัตว์", kids = "ลูก", pet = "สัตว์เลี้ยง", grewUp = "%s โตขึ้นเป็น%s", proposeNo = "%s ปฏิเสธ", proposeYes = "%s ตอบตกลง!", divorce = "หย่า", divorced = "หย่าแล้ว", wedding = "งานแต่ง (฿%s)", playWithKid = "เล่นกับ %s", feedPet = "ให้อาหารสัตว์", noSpouse = "ต้องมีคู่สมรสก่อน",
+	milestone = "ผ่านเป้าหมายความฝัน! +฿%s", aspirationDone = "ความฝันเป็นจริง! 🌟", skillUp = "ทักษะ%s ระดับ %d!", questDone = "เป้าหมายสำเร็จ +฿%s", qskill = "เพิ่มทักษะ %d ระดับ", qsocial = "คุยกับ %d คน", qwork = "ทำงาน %d กะ", qneeds = "รักษาความต้องการทุกอย่างเกิน 50 ตลอดวัน", qmoney = "หาเงิน ฿%s",
+	eventLottery = "ถูกหวย! +฿%s", eventBurglar = "ขโมยขึ้นบ้าน -฿%s (ซื้อสัญญาณกันขโมย)", eventFriendGift = "เพื่อนส่งของขวัญ +฿%s", eventBonus = "โบนัสจากที่ทำงาน +฿%s", eventCarRepair = "ซ่อมรถ -฿%s", eventMeteor = "อุกกาบาตตก...", festival = "เทศกาล: %s (ของขวัญ ฿%s)", NewYear = "ปีใหม่", Songkran = "สงกรานต์", Halloween = "ฮาโลวีน", LoyKrathong = "ลอยกระทง", Christmas = "คริสต์มาส",
+	daily = "รางวัลรายวัน", claim = "รับ", claimed = "พรุ่งนี้มาใหม่", topPlayers = "ตระกูลที่รวยที่สุด", weekly = "สัปดาห์นี้",
+	VIP = "VIP", MansionPass = "คฤหาสน์", SportsCar = "รถสปอร์ต", PetPack = "สัตว์เลี้ยงพิเศษ", SecondLife = "ตัวละครที่ 2", Cash1 = "฿5,000", Cash2 = "฿30,000", Cash3 = "฿150,000", Elixir = "ยาอายุวัฒนะ", Rename = "เปลี่ยนชื่อ",
+	vipDesc = "ป้ายชื่อ, +฿500 ทุกวัน, ชุดพิเศษ", mansionDesc = "ปลดล็อกที่ดินคฤหาสน์", carDesc = "รถเร็ว ไม่เสียค่าแท็กซี่", petDesc = "สัตว์พิเศษ: นกแก้ว จิ้งจอก หมูจิ๋ว", secondLifeDesc = "เล่นครอบครัวที่สอง", elixirDesc = "ย้อนอายุ 1 ช่วงชีวิต",
+	needLow = "%sต่ำมาก!", collapsed = "คุณหมดแรงล้มพับ", wetSelf = "อุ๊ย... ไม่ทันแล้ว", starving = "คุณกำลังอดอยาก!", stinky = "คนหนีคุณ... ไปอาบน้ำ", lonely = "คุณรู้สึกเหงา", boredMsg = "เบื่อจัง...", dirtyHome = "บ้านรก ทำความสะอาดหน่อย!",
+	seasonRain = "ฤดูฝน: สนุกลด หวัดง่าย", seasonWinter = "ฤดูหนาว: หวัดง่าย", seasonSummer = "ฤดูร้อน: พลังงานลดเร็ว",
+	npcTalk = "คุย", inviteHome = "ชวนมาบ้าน", relationship = "ความสัมพันธ์", romance = "ความรัก", friendship = "มิตรภาพ", you = "คุณ", npc = "ชาวเมือง",
+	mgTiming = "กด SPACE / แตะ ตอนเข็มอยู่โซนเขียว!", lang = "ภาษา", welcome = "ยินดีต้อนรับสู่ Life Story! สร้างตัวละครของคุณ", loading = "กำลังโหลด...", version = "v%s", taxi = "แท็กซี่ไป", walkTo = "ไปที่",
+}
+L.strings.ja = {
+	updateKick = "更新されました！再参加してください", title = "ライフストーリー", cash = "お金", day = "%d日目", hunger = "空腹", energy = "体力", bladder = "トイレ", hygiene = "清潔", fun = "楽しさ", social = "交流", environment = "部屋", health = "健康",
+	Baby = "赤ちゃん", Toddler = "幼児", Child = "子供", Teen = "10代", YoungAdult = "若者", Adult = "大人", Elder = "高齢者", menu = "メニュー", character = "自分", skills = "スキル", career = "仕事", school = "学校", relationships = "人々", home = "家", build = "建築", business = "ビジネス", shop = "店", passes = "パス", family = "家族", quests = "目標",
+	Doctor = "医者", Police = "警察官", Chef = "シェフ", Programmer = "プログラマー", Teacher = "教師", Artist = "アーティスト", Chat = "話す", Joke = "冗談", Flirt = "口説く", Propose = "プロポーズ", Hug = "ハグ", sleep = "寝る", eat = "食べる", shower = "シャワー", watch = "テレビ", goWork = "仕事へ行く", goSchool = "学校へ行く", buy = "買う", notEnough = "お金が足りない！", sick = "%sにかかった！", cured = "治った！", died = "%sは亡くなりました（%s）", married = "%sと結婚した！💍", babyBorn = "赤ちゃんが生まれた: %s 👶", start = "人生を始める", chooseTraits = "特徴を3つ選ぶ", chooseAspiration = "夢を選ぶ", yourName = "名前", welcome = "ライフストーリーへようこそ！キャラクターを作ろう", lang = "言語",
+}
+L.strings.zh = {
+	updateKick = "游戏已更新！请重新加入", title = "人生故事", cash = "金钱", day = "第%d天", hunger = "饥饿", energy = "精力", bladder = "如厕", hygiene = "卫生", fun = "娱乐", social = "社交", environment = "环境", health = "健康",
+	Baby = "婴儿", Toddler = "幼儿", Child = "儿童", Teen = "青少年", YoungAdult = "青年", Adult = "成年", Elder = "老年", menu = "菜单", character = "我", skills = "技能", career = "职业", school = "学校", relationships = "人物", home = "家", build = "建造", business = "生意", shop = "商店", passes = "通行证", family = "家庭", quests = "目标",
+	Doctor = "医生", Police = "警察", Chef = "厨师", Programmer = "程序员", Teacher = "教师", Artist = "艺术家", Chat = "聊天", Joke = "讲笑话", Flirt = "调情", Propose = "求婚", Hug = "拥抱", sleep = "睡觉", eat = "吃饭", shower = "洗澡", watch = "看电视", goWork = "去上班", goSchool = "去上学", buy = "购买", notEnough = "钱不够！", sick = "你得了%s！", cured = "痊愈了！", died = "%s去世了（%s）", married = "和%s结婚了！💍", babyBorn = "宝宝出生了：%s 👶", start = "开始人生", chooseTraits = "选择3个特质", chooseAspiration = "选择梦想", yourName = "你的名字", welcome = "欢迎来到人生故事！创建你的角色", lang = "语言",
+}
+L.strings.id = {
+	updateKick = "Game diperbarui! Masuk lagi ya", title = "Life Story", cash = "Uang", day = "Hari %d", hunger = "Lapar", energy = "Energi", bladder = "Toilet", hygiene = "Kebersihan", fun = "Hiburan", social = "Sosial", environment = "Lingkungan", health = "Kesehatan",
+	Baby = "Bayi", Toddler = "Balita", Child = "Anak", Teen = "Remaja", YoungAdult = "Dewasa muda", Adult = "Dewasa", Elder = "Lansia", menu = "Menu", character = "Aku", skills = "Keahlian", career = "Karier", school = "Sekolah", relationships = "Orang", home = "Rumah", build = "Bangun", business = "Bisnis", shop = "Toko", passes = "Pass", family = "Keluarga", quests = "Tujuan",
+	Doctor = "Dokter", Police = "Polisi", Chef = "Koki", Programmer = "Programmer", Teacher = "Guru", Artist = "Seniman", Chat = "Ngobrol", Joke = "Lelucon", Flirt = "Menggoda", Propose = "Melamar", Hug = "Peluk", sleep = "Tidur", eat = "Makan", shower = "Mandi", watch = "Nonton TV", goWork = "Pergi kerja", goSchool = "Pergi sekolah", buy = "Beli", notEnough = "Uang tidak cukup!", sick = "Kamu terkena %s!", cured = "Sembuh!", died = "%s meninggal (%s)", married = "Menikah dengan %s! 💍", babyBorn = "Bayi lahir: %s 👶", start = "Mulai hidup", chooseTraits = "Pilih 3 sifat", chooseAspiration = "Pilih impian", yourName = "Namamu", welcome = "Selamat datang di Life Story! Buat karaktermu", lang = "Bahasa",
+}
+function L.get(lang, key, ...)
+	local t = L.strings[lang] or L.strings.en
+	local s = t[key] or L.strings.en[key] or key
+	if select("#", ...) > 0 then local ok, r = pcall(string.format, s, ...); if ok then return r end end
+	return s
+end
+function L.detect(localeId)
+	local p = string.sub(tostring(localeId or "en"), 1, 2)
+	for _, l in ipairs({ "en", "th", "ja", "zh", "id" }) do if p == l then return l end end
+	return "en"
+end
+function L.fmt(n)
+	local s = tostring(math.floor(n or 0)); local out = s:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+	return (out:gsub("^,", ""))
+end
+return L
