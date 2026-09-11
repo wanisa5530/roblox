@@ -36,13 +36,13 @@ local function buildingPrompts()
 			if c.career == cc.key then
 				local ok, why = Career.startShift(who, "work")
 				if not ok then if why == "notTime" then Core.notify(who, "workHours", "yellow", cc.hours[1], cc.hours[2]) elseif why == "done" then Core.notify(who, "shiftDoneToday", "yellow") end end
+			elseif cc.building == "Hospital" then Remotes.Career:FireClient(who, "openHospital")  -- คนทั่วไปมาโรงพยาบาลเพื่อรักษา
 			else Remotes.Career:FireClient(who, "openJob", cc.key) end
 		end)
 	end
 	pp("Cafe", "work", "Work", function(who) local c = Core.char(who); if c and c.career == "Barista" then Career.startShift(who, "work") end end)
 	pp("School", "school", "School", function(who) local ok, why = Career.startShift(who, "school"); if not ok and why == "notTime" then Core.notify(who, "workHours", "yellow", Config.SchoolHours[1], Config.SchoolHours[2]) elseif not ok and why == "done" then Core.notify(who, "shiftDoneToday", "yellow") end end)
 	pp("University", "uni", "University", function(who) local c = Core.char(who); if c and c.uni then Career.startShift(who, "uni") else Remotes.Career:FireClient(who, "openUni") end end)
-	pp("Hospital", "hospital", "Clinic", function(who) Remotes.Career:FireClient(who, "openHospital") end)
 	pp("Shop", "shop", "Shop", function(who) Remotes.Build:FireClient(who, "openShop") end)
 	pp("CityHall", "cityhall", "Lots", function(who) Remotes.Build:FireClient(who, "openLots") end)
 end

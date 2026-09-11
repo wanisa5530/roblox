@@ -158,6 +158,7 @@ player:GetAttributeChangedSignal("LangTick"):Connect(function() langBtn.Text = "
 local function localizePrompt(pp)
 	local act = pp:GetAttribute("Action"); if not act then return end
 	local map = { work = "goWork", school = "goSchool", uni = "University", hospital = "Hospital", shop = "Shop", cityhall = "buyLot", talk = "npcTalk", serve = "serve", cafe = "business", extinguish = "extinguish", harvest = "harvest" }
+	if act == "work" and pp.ObjectText == "Hospital" and not (data and data.char and data.char.career == "Doctor") then pp.ActionText = T("treat", "") :gsub("%s*%(.*%)%s*$", "") ; return end
 	pp.ActionText = T(map[act] or act)
 end
 for _, pp in ipairs(workspace:GetDescendants()) do if pp:IsA("ProximityPrompt") then localizePrompt(pp) end end
