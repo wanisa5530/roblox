@@ -21,6 +21,13 @@ local STEPS = {
 	{ key = "g7", done = function(d) return d.char and (d.char.bought or 0) > 0 end },
 	{ key = "g8", done = function(d) return d.char and d.char.car ~= nil end },
 }
+-- แถบเควสต์ด้านบน: ขั้นตอนปัจจุบัน + ความคืบหน้า
+local qbar = U.frame(gui, UDim2.new(0, 520, 0, 44), UDim2.new(0.5, -260, 0, 14), U.C.accent, 22); qbar.Visible = false
+local qtext = U.label(qbar, "", UDim2.new(0.62, -10, 1, 0), UDim2.new(0, 16, 0, 0), { textSize = 17, color = Color3.fromRGB(255, 255, 255) })
+local qtrack = Instance.new("Frame"); qtrack.Size = UDim2.new(0.34, 0, 0, 14); qtrack.Position = UDim2.new(0.64, 0, 0.5, -7); qtrack.BackgroundColor3 = Color3.fromRGB(20, 110, 150); qtrack.BorderSizePixel = 0; qtrack.Parent = qbar
+Instance.new("UICorner", qtrack).CornerRadius = UDim.new(1, 0)
+local qfill = Instance.new("Frame"); qfill.Size = UDim2.new(0, 0, 1, 0); qfill.BackgroundColor3 = Color3.fromRGB(200, 240, 255); qfill.BorderSizePixel = 0; qfill.Parent = qtrack
+Instance.new("UICorner", qfill).CornerRadius = UDim.new(1, 0)
 local rows = {}
 for i, st in ipairs(STEPS) do
 	local r = U.label(list, "", UDim2.new(1, 0, 0, 22), nil, { textSize = 12, font = Enum.Font.Gotham }); r.LayoutOrder = i; rows[i] = r
@@ -39,6 +46,10 @@ local function render(d)
 		if not ok then allDone = false end
 	end
 	if allDone then rows[1].Text = "🌟 " .. T("guideDone"); rows[1].Visible = true; rows[1].TextColor3 = U.C.green end
+	local doneN = 0; for _, st in ipairs(STEPS) do if st.done(d) then doneN += 1 end end
+	qbar.Visible = not allDone
+	if firstOpen then qtext.Text = "🎯 " .. T(STEPS[firstOpen].key) end
+	qfill.Size = UDim2.new(doneN / #STEPS, 0, 1, 0)
 	panel.Size = collapsed and UDim2.new(0, 330, 0, 76) or UDim2.new(0, 330, 0, 250)
 end
 local last
