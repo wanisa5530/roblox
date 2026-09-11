@@ -111,10 +111,10 @@ C.Emotions = { "Happy", "Sad", "Angry", "Stressed", "Embarrassed", "Inspired", "
 
 -- บ้าน: lots = ที่ดิน
 C.Lots = {
-	{ key = "Apartment", price = 0,     rent = 150, size = 12, tables = 0 },
-	{ key = "Starter",   price = 12000, rent = 0,   size = 20, tax = 80 },
-	{ key = "Family",    price = 45000, rent = 0,   size = 28, tax = 200 },
-	{ key = "Mansion",   price = 0,     rent = 0,   size = 36, tax = 400, pass = "Mansion" },
+	{ key = "Apartment", price = 0,     rent = 150, size = 20 },
+	{ key = "Starter",   price = 12000, rent = 0,   size = 30, tax = 80 },
+	{ key = "Family",    price = 45000, rent = 0,   size = 40, tax = 200 },
+	{ key = "Mansion",   price = 0,     rent = 0,   size = 60, tax = 400, pass = "Mansion" },
 }
 C.Bills = { power = 40, water = 20 }   -- ต่อวัน + ภาษี
 

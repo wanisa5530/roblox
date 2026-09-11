@@ -18,17 +18,155 @@ local function prompt(parent, action, obj, cb)
 end
 local ACTION = { bed = "sleep", kitchen = "eat", bath = "useToilet", fun = "watch", skill = "practice", outdoor = "garden", family = "play", decor = nil, safety = nil }
 -- สร้างโมเดลเฟอร์นิเจอร์จาก Part
+-- โมเดลเฟอร์นิเจอร์แบบละเอียด (ประกอบจากหลาย Part) ให้ดูเหมือนของจริง
+local function sub(m, size, cf, color, material, shape)
+	local q = Instance.new("Part"); q.Anchored = true; q.CanCollide = false; q.Size = size; q.CFrame = cf; q.Color = color; q.Material = material or Enum.Material.SmoothPlastic
+	if shape then q.Shape = shape end
+	q.Parent = m; return q
+end
+local WOOD, DARK, WHITE, METAL = Color3.fromRGB(150, 105, 60), Color3.fromRGB(40, 40, 45), Color3.fromRGB(245, 245, 245), Color3.fromRGB(190, 190, 195)
+local DETAIL = {
+	bed = function(m, body, s, col)
+		body.Size = Vector3.new(s.X, 0.6, s.Z); body.CFrame = body.CFrame * CFrame.new(0, -s.Y / 2 + 1.1, 0); body.Color = WOOD; body.Material = Enum.Material.Wood   -- โครงเตียง
+		for _, o in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do sub(m, Vector3.new(0.4, 0.8, 0.4), body.CFrame * CFrame.new(o[1] * (s.X / 2 - 0.3), -0.7, o[2] * (s.Z / 2 - 0.3)), WOOD, Enum.Material.Wood) end
+		sub(m, Vector3.new(s.X - 0.4, 0.9, s.Z - 0.4), body.CFrame * CFrame.new(0, 0.75, 0), Color3.fromRGB(240, 240, 235), Enum.Material.Fabric)           -- ที่นอน
+		sub(m, Vector3.new(s.X - 0.4, 0.5, s.Z * 0.62), body.CFrame * CFrame.new(0, 1.35, s.Z * 0.17), col, Enum.Material.Fabric)                              -- ผ้าห่ม
+		sub(m, Vector3.new(s.X / 2 - 0.6, 0.5, 1.6), body.CFrame * CFrame.new(-s.X / 4 + 0.1, 1.45, -s.Z / 2 + 1.3), WHITE, Enum.Material.Fabric)             -- หมอน 2 ใบ
+		sub(m, Vector3.new(s.X / 2 - 0.6, 0.5, 1.6), body.CFrame * CFrame.new(s.X / 4 - 0.1, 1.45, -s.Z / 2 + 1.3), WHITE, Enum.Material.Fabric)
+		sub(m, Vector3.new(s.X, 2.6, 0.4), body.CFrame * CFrame.new(0, 1.2, -s.Z / 2 - 0.1), WOOD, Enum.Material.Wood)                                        -- หัวเตียง
+	end,
+	Fridge = function(m, body, s, col)
+		body.Material = Enum.Material.Metal; body.Reflectance = 0.1
+		sub(m, Vector3.new(s.X + 0.05, 0.1, s.Z + 0.05), body.CFrame * CFrame.new(0, s.Y * 0.15, 0), DARK)                       -- เส้นแบ่งประตู
+		sub(m, Vector3.new(0.25, 1.6, 0.25), body.CFrame * CFrame.new(s.X / 2 - 0.5, s.Y * 0.35, s.Z / 2 + 0.15), METAL, Enum.Material.Metal)  -- มือจับบน
+		sub(m, Vector3.new(0.25, 1.0, 0.25), body.CFrame * CFrame.new(s.X / 2 - 0.5, -s.Y * 0.15, s.Z / 2 + 0.15), METAL, Enum.Material.Metal) -- มือจับล่าง
+	end,
+	Stove = function(m, body, s, col)
+		body.Color = Color3.fromRGB(220, 220, 225); body.Material = Enum.Material.Metal
+		sub(m, Vector3.new(s.X, 0.15, s.Z), body.CFrame * CFrame.new(0, s.Y / 2 + 0.05, 0), DARK)                                 -- เตาด้านบน
+		for _, o in ipairs({ { -0.7, -0.7 }, { 0.7, -0.7 }, { -0.7, 0.7 }, { 0.7, 0.7 } }) do sub(m, Vector3.new(0.1, 0.9, 0.9), body.CFrame * CFrame.new(o[1], s.Y / 2 + 0.16, o[2]) * CFrame.Angles(0, 0, math.rad(90)), Color3.fromRGB(60, 60, 60), Enum.Material.Metal, Enum.PartType.Cylinder) end
+		sub(m, Vector3.new(s.X - 0.4, s.Y * 0.5, 0.1), body.CFrame * CFrame.new(0, -s.Y * 0.15, s.Z / 2 + 0.05), Color3.fromRGB(30, 30, 35), Enum.Material.Glass)  -- ประตูเตาอบ
+		sub(m, Vector3.new(s.X - 0.6, 0.15, 0.15), body.CFrame * CFrame.new(0, s.Y * 0.2, s.Z / 2 + 0.1), METAL, Enum.Material.Metal)
+		sub(m, Vector3.new(s.X, 1.2, 1.6), body.CFrame * CFrame.new(0, s.Y / 2 + 4, -s.Z / 2 + 0.8), METAL, Enum.Material.Metal)     -- เครื่องดูดควัน
+	end,
+	Toilet = function(m, body, s, col)
+		body.Size = Vector3.new(1.6, 1.4, 2.2); body.CFrame = body.CFrame * CFrame.new(0, -s.Y / 2 + 0.7, 0.3); body.Color = WHITE   -- โถ
+		sub(m, Vector3.new(1.8, 0.2, 2.4), body.CFrame * CFrame.new(0, 0.8, 0), WHITE)                                                -- ฝารองนั่ง
+		sub(m, Vector3.new(1.6, 1.8, 0.8), body.CFrame * CFrame.new(0, 1.2, -1.2), WHITE)                                             -- แท็งก์น้ำ
+		sub(m, Vector3.new(0.5, 0.15, 0.3), body.CFrame * CFrame.new(0.4, 2.15, -1.2), METAL, Enum.Material.Metal)
+	end,
+	Shower = function(m, body, s, col)
+		body.Size = Vector3.new(s.X, 0.3, s.Z); body.CFrame = body.CFrame * CFrame.new(0, -s.Y / 2 + 0.15, 0); body.Color = WHITE      -- ถาดรอง
+		sub(m, Vector3.new(s.X, s.Y - 0.3, 0.15), body.CFrame * CFrame.new(0, s.Y / 2, -s.Z / 2), Color3.fromRGB(200, 230, 240), Enum.Material.Glass).Transparency = 0.5
+		sub(m, Vector3.new(0.15, s.Y - 0.3, s.Z), body.CFrame * CFrame.new(-s.X / 2, s.Y / 2, 0), Color3.fromRGB(200, 230, 240), Enum.Material.Glass).Transparency = 0.5
+		sub(m, Vector3.new(0.2, s.Y - 1, 0.2), body.CFrame * CFrame.new(0, s.Y / 2, -s.Z / 2 + 0.3), METAL, Enum.Material.Metal)    -- ท่อ
+		sub(m, Vector3.new(0.3, 1.2, 1.2), body.CFrame * CFrame.new(0, s.Y - 0.6, -s.Z / 2 + 0.9) * CFrame.Angles(0, 0, math.rad(90)), METAL, Enum.Material.Metal, Enum.PartType.Cylinder)  -- ฝักบัว
+	end,
+	Bathtub = function(m, body, s, col)
+		body.Color = WHITE; body.Material = Enum.Material.SmoothPlastic
+		sub(m, Vector3.new(s.X - 0.6, 0.3, s.Z - 0.6), body.CFrame * CFrame.new(0, s.Y / 2 - 0.2, 0), Color3.fromRGB(120, 190, 230), Enum.Material.Glass).Transparency = 0.3
+		sub(m, Vector3.new(0.3, 0.8, 0.3), body.CFrame * CFrame.new(0, s.Y / 2 + 0.4, -s.Z / 2 + 0.5), METAL, Enum.Material.Metal)
+	end,
+	TV = function(m, body, s, col)
+		body.Size = Vector3.new(s.X, 0.6, 1.6); body.CFrame = body.CFrame * CFrame.new(0, -s.Y / 2 + 0.3, 0); body.Color = DARK           -- ตู้วางทีวี
+		sub(m, Vector3.new(s.X, 1.2, 1.6), body.CFrame * CFrame.new(0, -0.9, 0), WOOD, Enum.Material.Wood)
+		sub(m, Vector3.new(0.6, 0.6, 0.6), body.CFrame * CFrame.new(0, 0.6, 0), DARK)                                                        -- ขาตั้ง
+		sub(m, Vector3.new(s.X, s.Y - 0.4, 0.2), body.CFrame * CFrame.new(0, s.Y / 2 + 0.7, 0), DARK)                                        -- กรอบจอ
+		local scr = sub(m, Vector3.new(s.X - 0.3, s.Y - 0.7, 0.05), body.CFrame * CFrame.new(0, s.Y / 2 + 0.7, -0.13), Color3.fromRGB(80, 160, 255), Enum.Material.Neon)
+		local sl = Instance.new("PointLight"); sl.Color = Color3.fromRGB(120, 180, 255); sl.Range = 8; sl.Brightness = 0.6; sl.Parent = scr
+	end,
+	Sofa = function(m, body, s, col)
+		body.Size = Vector3.new(s.X, 0.9, s.Z); body.CFrame = body.CFrame * CFrame.new(0, -s.Y / 2 + 0.75, 0); body.Material = Enum.Material.Fabric   -- เบาะนั่ง
+		sub(m, Vector3.new(s.X, 1.5, 0.7), body.CFrame * CFrame.new(0, 0.9, -s.Z / 2 + 0.35), col, Enum.Material.Fabric)       -- พนักพิง
+		sub(m, Vector3.new(0.6, 1.0, s.Z), body.CFrame * CFrame.new(-s.X / 2 + 0.3, 0.5, 0), col, Enum.Material.Fabric)        -- ที่วางแขน
+		sub(m, Vector3.new(0.6, 1.0, s.Z), body.CFrame * CFrame.new(s.X / 2 - 0.3, 0.5, 0), col, Enum.Material.Fabric)
+		for i = 1, 2 do sub(m, Vector3.new(1.2, 1.2, 0.5), body.CFrame * CFrame.new((i - 1.5) * 3, 1.0, -s.Z / 2 + 0.8) * CFrame.Angles(math.rad(-10), 0, 0), Color3.fromRGB(245, 230, 200), Enum.Material.Fabric) end  -- หมอนอิง
+		for _, o in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do sub(m, Vector3.new(0.3, 0.6, 0.3), body.CFrame * CFrame.new(o[1] * (s.X / 2 - 0.4), -0.7, o[2] * (s.Z / 2 - 0.4)), DARK) end
+	end,
+	DiningTable = function(m, body, s, col)
+		body.Size = Vector3.new(s.X, 0.25, s.Z); body.CFrame = body.CFrame * CFrame.new(0, s.Y / 2 - 0.5, 0); body.Material = Enum.Material.Wood   -- หน้าโต๊ะ
+		for _, o in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do sub(m, Vector3.new(0.3, s.Y - 0.5, 0.3), body.CFrame * CFrame.new(o[1] * (s.X / 2 - 0.4), -(s.Y - 0.5) / 2, o[2] * (s.Z / 2 - 0.4)), WOOD, Enum.Material.Wood) end
+		for _, cx in ipairs({ -1.6, 1.6 }) do for _, cz in ipairs({ -1, 1 }) do
+			local ccf = body.CFrame * CFrame.new(cx, -1.2, cz * (s.Z / 2 + 1.2))
+			sub(m, Vector3.new(1.6, 0.25, 1.6), ccf, WOOD, Enum.Material.Wood)
+			sub(m, Vector3.new(1.6, 1.8, 0.25), ccf * CFrame.new(0, 1.0, cz * 0.7), WOOD, Enum.Material.Wood)
+			for _, o in ipairs({ { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } }) do sub(m, Vector3.new(0.2, 1.4, 0.2), ccf * CFrame.new(o[1] * 0.65, -0.8, o[2] * 0.65), WOOD, Enum.Material.Wood) end
+		end end
+		sub(m, Vector3.new(0.8, 0.9, 0.8), body.CFrame * CFrame.new(0, 0.55, 0), Color3.fromRGB(220, 240, 250), Enum.Material.Glass, Enum.PartType.Cylinder).CFrame = body.CFrame * CFrame.new(0, 0.55, 0) * CFrame.Angles(0, 0, math.rad(90))  -- แจกัน
+	end,
+	Bookshelf = function(m, body, s, col)
+		body.Material = Enum.Material.Wood
+		for i = 1, 3 do
+			sub(m, Vector3.new(s.X - 0.3, 0.15, s.Z + 0.3), body.CFrame * CFrame.new(0, -s.Y / 2 + i * (s.Y / 4), 0), WOOD, Enum.Material.Wood)
+			for j = 1, 6 do sub(m, Vector3.new(0.4, 1.1, 0.8), body.CFrame * CFrame.new(-s.X / 2 + 0.5 + j * 0.5, -s.Y / 2 + i * (s.Y / 4) + 0.65, 0), Color3.fromHSV((i * 7 + j * 13) % 10 / 10, 0.6, 0.85)) end
+		end
+	end,
+	Computer = function(m, body, s, col)
+		body.Size = Vector3.new(s.X, 0.2, s.Z); body.CFrame = body.CFrame * CFrame.new(0, 0, 0); body.Material = Enum.Material.Wood; body.Color = WOOD   -- โต๊ะ
+		for _, o in ipairs({ -1, 1 }) do sub(m, Vector3.new(0.2, s.Y, s.Z), body.CFrame * CFrame.new(o * (s.X / 2 - 0.1), -s.Y / 2, 0), WOOD, Enum.Material.Wood) end
+		sub(m, Vector3.new(1.8, 1.2, 0.1), body.CFrame * CFrame.new(0, 0.9, -0.4), DARK)
+		sub(m, Vector3.new(1.6, 1.0, 0.05), body.CFrame * CFrame.new(0, 0.9, -0.34), Color3.fromRGB(100, 200, 255), Enum.Material.Neon)
+		sub(m, Vector3.new(1.4, 0.1, 0.5), body.CFrame * CFrame.new(0, 0.15, 0.4), Color3.fromRGB(60, 60, 65))
+	end,
+	Lamp = function(m, body, s, col)
+		body.Size = Vector3.new(0.15, s.Y - 1.2, 0.15); body.CFrame = body.CFrame * CFrame.new(0, -0.5, 0); body.Color = METAL; body.Material = Enum.Material.Metal
+		sub(m, Vector3.new(1, 0.15, 1), body.CFrame * CFrame.new(0, -(s.Y - 1.2) / 2, 0), DARK)
+		sub(m, Vector3.new(1.4, 1.2, 1.4), body.CFrame * CFrame.new(0, (s.Y - 1.2) / 2 + 0.6, 0), Color3.fromRGB(255, 235, 190), Enum.Material.Neon)
+	end,
+	Plant = function(m, body, s, col)
+		body.Size = Vector3.new(1.2, 1.2, 1.2); body.CFrame = body.CFrame * CFrame.new(0, -s.Y / 2 + 0.6, 0); body.Color = Color3.fromRGB(190, 110, 70)   -- กระถาง
+		sub(m, Vector3.new(0.2, 1.5, 0.2), body.CFrame * CFrame.new(0, 1.2, 0), Color3.fromRGB(80, 60, 40))
+		sub(m, Vector3.new(1.8, 1.6, 1.8), body.CFrame * CFrame.new(0, 2.2, 0), col, Enum.Material.Grass, Enum.PartType.Ball)
+	end,
+	Painting = function(m, body, s, col)
+		body.Color = Color3.fromRGB(60, 40, 30); body.Material = Enum.Material.Wood
+		sub(m, Vector3.new(s.X - 0.4, s.Y - 0.4, 0.05), body.CFrame * CFrame.new(0, 0, -0.18), col)
+		sub(m, Vector3.new(s.X * 0.4, s.Y * 0.4, 0.02), body.CFrame * CFrame.new(-0.3, 0.2, -0.22), Color3.fromRGB(250, 220, 90))
+	end,
+	Rug = function(m, body, s, col) body.Material = Enum.Material.Fabric; sub(m, Vector3.new(s.X - 1, 0.05, s.Z - 1), body.CFrame * CFrame.new(0, 0.12, 0), col:Lerp(Color3.new(1, 1, 1), 0.3), Enum.Material.Fabric) end,
+	Aquarium = function(m, body, s, col)
+		body.Material = Enum.Material.Glass; body.Transparency = 0.4; body.Color = Color3.fromRGB(90, 190, 230)
+		sub(m, Vector3.new(s.X, 0.5, s.Z), body.CFrame * CFrame.new(0, -s.Y / 2 + 0.25, 0), DARK)
+		sub(m, Vector3.new(s.X - 0.4, 0.4, s.Z - 0.4), body.CFrame * CFrame.new(0, -s.Y / 2 + 0.7, 0), Color3.fromRGB(230, 200, 140), Enum.Material.Sand)
+		for i = 1, 3 do sub(m, Vector3.new(0.5, 0.3, 0.2), body.CFrame * CFrame.new(-1 + i * 0.7, -0.2 + (i % 2) * 0.6, 0), Color3.fromRGB(255, 140, 40)) end
+		local al = Instance.new("PointLight"); al.Color = Color3.fromRGB(120, 200, 255); al.Range = 8; al.Parent = body
+	end,
+	Crib = function(m, body, s, col)
+		body.Size = Vector3.new(s.X, 0.8, s.Z); body.CFrame = body.CFrame * CFrame.new(0, -s.Y / 2 + 1.0, 0); body.Material = Enum.Material.Fabric
+		for i = 0, 6 do for _, o in ipairs({ -1, 1 }) do sub(m, Vector3.new(0.15, s.Y, 0.15), body.CFrame * CFrame.new(-s.X / 2 + i * (s.X / 6), s.Y / 2 - 1.0, o * s.Z / 2), WHITE) end end
+		sub(m, Vector3.new(s.X, 0.2, 0.2), body.CFrame * CFrame.new(0, s.Y - 1.0, -s.Z / 2), WHITE); sub(m, Vector3.new(s.X, 0.2, 0.2), body.CFrame * CFrame.new(0, s.Y - 1.0, s.Z / 2), WHITE)
+	end,
+	Piano = function(m, body, s, col)
+		body.Material = Enum.Material.SmoothPlastic; body.Reflectance = 0.2
+		sub(m, Vector3.new(s.X - 0.6, 0.3, 1.2), body.CFrame * CFrame.new(0, s.Y / 2 - 1.2, s.Z / 2 + 0.6), WHITE)
+		for i = 1, 12 do sub(m, Vector3.new(0.25, 0.2, 0.7), body.CFrame * CFrame.new(-s.X / 2 + 0.6 + i * (s.X - 1.2) / 12, s.Y / 2 - 1.0, s.Z / 2 + 0.4), DARK) end
+		sub(m, Vector3.new(2, 0.3, 1.4), body.CFrame * CFrame.new(0, -s.Y / 2 + 1.6, s.Z / 2 + 2), DARK)
+	end,
+}
 local function buildItem(cfg, cf, parent, id)
 	local m = Instance.new("Model"); m.Name = cfg.key; m:SetAttribute("Key", cfg.key); m:SetAttribute("Id", id)
 	local s = Vector3.new(cfg.size[1], cfg.size[2], cfg.size[3])
-	local body = Instance.new("Part"); body.Anchored = true; body.Size = s; body.CFrame = cf * CFrame.new(0, s.Y / 2, 0); body.Color = Color3.fromRGB(cfg.color[1], cfg.color[2], cfg.color[3]); body.Material = Enum.Material.SmoothPlastic; body.Name = "Body"; body.Parent = m
+	local col = Color3.fromRGB(cfg.color[1], cfg.color[2], cfg.color[3])
+	local body = Instance.new("Part"); body.Anchored = true; body.Size = s; body.CFrame = cf * CFrame.new(0, s.Y / 2, 0); body.Color = col; body.Material = Enum.Material.SmoothPlastic; body.Name = "Body"; body.Parent = m
 	m.PrimaryPart = body
-	if cfg.cat == "bed" then local pil = body:Clone(); pil.Size = Vector3.new(s.X - 1, 0.8, 2); pil.CFrame = body.CFrame * CFrame.new(0, s.Y / 2 + 0.4, -s.Z / 2 + 1.5); pil.Color = Color3.new(1, 1, 1); pil.Parent = m end
-	if cfg.cat == "fun" and cfg.key:sub(1, 2) == "TV" then local scr = body:Clone(); scr.Size = Vector3.new(s.X - 0.6, s.Y - 0.6, 0.2); scr.CFrame = body.CFrame * CFrame.new(0, 0, -s.Z / 2 - 0.1); scr.Color = Color3.fromRGB(80, 160, 255); scr.Material = Enum.Material.Neon; scr.Parent = m end
-	if cfg.light then local l = Instance.new("PointLight"); l.Range = 14; l.Brightness = 1.2; l.Color = Color3.fromRGB(255, 230, 170); l.Parent = body end
+	local d = DETAIL[cfg.key] or (cfg.cat == "bed" and DETAIL.bed) or (cfg.key:sub(1, 2) == "TV" and DETAIL.TV)
+	if d then pcall(d, m, body, s, col) end
+	if cfg.light and not DETAIL[cfg.key] then local l = Instance.new("PointLight"); l.Range = 14; l.Brightness = 1.2; l.Color = Color3.fromRGB(255, 230, 170); l.Parent = body end
+	if cfg.key == "Lamp" then local l = Instance.new("PointLight"); l.Range = 16; l.Brightness = 1.2; l.Color = Color3.fromRGB(255, 230, 170); l.Parent = body end
 	if cfg.cat == "outdoor" then local plant = body:Clone(); plant.Size = Vector3.new(s.X - 1, 1.5, s.Z - 1); plant.CFrame = body.CFrame * CFrame.new(0, 1.2, 0); plant.Color = Color3.fromRGB(60, 160, 60); plant.Material = Enum.Material.Grass; plant.Name = "Plant"; plant.Parent = m end
 	m.Parent = parent
 	return m
+end
+-- ชุดเฟอร์นิเจอร์เริ่มต้น (บ้านมีของครบเหมือนย้ายเข้าจริง) : key, x, z, rot
+H.Starter = {
+	Apartment = { { "BedCheap", -8, -7, 0 }, { "Toilet", 10, -10, 90 }, { "Shower", 10, -4, 90 }, { "Fridge", 11, 5, -90 }, { "Stove", 11, 9, -90 }, { "Sofa", -6, 5, 0 }, { "TV", -6, 10, 180 }, { "DiningTable", 3, 8, 0 }, { "Lamp", -12, -3, 0 }, { "Rug", -6, 8, 0 }, { "Plant", 12, -1, 0 }, { "Painting", -8, -12, 0 } },
+	House = { { "BedComfy", -10, -8, 0 }, { "Lamp", -14, -3, 0 }, { "Toilet", 13, -11, 90 }, { "Shower", 9, -11, 0 }, { "Fridge", 13, 10, -90 }, { "Stove", 13, 6, -90 }, { "DiningTable", 5, 9, 0 }, { "Sofa", -8, 7, 0 }, { "TV", -8, 12, 180 }, { "Rug", -8, 9, 0 }, { "Plant", 14, -3, 0 }, { "Bookshelf", -14, 4, 90 }, { "Painting", 0, -13, 0 }, { "Computer", -13, -12, 90 } },
+}
+function H.furnishStarter(p)
+	local c = Core.char(p); if not c then return end
+	local set = (c.lot == "Apartment") and H.Starter.Apartment or H.Starter.House
+	c.furniture = {}
+	for _, it in ipairs(set) do table.insert(c.furniture, { key = it[1], x = it[2], z = it[3], rot = it[4] }) end
 end
 -- วางเฟอร์นิเจอร์ทั้งหมดของบ้านใหม่ (เรียกตอนเข้า/ย้าย)
 function H.rebuild(p)
@@ -179,7 +317,7 @@ function H.assign(p)
 	local want = (c.lot == "Apartment") and "apt" or "house"
 	for k, lot in pairs(Map.lots) do
 		local isApt = lot.apartment == true
-		if lot.owner == nil and ((want == "apt") == isApt) then lot.owner = p; c.lotIndex = k; H.rebuild(p); return lot end
+		if lot.owner == nil and ((want == "apt") == isApt) then lot.owner = p; c.lotIndex = k; if #c.furniture == 0 then H.furnishStarter(p) end; H.rebuild(p); return lot end
 	end
 end
 function H.release(p)
@@ -193,7 +331,13 @@ function H.buyLot(p, key)
 	if lc.pass and not Core.ownsPass(p, lc.pass) then Remotes.PromptPass:FireClient(p, "pass", lc.pass); return false end
 	if lc.price > 0 and not Core.spend(p, lc.price) then return false end
 	c.lot = key; c.lotSize = lc.size
+	local extras = {}
+	for _, it in ipairs(c.furniture) do local inStarter = false; for _, st in ipairs(H.Starter.House) do if st[1] == it.key then inStarter = true end end; if not inStarter then extras[#extras + 1] = it end end
+	c.furniture = {}
 	H.release(p); H.assign(p)
+	if #c.furniture == 0 then H.furnishStarter(p) end
+	for _, it in ipairs(extras) do it.x = math.clamp(it.x, -12, 12); it.z = math.clamp(it.z, -12, 12); table.insert(c.furniture, it) end
+	H.rebuild(p)
 	Core.notify(p, "moveIn", "green"); Core.push(p)
 	return true
 end

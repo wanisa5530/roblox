@@ -219,6 +219,14 @@ function M.build()
 			part({ Size = Vector3.new(6, 4, 0.3), Position = origin + Vector3.new(wx, 6.5, RD / 2 + 0.2), Color = Color3.fromRGB(140, 200, 235), Material = Enum.Material.Glass, Transparency = 0.3, Reflectance = 0.2, CanCollide = false }, f)
 			part({ Size = Vector3.new(6, 4, 0.3), Position = origin + Vector3.new(wx, 6.5, -RD / 2 - 0.2), Color = Color3.fromRGB(140, 200, 235), Material = Enum.Material.Glass, Transparency = 0.3, Reflectance = 0.2, CanCollide = false }, f)
 		end
+		-- ผนังกั้นห้องน้ำ (ขวาหลัง) + เคาน์เตอร์ครัว (ขวาหน้า)
+		part({ Size = Vector3.new(0.3, FH, 8), Position = origin + Vector3.new(6, FH / 2, -9), Color = Color3.fromRGB(245, 240, 232), Material = Enum.Material.SmoothPlastic, Name = "Wall" }, f)
+		part({ Size = Vector3.new(5, FH, 0.3), Position = origin + Vector3.new(11.5, FH / 2, -5), Color = Color3.fromRGB(245, 240, 232), Material = Enum.Material.SmoothPlastic, Name = "Wall" }, f)
+		part({ Size = Vector3.new(8, 0.15, 8), Position = origin + Vector3.new(10, 0.33, -9), Color = Color3.fromRGB(225, 230, 235), Material = Enum.Material.Marble, CanCollide = false }, f)
+		part({ Size = Vector3.new(2, 3, 6), Position = origin + Vector3.new(13, 1.75, 2), Color = Color3.fromRGB(235, 235, 235), Material = Enum.Material.SmoothPlastic, Name = "Counter" }, f)
+		part({ Size = Vector3.new(2.2, 0.15, 6.2), Position = origin + Vector3.new(13, 3.3, 2), Color = Color3.fromRGB(70, 70, 75), Material = Enum.Material.Granite }, f)
+		part({ Size = Vector3.new(1.4, 0.3, 1.8), Position = origin + Vector3.new(13, 3.25, 0.5), Color = Color3.fromRGB(190, 190, 195), Material = Enum.Material.Metal }, f)
+		part({ Size = Vector3.new(1.2, 2.2, 6), Position = origin + Vector3.new(13.4, 7.5, 2), Color = Color3.fromRGB(235, 235, 235), Material = Enum.Material.SmoothPlastic }, f)
 		-- โคมไฟเพดาน
 		local lamp = part({ Size = Vector3.new(2, 0.3, 2), Position = origin + Vector3.new(0, FH - 0.6, 0), Color = Color3.fromRGB(255, 245, 220), Material = Enum.Material.Neon, CanCollide = false }, f)
 		local l = Instance.new("PointLight"); l.Range = 22; l.Brightness = 0.9; l.Color = Color3.fromRGB(255, 240, 210); l.Parent = lamp
@@ -311,6 +319,23 @@ function M.houseShell(f, origin, i)
 	end
 	part({ Size = Vector3.new(W + 4, 0.6, D + 4), Position = o + Vector3.new(0, H + 0.3, 0), Color = roofC, Material = Enum.Material.Slate, Name = "Roof" }, f)
 	part({ Size = Vector3.new(2.5, 6, 2.5), Position = o + Vector3.new(W / 3, H + 5, -D / 4), Color = Color3.fromRGB(120, 70, 55), Material = Enum.Material.Brick }, f)
+	-- ห้องภายใน: ผนังกั้นห้องนอน (ซ้ายหลัง) ห้องน้ำ (ขวาหลัง) ครัว (ขวาหน้า) + เคาน์เตอร์ครัว ตู้แขวน อ่างล้างจาน
+	local inner = Color3.fromRGB(245, 240, 232)
+	part({ Size = Vector3.new(11, H, 0.4), Position = o + Vector3.new(-10.5, H / 2, -2), Color = inner, Material = Enum.Material.SmoothPlastic, Name = "HouseWall" }, f)   -- ผนังห้องนอน (ประตูช่วง x -5..-2)
+	part({ Size = Vector3.new(0.4, H, 5), Position = o + Vector3.new(-2, H / 2, -11.5), Color = inner, Material = Enum.Material.SmoothPlastic, Name = "HouseWall" }, f)
+	part({ Size = Vector3.new(0.4, H, 8), Position = o + Vector3.new(6, H / 2, -10), Color = inner, Material = Enum.Material.SmoothPlastic, Name = "HouseWall" }, f)         -- ห้องน้ำ x 6..16 z -14..-6
+	part({ Size = Vector3.new(7, H, 0.4), Position = o + Vector3.new(12.5, H / 2, -6), Color = inner, Material = Enum.Material.SmoothPlastic, Name = "HouseWall" }, f)
+	part({ Size = Vector3.new(0.4, H - 7.5, 3.5), Position = o + Vector3.new(6, H - (H - 7.5) / 2, -4.25), Color = inner, Material = Enum.Material.SmoothPlastic, Name = "HouseWall" }, f)
+	part({ Size = Vector3.new(0.4, 0.05, 10), Position = o + Vector3.new(6, 0.2, -9), Color = Color3.fromRGB(230, 230, 235), Material = Enum.Material.Marble, CanCollide = false }, f)
+	part({ Size = Vector3.new(9.6, 0.15, 7.6), Position = o + Vector3.new(11.2, 0.22, -10.2), Color = Color3.fromRGB(225, 230, 235), Material = Enum.Material.Marble, CanCollide = false, Name = "BathFloor" }, f)
+	part({ Size = Vector3.new(2, 3, 8), Position = o + Vector3.new(15, 1.5, 3), Color = Color3.fromRGB(235, 235, 235), Material = Enum.Material.SmoothPlastic, Name = "Counter" }, f)    -- เคาน์เตอร์ครัว
+	part({ Size = Vector3.new(2.2, 0.15, 8.2), Position = o + Vector3.new(15, 3.05, 3), Color = Color3.fromRGB(70, 70, 75), Material = Enum.Material.Granite }, f)
+	part({ Size = Vector3.new(1.4, 0.3, 2), Position = o + Vector3.new(15, 3.0, 1), Color = Color3.fromRGB(190, 190, 195), Material = Enum.Material.Metal }, f)                  -- อ่างล้างจาน
+	part({ Size = Vector3.new(0.15, 1.0, 0.15), Position = o + Vector3.new(15.6, 3.6, 1), Color = Color3.fromRGB(190, 190, 195), Material = Enum.Material.Metal }, f)
+	part({ Size = Vector3.new(1.4, 2.4, 8), Position = o + Vector3.new(15.3, 7.5, 3), Color = Color3.fromRGB(235, 235, 235), Material = Enum.Material.SmoothPlastic }, f)                   -- ตู้แขวน
+	for i = 0, 3 do part({ Size = Vector3.new(0.1, 0.5, 0.1), Position = o + Vector3.new(14.5, 7.5, i * 2), Color = Color3.fromRGB(190, 190, 195), Material = Enum.Material.Metal }, f) end
+	-- ขอบบัวพื้น + ผ้าม่านหน้าต่างหน้า
+	for _, wx in ipairs({ -W / 4 - 1.75, W / 4 + 1.75 }) do part({ Size = Vector3.new(7.6, 5.8, 0.2), Position = o + Vector3.new(wx, 5.5, D / 2 - 0.5), Color = Color3.fromRGB(200, 170, 140), Material = Enum.Material.Fabric, CanCollide = false, Transparency = 0.35 }, f) end
 	-- พื้นภายในไม้ + ไฟเพดาน + ทางเดินหน้าบ้าน
 	part({ Size = Vector3.new(W - 1, 0.3, D - 1), Position = o + Vector3.new(0, 0.15, 0), Color = Color3.fromRGB(205, 175, 130), Material = Enum.Material.WoodPlanks, CanCollide = false, Name = "InnerFloor" }, f)
 	local lamp = part({ Size = Vector3.new(2, 0.3, 2), Position = o + Vector3.new(0, H - 0.5, 0), Color = Color3.fromRGB(255, 245, 220), Material = Enum.Material.Neon, CanCollide = false }, f)
