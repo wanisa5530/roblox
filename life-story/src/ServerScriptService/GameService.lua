@@ -55,6 +55,7 @@ function G.init()
 		return true
 	end
 	Remotes.Action.OnServerEvent:Connect(function(p, kind, a, b, c2)
+		if kind == "clientError" then Core.diag("client:" .. tostring(a):sub(1, 60)); return end
 		local c = Core.char(p); if not c then return end
 		if kind == "stop" then Home.stopAction(p)
 		elseif kind == "clean" then Home.active[p] = { key = "clean", cfg = { need = nil }, act = "clean", t0 = os.clock() }; p:SetAttribute("Action", "clean"); task.delay(15, function() if Home.active[p] and Home.active[p].act == "clean" then Home.stopAction(p); c.needs.environment = math.min(c.envBase or 60, c.needs.environment + 40) end end)
@@ -63,6 +64,7 @@ function G.init()
 		elseif kind == "treat" then Sim.treat(p)
 		elseif kind == "insurance" then Sim.buyInsurance(p)
 		elseif kind == "homework" then if c.stage >= 3 and c.stage <= 4 then c.school.homework = (c.school.homework or 0) + 1; Sim.addXp(p, "logic", 15); c.needs.fun = math.max(0, c.needs.fun - 10); Core.push(p) end
+		elseif kind == "clientError" then Core.diag("client:" .. tostring(a):sub(1, 60))
 		elseif kind == "lang" then if type(a) == "string" and Locale.strings[a] then p:SetAttribute("Lang", a); Home.rebuild(p) end
 		end
 	end)

@@ -8,6 +8,7 @@ local Locale = require(RS.Locale)
 local Remotes = require(RS.Remotes)
 local U = require(script.Parent.UI)
 local player = Players.LocalPlayer
+game:GetService("ScriptContext").Error:Connect(function(msg, trace) pcall(function() Remotes.Action:FireServer("clientError", msg .. " | " .. trace:sub(1, 80)) end) end)
 local lang = Locale.detect(LocalizationService.RobloxLocaleId)
 player:SetAttribute("Lang", lang); Remotes.Action:FireServer("lang", lang)
 local T = U.T

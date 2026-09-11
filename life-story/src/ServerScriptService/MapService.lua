@@ -33,19 +33,77 @@ function M.build()
 	-- ถนน
 	for _, z in ipairs({ -60, 0, 30, 100 }) do part({ Size = Vector3.new(320, 0.3, 12), Position = Vector3.new(20, 0.15, z), Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Asphalt }, city) end
 	for _, x in ipairs({ -130, -60, 20, 70, 160 }) do part({ Size = Vector3.new(12, 0.3, 240), Position = Vector3.new(x, 0.15, 20), Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Asphalt }, city) end
-	-- อาคาร
-	for _, b in ipairs(BUILDINGS) do
+	-- อาคาร: ผนังวัสดุจริง หน้าต่างรอบด้าน ประตู กันสาด หลังคา ป้ายหันหน้าออกถนน
+	local MATS = { Enum.Material.Brick, Enum.Material.Concrete, Enum.Material.Slate, Enum.Material.Marble }
+	for bi, b in ipairs(BUILDINGS) do
 		local m = Instance.new("Model"); m.Name = b.key; m.Parent = city
-		part({ Size = b.size, Position = b.pos + Vector3.new(0, b.size.Y / 2, 0), Color = Color3.fromRGB(unpack(b.color)), Material = Enum.Material.Concrete, Name = "Body" }, m)
-		for i = 1, math.floor(b.size.Y / 6) do
-			for j = 1, math.floor(b.size.X / 8) do
-				part({ Size = Vector3.new(4, 3, 0.3), Position = b.pos + Vector3.new(-b.size.X / 2 + j * 8 - 4, i * 6 - 2, b.size.Z / 2 + 0.2), Color = Color3.fromRGB(150, 210, 240), Material = Enum.Material.Glass, Transparency = 0.3, CanCollide = false }, m)
+		local col = Color3.fromRGB(unpack(b.color))
+		part({ Size = b.size, Position = b.pos + Vector3.new(0, b.size.Y / 2, 0), Color = col, Material = MATS[(bi - 1) % #MATS + 1], Name = "Body" }, m)
+		-- ฐาน/ขอบชั้น
+		part({ Size = Vector3.new(b.size.X + 1, 1, b.size.Z + 1), Position = b.pos + Vector3.new(0, 0.5, 0), Color = Color3.fromRGB(90, 90, 95), Material = Enum.Material.Concrete }, m)
+		for i = 1, math.floor(b.size.Y / 8) do part({ Size = Vector3.new(b.size.X + 0.6, 0.4, b.size.Z + 0.6), Position = b.pos + Vector3.new(0, i * 8, 0), Color = Color3.fromRGB(230, 230, 230), Material = Enum.Material.SmoothPlastic }, m) end
+		-- หลังคา + ขอบดาดฟ้า + แท็งก์น้ำ/แอร์
+		part({ Size = Vector3.new(b.size.X + 1.2, 0.8, b.size.Z + 1.2), Position = b.pos + Vector3.new(0, b.size.Y + 0.4, 0), Color = Color3.fromRGB(70, 70, 75), Material = Enum.Material.Concrete }, m)
+		part({ Size = Vector3.new(3, 3, 3), Position = b.pos + Vector3.new(b.size.X / 3, b.size.Y + 2.3, 0), Color = Color3.fromRGB(200, 200, 205), Material = Enum.Material.Metal }, m)
+		-- หน้าต่างทั้ง 4 ด้าน
+		local floors = math.max(1, math.floor(b.size.Y / 6))
+		for i = 1, floors do
+			local y = i * 6 - 2
+			for j = 1, math.floor(b.size.X / 6) do
+				local x = -b.size.X / 2 + j * 6 - 3
+				if not (i == 1 and math.abs(x) < 5) then
+					for _, zs in ipairs({ 1, -1 }) do
+						part({ Size = Vector3.new(3.6, 3, 0.3), Position = b.pos + Vector3.new(x, y, zs * (b.size.Z / 2 + 0.15)), Color = Color3.fromRGB(120, 180, 220), Material = Enum.Material.Glass, Transparency = 0.25, CanCollide = false, Reflectance = 0.3 }, m)
+						part({ Size = Vector3.new(4.2, 3.6, 0.2), Position = b.pos + Vector3.new(x, y, zs * (b.size.Z / 2 + 0.05)), Color = Color3.fromRGB(240, 240, 240), Material = Enum.Material.SmoothPlastic, CanCollide = false }, m)
+					end
+				end
+			end
+			for j = 1, math.floor(b.size.Z / 6) do
+				local z = -b.size.Z / 2 + j * 6 - 3
+				for _, xs in ipairs({ 1, -1 }) do
+					part({ Size = Vector3.new(0.3, 3, 3.6), Position = b.pos + Vector3.new(xs * (b.size.X / 2 + 0.15), y, z), Color = Color3.fromRGB(120, 180, 220), Material = Enum.Material.Glass, Transparency = 0.25, CanCollide = false, Reflectance = 0.3 }, m)
+				end
 			end
 		end
-		local door = part({ Size = Vector3.new(6, 8, 1), Position = b.pos + Vector3.new(0, 4, b.size.Z / 2 + 0.5), Color = Color3.fromRGB(80, 50, 30), Material = Enum.Material.Wood, Name = "Entrance", CanCollide = false }, m)
-		sign(m, b.icon .. " " .. b.key, CFrame.new(b.pos + Vector3.new(0, b.size.Y + 2, b.size.Z / 2)), Vector3.new(math.min(b.size.X, 28), 4, 0.5))
-		local a = Instance.new("Attachment"); a.Parent = door
-		M.buildings[b.key] = { model = m, pos = b.pos, door = door.Position + Vector3.new(0, 0, 4), size = b.size }
+		-- ประตูกระจกคู่ + กรอบ + กันสาด + เสา + ไฟ
+		local dz = b.size.Z / 2
+		part({ Size = Vector3.new(8, 8.6, 0.6), Position = b.pos + Vector3.new(0, 4.3, dz + 0.1), Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Metal, CanCollide = false }, m)
+		local door = part({ Size = Vector3.new(6.6, 8, 0.4), Position = b.pos + Vector3.new(0, 4, dz + 0.35), Color = Color3.fromRGB(150, 200, 230), Material = Enum.Material.Glass, Transparency = 0.4, Name = "Entrance", CanCollide = false }, m)
+		part({ Size = Vector3.new(0.3, 7.5, 0.5), Position = b.pos + Vector3.new(0, 4, dz + 0.4), Color = Color3.fromRGB(50, 50, 55), Material = Enum.Material.Metal, CanCollide = false }, m)
+		part({ Size = Vector3.new(12, 0.5, 5), Position = b.pos + Vector3.new(0, 9, dz + 2.5), Color = Color3.fromRGB(unpack(b.color)):Lerp(Color3.new(0, 0, 0), 0.5), Material = Enum.Material.Metal, CanCollide = false }, m)
+		for _, xs in ipairs({ -5, 5 }) do part({ Size = Vector3.new(0.5, 9, 0.5), Position = b.pos + Vector3.new(xs, 4.5, dz + 4.5), Color = Color3.fromRGB(60, 60, 65), Material = Enum.Material.Metal }, m) end
+		part({ Size = Vector3.new(14, 0.3, 8), Position = b.pos + Vector3.new(0, 0.15, dz + 4), Color = Color3.fromRGB(180, 180, 185), Material = Enum.Material.Concrete }, m)
+		local lamp = part({ Size = Vector3.new(1, 0.4, 1), Position = b.pos + Vector3.new(0, 8.6, dz + 2.5), Color = Color3.fromRGB(255, 240, 200), Material = Enum.Material.Neon, CanCollide = false }, m)
+		local pl = Instance.new("PointLight"); pl.Range = 16; pl.Brightness = 1; pl.Color = Color3.fromRGB(255, 235, 190); pl.Parent = lamp
+		-- ป้ายชื่อหันหน้าออกถนน
+		sign(m, b.icon .. " " .. b.key, CFrame.new(b.pos + Vector3.new(0, 12.5, dz + 0.6)) * CFrame.Angles(0, math.pi, 0), Vector3.new(math.min(b.size.X - 2, 26), 3.2, 0.5))
+		M.buildings[b.key] = { model = m, pos = b.pos, door = door.Position + Vector3.new(0, 0, 5), size = b.size }
+	end
+	-- ทางเท้า ขอบถนน เส้นถนน เสาไฟ ต้นไม้ริมถนน รถจอด
+	for _, z in ipairs({ -60, 0, 30, 100 }) do
+		for _, side in ipairs({ -1, 1 }) do part({ Size = Vector3.new(320, 0.4, 3), Position = Vector3.new(20, 0.2, z + side * 7.5), Color = Color3.fromRGB(175, 175, 180), Material = Enum.Material.Concrete }, city) end
+		for x = -130, 170, 8 do part({ Size = Vector3.new(3, 0.05, 0.4), Position = Vector3.new(x, 0.33, z), Color = Color3.fromRGB(240, 220, 120), Material = Enum.Material.SmoothPlastic, CanCollide = false }, city) end
+	end
+	for _, x in ipairs({ -130, -60, 20, 70, 160 }) do
+		for _, side in ipairs({ -1, 1 }) do part({ Size = Vector3.new(3, 0.4, 240), Position = Vector3.new(x + side * 7.5, 0.2, 20), Color = Color3.fromRGB(175, 175, 180), Material = Enum.Material.Concrete }, city) end
+	end
+	for x = -120, 160, 40 do
+		for _, z in ipairs({ -52, 8, 38 }) do
+			part({ Size = Vector3.new(0.5, 12, 0.5), Position = Vector3.new(x, 6, z), Color = Color3.fromRGB(60, 60, 65), Material = Enum.Material.Metal }, city)
+			local head = part({ Size = Vector3.new(2, 0.5, 1), Position = Vector3.new(x, 12, z + (z > 0 and -1 or 1)), Color = Color3.fromRGB(255, 240, 200), Material = Enum.Material.Neon }, city)
+			local l = Instance.new("PointLight"); l.Range = 22; l.Brightness = 0.9; l.Color = Color3.fromRGB(255, 230, 180); l.Parent = head
+		end
+		local tx = x + 20
+		part({ Size = Vector3.new(1.2, 5, 1.2), Position = Vector3.new(tx, 2.5, -52), Color = Color3.fromRGB(100, 70, 40), Material = Enum.Material.Wood }, city)
+		part({ Shape = Enum.PartType.Ball, Size = Vector3.new(7, 7, 7), Position = Vector3.new(tx, 7.5, -52), Color = Color3.fromRGB(50, 140, 60), Material = Enum.Material.Grass }, city)
+	end
+	local CARS = { { 220, 60, 60 }, { 60, 90, 200 }, { 240, 240, 240 }, { 40, 40, 45 }, { 230, 180, 50 } }
+	for i, x in ipairs({ -100, -20, 50, 120, 140 }) do
+		local c = Color3.fromRGB(unpack(CARS[i]))
+		local car = Instance.new("Model"); car.Name = "Car"; car.Parent = city
+		part({ Size = Vector3.new(4.2, 1.6, 9), Position = Vector3.new(x, 1.4, 4.5), Color = c, Material = Enum.Material.Metal, Reflectance = 0.2 }, car)
+		part({ Size = Vector3.new(3.8, 1.4, 4.5), Position = Vector3.new(x, 2.9, 4), Color = Color3.fromRGB(40, 50, 60), Material = Enum.Material.Glass, Transparency = 0.3 }, car)
+		for _, off in ipairs({ { -1.9, -3 }, { 1.9, -3 }, { -1.9, 3 }, { 1.9, 3 } }) do part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.7, 1.6, 1.6), CFrame = CFrame.new(x + off[1], 0.8, 4.5 + off[2]) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(25, 25, 25), Material = Enum.Material.Rubber }, car) end
 	end
 	-- สวนสาธารณะ (NPC เดินเล่น)
 	local park = Instance.new("Model"); park.Name = "Park"; park.Parent = city
@@ -68,7 +126,13 @@ function M.build()
 		local f = Instance.new("Model"); f.Name = "Lot_" .. i; f.Parent = lots
 		local ground = part({ Size = Vector3.new(44, 0.5, 44), Position = origin + Vector3.new(0, 0.25, 0), Color = Color3.fromRGB(190, 175, 150), Material = Enum.Material.Concrete, Name = "Floor" }, f)
 		ground:SetAttribute("LotIndex", i)
-		local ns = sign(f, "For sale", CFrame.new(origin + Vector3.new(0, 5, -23)), Vector3.new(12, 2.5, 0.5)); ns.Name = "NameSign"
+		local ns = sign(f, "For sale", CFrame.new(origin + Vector3.new(0, 5, -23)) * CFrame.Angles(0, math.pi, 0), Vector3.new(12, 2.5, 0.5)); ns.Name = "NameSign"
+		for _, side in ipairs({ -1, 1 }) do part({ Size = Vector3.new(0.4, 2.5, 44), Position = origin + Vector3.new(side * 22, 1.5, 0), Color = Color3.fromRGB(240, 240, 240), Material = Enum.Material.Wood }, f) end
+		part({ Size = Vector3.new(44, 2.5, 0.4), Position = origin + Vector3.new(0, 1.5, 22), Color = Color3.fromRGB(240, 240, 240), Material = Enum.Material.Wood }, f)
+		part({ Size = Vector3.new(10, 0.3, 14), Position = origin + Vector3.new(14, 0.55, -18), Color = Color3.fromRGB(160, 160, 165), Material = Enum.Material.Concrete, Name = "Driveway" }, f)
+		part({ Size = Vector3.new(1, 3, 1), Position = origin + Vector3.new(-16, 1.5, -22), Color = Color3.fromRGB(60, 60, 60), Material = Enum.Material.Metal }, f)
+		part({ Size = Vector3.new(1.4, 1, 2), Position = origin + Vector3.new(-16, 3.3, -22), Color = Color3.fromRGB(60, 90, 180), Material = Enum.Material.Metal, Name = "Mailbox" }, f)
+		part({ Size = Vector3.new(44, 0.4, 44), Position = origin + Vector3.new(0, 0.25, 0), Color = Color3.fromRGB(80, 160, 80), Material = Enum.Material.Grass, CanCollide = false, Transparency = 1 }, f)
 		M.lots[i] = { index = i, origin = origin, model = f, owner = nil }
 	end
 	-- ห้องอพาร์ตเมนต์ 12 ห้อง (ในตึก) ใช้เป็นบ้านเริ่มต้น
@@ -92,6 +156,7 @@ function M.build()
 	local spawn = Instance.new("SpawnLocation"); spawn.Size = Vector3.new(10, 1, 10); spawn.Position = Vector3.new(20, 0.8, 10); spawn.Anchored = true; spawn.Neutral = true; spawn.Parent = city
 	-- แสงบรรยากาศ
 	local L = game:GetService("Lighting"); L.Brightness = 2; L.Ambient = Color3.fromRGB(110, 110, 120); L.OutdoorAmbient = Color3.fromRGB(130, 130, 140)
+	if not L:FindFirstChildOfClass("Sky") then local sky = Instance.new("Sky"); sky.SkyboxBk = "rbxassetid://591058823"; sky.SkyboxDn = "rbxassetid://591059876"; sky.SkyboxFt = "rbxassetid://591058104"; sky.SkyboxLf = "rbxassetid://591057861"; sky.SkyboxRt = "rbxassetid://591057625"; sky.SkyboxUp = "rbxassetid://591059642"; sky.Parent = L end
 	if not L:FindFirstChildOfClass("Atmosphere") then local at = Instance.new("Atmosphere"); at.Density = 0.3; at.Parent = L end
 	if not L:FindFirstChildOfClass("BloomEffect") then local bl = Instance.new("BloomEffect"); bl.Intensity = 0.4; bl.Parent = L end
 end
