@@ -162,7 +162,7 @@ function G.init()
 		end
 	end)
 	G.onPlayer = onPlayer
-	Core.diag("boot v" .. tostring(game.PlaceVersion) .. " assets=" .. tostring(Map.assetsUsed))
+	Core.diag("boot v" .. tostring(game.PlaceVersion) .. " assets=" .. tostring(Map.assetsUsed) .. (Map.terrainErr and (" terrainErr=" .. Map.terrainErr:sub(1, 80)) or ""))
 	return G
 end
 return G

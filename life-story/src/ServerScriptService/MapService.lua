@@ -86,16 +86,20 @@ function M.build()
 	local city = Instance.new("Folder"); city.Name = "City"; city.Parent = workspace
 	-- พื้นดินเป็น Terrain หญ้าจริง (มีเนินเล็กน้อยรอบเมือง) + น้ำจริงในแม่น้ำ
 	local Terrain = workspace.Terrain
-	pcall(function()
-		Terrain:Clear(); Terrain.Decoration = false
-		Terrain:FillBlock(CFrame.new(40, -6, 0), Vector3.new(1400, 12, 1400), Enum.Material.Grass)
-		Terrain:FillBlock(CFrame.new(40, -30, 0), Vector3.new(1400, 40, 1400), Enum.Material.Ground)
-		for i = 1, 14 do  -- เนินรอบขอบเมือง
-			local a = i / 14 * math.pi * 2; local hp = Vector3.new(40 + math.cos(a) * 600, 0, math.sin(a) * 600)
-			Terrain:FillBall(hp + Vector3.new(0, -10, 0), 60 + (i % 3) * 20, Enum.Material.Grass)
-		end
-	end)
-	part({ Size = Vector3.new(1000, 0.2, 1000), Position = Vector3.new(40, -0.2, 0), Color = Color3.fromRGB(90, 150, 80), Material = Enum.Material.Grass, Name = "Ground", Transparency = 1 }, city)
+	M.terrainErr = nil
+	local function tfill(fn) local ok, err = pcall(fn); if not ok then M.terrainErr = tostring(err) end end
+	tfill(function() Terrain.Decoration = false end)
+	tfill(function() Terrain:Clear() end)
+	-- เติมเป็นบล็อกย่อย 200x200 (บล็อกใหญ่เกินอาจล้มเหลว)
+	for gx = -660, 660, 200 do for gz = -700, 700, 200 do
+		tfill(function() Terrain:FillBlock(CFrame.new(40 + gx, -6, gz), Vector3.new(200, 12, 200), Enum.Material.Grass) end)
+	end end
+	for i = 1, 14 do  -- เนินรอบขอบเมือง
+		local a = i / 14 * math.pi * 2; local hp = Vector3.new(40 + math.cos(a) * 600, 0, math.sin(a) * 600)
+		tfill(function() Terrain:FillBall(hp + Vector3.new(0, -10, 0), 60 + (i % 3) * 20, Enum.Material.Grass) end)
+	end
+	-- พื้นหญ้าสำรอง (Part) เผื่อ Terrain ไม่ทำงาน อยู่ต่ำกว่าผิว Terrain เล็กน้อย
+	part({ Size = Vector3.new(1400, 1, 1400), Position = Vector3.new(40, -0.7, 0), Color = Color3.fromRGB(88, 145, 78), Material = Enum.Material.Grass, Name = "Ground" }, city)
 	-- ===== แม่น้ำเจ้าพระยา (โค้ง) + ตลิ่ง + ท่าเรือ =====
 	local RIVER = { Vector3.new(-120, 0, -480), Vector3.new(-90, 0, -260), Vector3.new(-40, 0, -90), Vector3.new(-60, 0, 80), Vector3.new(-120, 0, 260), Vector3.new(-100, 0, 480) }
 	M.river = RIVER
